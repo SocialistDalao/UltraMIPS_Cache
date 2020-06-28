@@ -1,11 +1,11 @@
 // Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2019.2 (win64) Build 2708876 Wed Nov  6 21:40:23 MST 2019
-// Date        : Thu Jun 25 20:45:10 2020
+// Date        : Thu Jun 25 16:42:10 2020
 // Host        : DESKTOP-DE0831E running 64-bit major release  (build 9200)
-// Command     : write_verilog -force -mode synth_stub
-//               c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/tag_ram/tag_ram_stub.v
-// Design      : tag_ram
+// Command     : write_verilog -force -mode synth_stub -rename_top tag_ram -prefix
+//               tag_ram_ blk_mem_gen_0_stub.v
+// Design      : blk_mem_gen_0
 // Purpose     : Stub declaration of top-level module interface
 // Device      : xc7k70tfbv676-1
 // --------------------------------------------------------------------------------
@@ -15,11 +15,11 @@
 // Please paste the declaration into a Verilog source file or add the file as an additional source.
 (* x_core_info = "blk_mem_gen_v8_4_4,Vivado 2019.2" *)
 module tag_ram(clka, ena, wea, addra, dina, douta)
-/* synthesis syn_black_box black_box_pad_pin="clka,ena,wea[2:0],addra[6:0],dina[23:0],douta[23:0]" */;
+/* synthesis syn_black_box black_box_pad_pin="clka,ena,wea[3:0],addra[6:0],dina[31:0],douta[31:0]" */;
   input clka;
   input ena;
-  input [2:0]wea;
+  input [3:0]wea;
   input [6:0]addra;
-  input [23:0]dina;
-  output [23:0]douta;
+  input [31:0]dina;
+  output [31:0]douta;
 endmodule

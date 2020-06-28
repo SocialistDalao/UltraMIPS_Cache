@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="ICache_sim_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="ICache_sim" />
+            <top_module name="glbl" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="887400fs"></ZoomStartTime>
+      <ZoomEndTime time="958401fs"></ZoomEndTime>
+      <Cursor1Time time="910000fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="175"></NameColumnWidth>
+      <ValueColumnWidth column_width="146"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="35" />
+   <wvobject fp_name="/ICache_sim/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/cpu_req_i" type="logic">
+      <obj_property name="ElementShortName">cpu_req_i</obj_property>
+      <obj_property name="ObjectShortName">cpu_req_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/virtual_addr_i" type="array">
+      <obj_property name="ElementShortName">virtual_addr_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">virtual_addr_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/icache1/physical_addr" type="array">
+      <obj_property name="ElementShortName">physical_addr[31:0]</obj_property>
+      <obj_property name="ObjectShortName">physical_addr[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/hit_o" type="logic">
+      <obj_property name="ElementShortName">hit_o</obj_property>
+      <obj_property name="ObjectShortName">hit_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/cpu_inst_valid_o" type="logic">
+      <obj_property name="ElementShortName">cpu_inst_valid_o</obj_property>
+      <obj_property name="ObjectShortName">cpu_inst_valid_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/cpu_inst_o" type="array">
+      <obj_property name="ElementShortName">cpu_inst_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">cpu_inst_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider15">
+      <obj_property name="label">Mem</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">#FAAFBE</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/mem_rvalid_i" type="logic">
+      <obj_property name="ElementShortName">mem_rvalid_i</obj_property>
+      <obj_property name="ObjectShortName">mem_rvalid_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/mem_arready_i" type="logic">
+      <obj_property name="ElementShortName">mem_arready_i</obj_property>
+      <obj_property name="ObjectShortName">mem_arready_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/mem_rdata_i" type="array">
+      <obj_property name="ElementShortName">mem_rdata_i[255:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_rdata_i[255:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/mem_ren_o" type="logic">
+      <obj_property name="ElementShortName">mem_ren_o</obj_property>
+      <obj_property name="ObjectShortName">mem_ren_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/mem_rready_o" type="logic">
+      <obj_property name="ElementShortName">mem_rready_o</obj_property>
+      <obj_property name="ObjectShortName">mem_rready_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/mem_arvalid_o" type="logic">
+      <obj_property name="ElementShortName">mem_arvalid_o</obj_property>
+      <obj_property name="ObjectShortName">mem_arvalid_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/mem_araddr_o" type="array">
+      <obj_property name="ElementShortName">mem_araddr_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_araddr_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider16">
+      <obj_property name="label">State</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">#A0A0A4</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/icache1/current_state" type="array">
+      <obj_property name="ElementShortName">current_state[1:0]</obj_property>
+      <obj_property name="ObjectShortName">current_state[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/icache1/next_state" type="array">
+      <obj_property name="ElementShortName">next_state[1:0]</obj_property>
+      <obj_property name="ObjectShortName">next_state[1:0]</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider21">
+      <obj_property name="label">Ram</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">#008080</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/icache1/wea_way0" type="array">
+      <obj_property name="ElementShortName">wea_way0[3:0]</obj_property>
+      <obj_property name="ObjectShortName">wea_way0[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/icache1/wea_way1" type="array">
+      <obj_property name="ElementShortName">wea_way1[3:0]</obj_property>
+      <obj_property name="ObjectShortName">wea_way1[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/icache1/TagV1/wea" type="array">
+      <obj_property name="ElementShortName">wea[3:0]</obj_property>
+      <obj_property name="ObjectShortName">wea[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/icache1/TagV1/addra" type="array">
+      <obj_property name="ElementShortName">addra[6:0]</obj_property>
+      <obj_property name="ObjectShortName">addra[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/icache1/TagV1/dina" type="array">
+      <obj_property name="ElementShortName">dina[31:0]</obj_property>
+      <obj_property name="ObjectShortName">dina[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/icache1/TagV1/douta" type="array">
+      <obj_property name="ElementShortName">douta[31:0]</obj_property>
+      <obj_property name="ObjectShortName">douta[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider35">
+      <obj_property name="label">InstCache</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/icache1/inst_way1" type="array">
+      <obj_property name="ElementShortName">inst_way1[31:0]</obj_property>
+      <obj_property name="ObjectShortName">inst_way1[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/icache1/inst_way0" type="array">
+      <obj_property name="ElementShortName">inst_way0[31:0]</obj_property>
+      <obj_property name="ObjectShortName">inst_way0[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/icache1/tagv_cache_w0" type="array">
+      <obj_property name="ElementShortName">tagv_cache_w0[19:0]</obj_property>
+      <obj_property name="ObjectShortName">tagv_cache_w0[19:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/icache1/tagv_cache_w1" type="array">
+      <obj_property name="ElementShortName">tagv_cache_w1[19:0]</obj_property>
+      <obj_property name="ObjectShortName">tagv_cache_w1[19:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/icache1/Bank5_way1/wea" type="array">
+      <obj_property name="ElementShortName">wea[3:0]</obj_property>
+      <obj_property name="ObjectShortName">wea[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/icache1/Bank5_way1/addra" type="array">
+      <obj_property name="ElementShortName">addra[6:0]</obj_property>
+      <obj_property name="ObjectShortName">addra[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/icache1/Bank5_way1/dina" type="array">
+      <obj_property name="ElementShortName">dina[31:0]</obj_property>
+      <obj_property name="ObjectShortName">dina[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ICache_sim/icache1/Bank5_way1/douta" type="array">
+      <obj_property name="ElementShortName">douta[31:0]</obj_property>
+      <obj_property name="ObjectShortName">douta[31:0]</obj_property>
+   </wvobject>
+</wave_config>

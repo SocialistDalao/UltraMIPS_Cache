@@ -1,11 +1,11 @@
 -- Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2019.2 (win64) Build 2708876 Wed Nov  6 21:40:23 MST 2019
--- Date        : Thu Jun 25 20:45:10 2020
+-- Date        : Thu Jun 25 16:42:10 2020
 -- Host        : DESKTOP-DE0831E running 64-bit major release  (build 9200)
--- Command     : write_vhdl -force -mode synth_stub
---               c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/tag_ram/tag_ram_stub.vhdl
--- Design      : tag_ram
+-- Command     : write_vhdl -force -mode synth_stub -rename_top tag_ram -prefix
+--               tag_ram_ blk_mem_gen_0_stub.vhdl
+-- Design      : blk_mem_gen_0
 -- Purpose     : Stub declaration of top-level module interface
 -- Device      : xc7k70tfbv676-1
 -- --------------------------------------------------------------------------------
@@ -16,10 +16,10 @@ entity tag_ram is
   Port ( 
     clka : in STD_LOGIC;
     ena : in STD_LOGIC;
-    wea : in STD_LOGIC_VECTOR ( 2 downto 0 );
+    wea : in STD_LOGIC_VECTOR ( 3 downto 0 );
     addra : in STD_LOGIC_VECTOR ( 6 downto 0 );
-    dina : in STD_LOGIC_VECTOR ( 23 downto 0 );
-    douta : out STD_LOGIC_VECTOR ( 23 downto 0 )
+    dina : in STD_LOGIC_VECTOR ( 31 downto 0 );
+    douta : out STD_LOGIC_VECTOR ( 31 downto 0 )
   );
 
 end tag_ram;
@@ -28,7 +28,7 @@ architecture stub of tag_ram is
 attribute syn_black_box : boolean;
 attribute black_box_pad_pin : string;
 attribute syn_black_box of stub : architecture is true;
-attribute black_box_pad_pin of stub : architecture is "clka,ena,wea[2:0],addra[6:0],dina[23:0],douta[23:0]";
+attribute black_box_pad_pin of stub : architecture is "clka,ena,wea[3:0],addra[6:0],dina[31:0],douta[31:0]";
 attribute x_core_info : string;
 attribute x_core_info of stub : architecture is "blk_mem_gen_v8_4_4,Vivado 2019.2";
 begin

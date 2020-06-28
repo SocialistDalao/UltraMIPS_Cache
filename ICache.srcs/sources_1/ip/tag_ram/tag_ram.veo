@@ -57,10 +57,10 @@
 tag_ram your_instance_name (
   .clka(clka),    // input wire clka
   .ena(ena),      // input wire ena
-  .wea(wea),      // input wire [2 : 0] wea
+  .wea(wea),      // input wire [3 : 0] wea
   .addra(addra),  // input wire [6 : 0] addra
-  .dina(dina),    // input wire [23 : 0] dina
-  .douta(douta)  // output wire [23 : 0] douta
+  .dina(dina),    // input wire [31 : 0] dina
+  .douta(douta)  // output wire [31 : 0] douta
 );
 // INST_TAG_END ------ End INSTANTIATION Template ---------
 

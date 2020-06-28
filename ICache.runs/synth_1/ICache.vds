@@ -1,0 +1,386 @@
+#-----------------------------------------------------------
+# Vivado v2019.2 (64-bit)
+# SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+# IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+# Start of session at: Sun Jun 28 22:02:02 2020
+# Process ID: 5256
+# Current directory: C:/NSCSCC/Project/ICache/ICache.runs/synth_1
+# Command line: vivado.exe -log ICache.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source ICache.tcl
+# Log file: C:/NSCSCC/Project/ICache/ICache.runs/synth_1/ICache.vds
+# Journal file: C:/NSCSCC/Project/ICache/ICache.runs/synth_1\vivado.jou
+#-----------------------------------------------------------
+source ICache.tcl -notrace
+Command: synth_design -top ICache -part xc7k70tfbv676-1
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xc7k70t'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7k70t'
+INFO: [Device 21-403] Loading part xc7k70tfbv676-1
+INFO: Launching helper process for spawning children vivado processes
+INFO: Helper process launched with PID 13112 
+WARNING: [Synth 8-6901] identifier 'read_success' is used before its declaration [C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/new/ICache.v:158]
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:03 ; elapsed = 00:00:04 . Memory (MB): peak = 786.480 ; gain = 241.594
+---------------------------------------------------------------------------------
+INFO: [Synth 8-6157] synthesizing module 'ICache' [C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/new/ICache.v:22]
+INFO: [Synth 8-6157] synthesizing module 'TLB' [C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/new/TLB.v:23]
+INFO: [Synth 8-6155] done synthesizing module 'TLB' (1#1) [C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/new/TLB.v:23]
+INFO: [Synth 8-6157] synthesizing module 'bank_ram' [C:/NSCSCC/Project/ICache/ICache.runs/synth_1/.Xil/Vivado-5256-DESKTOP-DE0831E/realtime/bank_ram_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'bank_ram' (2#1) [C:/NSCSCC/Project/ICache/ICache.runs/synth_1/.Xil/Vivado-5256-DESKTOP-DE0831E/realtime/bank_ram_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'tag_ram' [C:/NSCSCC/Project/ICache/ICache.runs/synth_1/.Xil/Vivado-5256-DESKTOP-DE0831E/realtime/tag_ram_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'tag_ram' (3#1) [C:/NSCSCC/Project/ICache/ICache.runs/synth_1/.Xil/Vivado-5256-DESKTOP-DE0831E/realtime/tag_ram_stub.v:6]
+WARNING: [Synth 8-689] width (20) of port connection 'douta' does not match port width (32) of module 'tag_ram' [C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/new/ICache.v:111]
+WARNING: [Synth 8-689] width (20) of port connection 'douta' does not match port width (32) of module 'tag_ram' [C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/new/ICache.v:120]
+INFO: [Synth 8-226] default block is never used [C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/new/ICache.v:143]
+INFO: [Synth 8-226] default block is never used [C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/new/ICache.v:203]
+INFO: [Synth 8-226] default block is never used [C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/new/ICache.v:217]
+INFO: [Synth 8-6155] done synthesizing module 'ICache' (4#1) [C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/new/ICache.v:22]
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:04 ; elapsed = 00:00:05 . Memory (MB): peak = 833.527 ; gain = 288.641
+---------------------------------------------------------------------------------
+
+Report Check Netlist: 
++------+------------------+-------+---------+-------+------------------+
+|      |Item              |Errors |Warnings |Status |Description       |
++------+------------------+-------+---------+-------+------------------+
+|1     |multi_driven_nets |      0|        0|Passed |Multi driven nets |
++------+------------------+-------+---------+-------+------------------+
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:04 ; elapsed = 00:00:05 . Memory (MB): peak = 833.527 ; gain = 288.641
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:04 ; elapsed = 00:00:05 . Memory (MB): peak = 833.527 ; gain = 288.641
+---------------------------------------------------------------------------------
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.010 . Memory (MB): peak = 833.527 ; gain = 0.000
+INFO: [Project 1-570] Preparing netlist for logic optimization
+
+Processing XDC Constraints
+Initializing timing engine
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/tag_ram/tag_ram/blk_mem_gen_0_in_context.xdc] for cell 'TagV0'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/tag_ram/tag_ram/blk_mem_gen_0_in_context.xdc] for cell 'TagV0'
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/tag_ram/tag_ram/blk_mem_gen_0_in_context.xdc] for cell 'TagV1'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/tag_ram/tag_ram/blk_mem_gen_0_in_context.xdc] for cell 'TagV1'
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank0_way0'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank0_way0'
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank1_way0'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank1_way0'
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank2_way0'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank2_way0'
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank3_way0'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank3_way0'
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank4_way0'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank4_way0'
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank5_way0'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank5_way0'
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank6_way0'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank6_way0'
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank7_way0'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank7_way0'
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank0_way1'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank0_way1'
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank1_way1'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank1_way1'
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank2_way1'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank2_way1'
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank3_way1'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank3_way1'
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank4_way1'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank4_way1'
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank5_way1'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank5_way1'
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank6_way1'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank6_way1'
+Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank7_way1'
+Finished Parsing XDC File [c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram/blk_mem_gen_0_in_context.xdc] for cell 'Bank7_way1'
+Parsing XDC File [C:/NSCSCC/Project/ICache/ICache.runs/synth_1/dont_touch.xdc]
+Finished Parsing XDC File [C:/NSCSCC/Project/ICache/ICache.runs/synth_1/dont_touch.xdc]
+Completed Processing XDC Constraints
+
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 940.324 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+Constraint Validation Runtime : Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.010 . Memory (MB): peak = 940.324 ; gain = 0.000
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:09 ; elapsed = 00:00:10 . Memory (MB): peak = 940.324 ; gain = 395.438
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xc7k70tfbv676-1
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:09 ; elapsed = 00:00:10 . Memory (MB): peak = 940.324 ; gain = 395.438
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying 'set_property' XDC Constraints
+---------------------------------------------------------------------------------
+Applied set_property DONT_TOUCH = true for TagV0. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for TagV1. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for Bank0_way0. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for Bank0_way1. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for Bank1_way0. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for Bank1_way1. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for Bank2_way0. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for Bank2_way1. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for Bank3_way0. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for Bank3_way1. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for Bank4_way0. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for Bank4_way1. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for Bank5_way0. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for Bank5_way1. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for Bank6_way0. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for Bank6_way1. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for Bank7_way0. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for Bank7_way1. (constraint file  auto generated constraint, line ).
+---------------------------------------------------------------------------------
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:09 ; elapsed = 00:00:10 . Memory (MB): peak = 940.324 ; gain = 395.438
+---------------------------------------------------------------------------------
+INFO: [Synth 8-802] inferred FSM for state register 'current_state_reg' in module 'ICache'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                 iSTATE0 |                             0010 |                               00
+                  iSTATE |                             1000 |                               01
+                 iSTATE1 |                             0100 |                               10
+                 iSTATE2 |                             0001 |                               11
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'current_state_reg' using encoding 'one-hot' in module 'ICache'
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:09 ; elapsed = 00:00:10 . Memory (MB): peak = 940.324 ; gain = 395.438
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+Detailed RTL Component Info : 
++---Registers : 
+	              256 Bit    Registers := 1     
++---Muxes : 
+	   2 Input     32 Bit        Muxes := 3     
+	   4 Input      4 Bit        Muxes := 1     
+	   2 Input      4 Bit        Muxes := 3     
+	   2 Input      1 Bit        Muxes := 3     
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start RTL Hierarchical Component Statistics 
+---------------------------------------------------------------------------------
+Hierarchical RTL Component report 
+Module ICache 
+Detailed RTL Component Info : 
++---Registers : 
+	              256 Bit    Registers := 1     
++---Muxes : 
+	   2 Input     32 Bit        Muxes := 2     
+	   4 Input      4 Bit        Muxes := 1     
+	   2 Input      4 Bit        Muxes := 3     
+	   2 Input      1 Bit        Muxes := 3     
+Module TLB 
+Detailed RTL Component Info : 
++---Muxes : 
+	   2 Input     32 Bit        Muxes := 1     
+---------------------------------------------------------------------------------
+Finished RTL Hierarchical Component Statistics
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 240 (col length:80)
+BRAMs: 270 (col length: RAMB18 80 RAMB36 40)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+Warning: Parallel synthesis criteria is not met 
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:13 ; elapsed = 00:00:15 . Memory (MB): peak = 940.324 ; gain = 395.438
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start Applying XDC Timing Constraints
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:19 ; elapsed = 00:00:20 . Memory (MB): peak = 940.324 ; gain = 395.438
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:00:19 ; elapsed = 00:00:21 . Memory (MB): peak = 940.324 ; gain = 395.438
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:00:20 ; elapsed = 00:00:21 . Memory (MB): peak = 971.785 ; gain = 426.898
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:00:23 ; elapsed = 00:00:24 . Memory (MB): peak = 986.594 ; gain = 441.707
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:00:23 ; elapsed = 00:00:24 . Memory (MB): peak = 986.594 ; gain = 441.707
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+
+Report Check Netlist: 
++------+------------------+-------+---------+-------+------------------+
+|      |Item              |Errors |Warnings |Status |Description       |
++------+------------------+-------+---------+-------+------------------+
+|1     |multi_driven_nets |      0|        0|Passed |Multi driven nets |
++------+------------------+-------+---------+-------+------------------+
+---------------------------------------------------------------------------------
+Start Rebuilding User Hierarchy
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:00:23 ; elapsed = 00:00:24 . Memory (MB): peak = 986.594 ; gain = 441.707
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Ports
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Ports : Time (s): cpu = 00:00:23 ; elapsed = 00:00:24 . Memory (MB): peak = 986.594 ; gain = 441.707
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:23 ; elapsed = 00:00:24 . Memory (MB): peak = 986.594 ; gain = 441.707
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Nets
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Nets : Time (s): cpu = 00:00:23 ; elapsed = 00:00:24 . Memory (MB): peak = 986.594 ; gain = 441.707
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+Report BlackBoxes: 
++------+--------------+----------+
+|      |BlackBox name |Instances |
++------+--------------+----------+
+|1     |bank_ram      |        16|
+|2     |tag_ram       |         2|
++------+--------------+----------+
+
+Report Cell Usage: 
++------+-------------+------+
+|      |Cell         |Count |
++------+-------------+------+
+|1     |bank_ram     |     1|
+|2     |bank_ram__16 |     1|
+|3     |bank_ram__17 |     1|
+|4     |bank_ram__18 |     1|
+|5     |bank_ram__19 |     1|
+|6     |bank_ram__20 |     1|
+|7     |bank_ram__21 |     1|
+|8     |bank_ram__22 |     1|
+|9     |bank_ram__23 |     1|
+|10    |bank_ram__24 |     1|
+|11    |bank_ram__25 |     1|
+|12    |bank_ram__26 |     1|
+|13    |bank_ram__27 |     1|
+|14    |bank_ram__28 |     1|
+|15    |bank_ram__29 |     1|
+|16    |bank_ram__30 |     1|
+|17    |tag_ram      |     1|
+|18    |tag_ram__2   |     1|
+|19    |BUFG         |     1|
+|20    |CARRY4       |     4|
+|21    |LUT2         |    39|
+|22    |LUT3         |     1|
+|23    |LUT4         |     1|
+|24    |LUT5         |     8|
+|25    |LUT6         |   301|
+|26    |MUXF7        |    64|
+|27    |FDRE         |   259|
+|28    |FDSE         |     1|
+|29    |IBUF         |   294|
+|30    |OBUF         |    69|
++------+-------------+------+
+
+Report Instance Areas: 
++------+---------+-------+------+
+|      |Instance |Module |Cells |
++------+---------+-------+------+
+|1     |top      |       |  1618|
++------+---------+-------+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:00:23 ; elapsed = 00:00:24 . Memory (MB): peak = 986.594 ; gain = 441.707
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 0 critical warnings and 0 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:00:17 ; elapsed = 00:00:23 . Memory (MB): peak = 986.594 ; gain = 334.910
+Synthesis Optimization Complete : Time (s): cpu = 00:00:23 ; elapsed = 00:00:24 . Memory (MB): peak = 986.594 ; gain = 441.707
+INFO: [Project 1-571] Translating synthesized netlist
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.012 . Memory (MB): peak = 997.074 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 68 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+WARNING: [Netlist 29-101] Netlist 'ICache' is not ideal for floorplanning, since the cellview 'ICache' contains a large number of primitives.  Please consider enabling hierarchy in synthesis if you want to do floorplanning.
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 997.133 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+INFO: [Common 17-83] Releasing license: Synthesis
+24 Infos, 4 Warnings, 0 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:00:28 ; elapsed = 00:00:29 . Memory (MB): peak = 997.133 ; gain = 698.977
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.001 . Memory (MB): peak = 997.133 ; gain = 0.000
+WARNING: [Constraints 18-5210] No constraints selected for write.
+Resolution: This message can indicate that there are no constraints for the design, or it can indicate that the used_in flags are set such that the constraints are ignored. This later case is used when running synth_design to not write synthesis constraints to the resulting checkpoint. Instead, project constraints are read when the synthesized design is opened.
+INFO: [Common 17-1381] The checkpoint 'C:/NSCSCC/Project/ICache/ICache.runs/synth_1/ICache.dcp' has been generated.
+INFO: [runtcl-4] Executing : report_utilization -file ICache_utilization_synth.rpt -pb ICache_utilization_synth.pb
+INFO: [Common 17-206] Exiting Vivado at Sun Jun 28 22:02:35 2020...
