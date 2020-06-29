@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="887400fs"></ZoomStartTime>
-      <ZoomEndTime time="958401fs"></ZoomEndTime>
-      <Cursor1Time time="910000fs"></Cursor1Time>
+      <ZoomStartTime time="3475000fs"></ZoomStartTime>
+      <ZoomEndTime time="4189001fs"></ZoomEndTime>
+      <Cursor1Time time="4070000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="175"></NameColumnWidth>
-      <ValueColumnWidth column_width="146"></ValueColumnWidth>
+      <ValueColumnWidth column_width="142"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="35" />
+   <WVObjectSize size="29" />
    <wvobject fp_name="/ICache_sim/clk" type="logic">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -111,21 +111,13 @@
       <obj_property name="ElementShortName">wea_way1[3:0]</obj_property>
       <obj_property name="ObjectShortName">wea_way1[3:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/ICache_sim/icache1/TagV1/wea" type="array">
-      <obj_property name="ElementShortName">wea[3:0]</obj_property>
-      <obj_property name="ObjectShortName">wea[3:0]</obj_property>
+   <wvobject fp_name="/ICache_sim/icache1/hit_way0" type="logic">
+      <obj_property name="ElementShortName">hit_way0</obj_property>
+      <obj_property name="ObjectShortName">hit_way0</obj_property>
    </wvobject>
-   <wvobject fp_name="/ICache_sim/icache1/TagV1/addra" type="array">
-      <obj_property name="ElementShortName">addra[6:0]</obj_property>
-      <obj_property name="ObjectShortName">addra[6:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ICache_sim/icache1/TagV1/dina" type="array">
-      <obj_property name="ElementShortName">dina[31:0]</obj_property>
-      <obj_property name="ObjectShortName">dina[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ICache_sim/icache1/TagV1/douta" type="array">
-      <obj_property name="ElementShortName">douta[31:0]</obj_property>
-      <obj_property name="ObjectShortName">douta[31:0]</obj_property>
+   <wvobject fp_name="/ICache_sim/icache1/hit_way1" type="logic">
+      <obj_property name="ElementShortName">hit_way1</obj_property>
+      <obj_property name="ObjectShortName">hit_way1</obj_property>
    </wvobject>
    <wvobject type="divider" fp_name="divider35">
       <obj_property name="label">InstCache</obj_property>
@@ -139,28 +131,12 @@
       <obj_property name="ElementShortName">inst_way0[31:0]</obj_property>
       <obj_property name="ObjectShortName">inst_way0[31:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/ICache_sim/icache1/tagv_cache_w0" type="array">
-      <obj_property name="ElementShortName">tagv_cache_w0[19:0]</obj_property>
-      <obj_property name="ObjectShortName">tagv_cache_w0[19:0]</obj_property>
+   <wvobject fp_name="/ICache_sim/icache1/LRU_pick" type="logic">
+      <obj_property name="ElementShortName">LRU_pick</obj_property>
+      <obj_property name="ObjectShortName">LRU_pick</obj_property>
    </wvobject>
-   <wvobject fp_name="/ICache_sim/icache1/tagv_cache_w1" type="array">
-      <obj_property name="ElementShortName">tagv_cache_w1[19:0]</obj_property>
-      <obj_property name="ObjectShortName">tagv_cache_w1[19:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ICache_sim/icache1/Bank5_way1/wea" type="array">
-      <obj_property name="ElementShortName">wea[3:0]</obj_property>
-      <obj_property name="ObjectShortName">wea[3:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ICache_sim/icache1/Bank5_way1/addra" type="array">
-      <obj_property name="ElementShortName">addra[6:0]</obj_property>
-      <obj_property name="ObjectShortName">addra[6:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ICache_sim/icache1/Bank5_way1/dina" type="array">
-      <obj_property name="ElementShortName">dina[31:0]</obj_property>
-      <obj_property name="ObjectShortName">dina[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ICache_sim/icache1/Bank5_way1/douta" type="array">
-      <obj_property name="ElementShortName">douta[31:0]</obj_property>
-      <obj_property name="ObjectShortName">douta[31:0]</obj_property>
+   <wvobject fp_name="/ICache_sim/icache1/LRU" type="array">
+      <obj_property name="ElementShortName">LRU[127:0]</obj_property>
+      <obj_property name="ObjectShortName">LRU[127:0]</obj_property>
    </wvobject>
 </wave_config>

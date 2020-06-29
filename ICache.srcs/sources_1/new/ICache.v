@@ -41,10 +41,9 @@ module ICache(
     output wire mem_ren_o,
     output wire mem_rready_o,
     output wire mem_arvalid_o,
-    output wire[`InstAddrBus]mem_araddr_o,
+    output wire[`InstAddrBus]mem_araddr_o
     
     //test
-    input LRU_pick
     );
     
 //////////////////////////////////////////////////////////////////////////////////
@@ -74,14 +73,14 @@ module ICache(
     wire [`RegBus]inst_cache_b5w0;
     wire [`RegBus]inst_cache_b6w0;
     wire [`RegBus]inst_cache_b7w0;
-    bank_ram Bank0_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(physical_addr[`IndexBus]), .dina(read_from_mem[32*1-1:32*0]),.douta(inst_cache_b0w0));
-    bank_ram Bank1_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(physical_addr[`IndexBus]), .dina(read_from_mem[32*2-1:32*1]),.douta(inst_cache_b1w0));
-    bank_ram Bank2_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(physical_addr[`IndexBus]), .dina(read_from_mem[32*3-1:32*2]),.douta(inst_cache_b2w0));
-    bank_ram Bank3_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(physical_addr[`IndexBus]), .dina(read_from_mem[32*4-1:32*3]),.douta(inst_cache_b3w0));
-    bank_ram Bank4_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(physical_addr[`IndexBus]), .dina(read_from_mem[32*5-1:32*4]),.douta(inst_cache_b4w0));
-    bank_ram Bank5_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(physical_addr[`IndexBus]), .dina(read_from_mem[32*6-1:32*5]),.douta(inst_cache_b5w0));
-    bank_ram Bank6_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(physical_addr[`IndexBus]), .dina(read_from_mem[32*7-1:32*6]),.douta(inst_cache_b6w0));
-    bank_ram Bank7_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(physical_addr[`IndexBus]), .dina(read_from_mem[32*8-1:32*7]),.douta(inst_cache_b7w0));
+    bank_ram Bank0_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*1-1:32*0]),.douta(inst_cache_b0w0));
+    bank_ram Bank1_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*2-1:32*1]),.douta(inst_cache_b1w0));
+    bank_ram Bank2_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*3-1:32*2]),.douta(inst_cache_b2w0));
+    bank_ram Bank3_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*4-1:32*3]),.douta(inst_cache_b3w0));
+    bank_ram Bank4_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*5-1:32*4]),.douta(inst_cache_b4w0));
+    bank_ram Bank5_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*6-1:32*5]),.douta(inst_cache_b5w0));
+    bank_ram Bank6_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*7-1:32*6]),.douta(inst_cache_b6w0));
+    bank_ram Bank7_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*8-1:32*7]),.douta(inst_cache_b7w0));
     
     wire [`RegBus]inst_cache_b0w1;
     wire [`RegBus]inst_cache_b1w1;
@@ -91,38 +90,34 @@ module ICache(
     wire [`RegBus]inst_cache_b5w1;
     wire [`RegBus]inst_cache_b6w1;
     wire [`RegBus]inst_cache_b7w1;                              
-    bank_ram Bank0_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(physical_addr[`IndexBus]), .dina(read_from_mem[32*1-1:32*0]),.douta(inst_cache_b0w1));
-    bank_ram Bank1_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(physical_addr[`IndexBus]), .dina(read_from_mem[32*2-1:32*1]),.douta(inst_cache_b1w1));
-    bank_ram Bank2_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(physical_addr[`IndexBus]), .dina(read_from_mem[32*3-1:32*2]),.douta(inst_cache_b2w1));
-    bank_ram Bank3_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(physical_addr[`IndexBus]), .dina(read_from_mem[32*4-1:32*3]),.douta(inst_cache_b3w1));
-    bank_ram Bank4_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(physical_addr[`IndexBus]), .dina(read_from_mem[32*5-1:32*4]),.douta(inst_cache_b4w1));
-    bank_ram Bank5_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(physical_addr[`IndexBus]), .dina(read_from_mem[32*6-1:32*5]),.douta(inst_cache_b5w1));
-    bank_ram Bank6_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(physical_addr[`IndexBus]), .dina(read_from_mem[32*7-1:32*6]),.douta(inst_cache_b6w1));
-    bank_ram Bank7_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(physical_addr[`IndexBus]), .dina(read_from_mem[32*8-1:32*7]),.douta(inst_cache_b7w1));
+    bank_ram Bank0_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*1-1:32*0]),.douta(inst_cache_b0w1));
+    bank_ram Bank1_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*2-1:32*1]),.douta(inst_cache_b1w1));
+    bank_ram Bank2_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*3-1:32*2]),.douta(inst_cache_b2w1));
+    bank_ram Bank3_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*4-1:32*3]),.douta(inst_cache_b3w1));
+    bank_ram Bank4_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*5-1:32*4]),.douta(inst_cache_b4w1));
+    bank_ram Bank5_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*6-1:32*5]),.douta(inst_cache_b5w1));
+    bank_ram Bank6_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*7-1:32*6]),.douta(inst_cache_b6w1));
+    bank_ram Bank7_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*8-1:32*7]),.douta(inst_cache_b7w1));
 
     //Tag+Valid
     wire [`TagVBus]tagv_cache_w0;
-    tag_ram TagV0 (
-      .clka(clk),    // input wire clka
-      .ena(`Enable),      // input wire ena
-      .wea(wea_way0),      // input wire [2 : 0] wea
-      .addra(physical_addr[`IndexBus]),  // input wire [6 : 0] addra
-      .dina(physical_addr[`TagBus]),    // input wire [23 : 0] dina
-      .douta(tagv_cache_w0)  // output wire [23 : 0] douta
-    );
     wire [`TagVBus]tagv_cache_w1;
-    tag_ram TagV1 (
-      .clka(clk),    // input wire clka
-      .ena(`Enable),      // input wire ena
-      .wea(wea_way1),      // input wire [2 : 0] wea
-      .addra(physical_addr[`IndexBus]),  // input wire [6 : 0] addra
-      .dina(physical_addr[`TagBus]),    // input wire [23 : 0] dina
-      .douta(tagv_cache_w1)  // output wire [23 : 0] douta
-    );
+    tag_ram TagV0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]),.dina({1'b1,physical_addr[`TagBus]}),.douta(tagv_cache_w0));
+    tag_ram TagV1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]),.dina({1'b1,physical_addr[`TagBus]}),.douta(tagv_cache_w1));
     
     //LRU
-//    reg [`SetBus]LRU;
-//    reg LRU_pick;
+    reg [`SetBus]LRU;
+    wire LRU_pick = LRU[virtual_addr_i[`IndexBus]];
+    always@(posedge clk)begin
+        if(rst)
+            LRU <= 0;
+        else if(cpu_inst_valid_o == `Valid && hit_o == `HitSuccess)
+            LRU[virtual_addr_i[`IndexBus]] <= hit_way0;
+        else if(cpu_inst_valid_o == `Valid && hit_o == `HitFail)
+            LRU[virtual_addr_i[`IndexBus]] <= wea_way0;
+        else
+            LRU <= LRU;
+    end
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////×´Ì¬»úÃèÊö////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
@@ -166,30 +161,6 @@ module ICache(
         endcase
     end//always
     
-//    always@(*)begin
-//        case(current_state)
-//            `STATE_LOOK_UP:begin
-//                if(req_i)begin
-//                    next_state <= `STATE_SCAN_CACHE;
-//                end
-//                else
-//                    next_state <= `STATE_LOOK_UP;
-//            end
-//            `STATE_SCAN_CACHE:begin
-                
-//            end
-//            `STATE_HIT_FAIL:
-//                next_state <= `STATE_WAIT_BUS;
-//            `STATE_WAIT_BUS:begin
-//                if(inst_valid_o)
-//                    next_state <= `STATE_LOOK_UP;
-//                else
-//                    next_state <= `STATE_WAIT_BUS;
-//            end
-//            default:;
-//        endcase
-//    end
-    
     
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////×éºÏÂß¼­//////////////////////////////////////////
@@ -200,7 +171,7 @@ module ICache(
     reg [`InstBus]inst_way1;
     //way0
     always@(*)begin
-        case(physical_addr[4:2])
+        case(virtual_addr_i[4:2])
             3'h0:inst_way0 <= inst_cache_b0w0;
             3'h1:inst_way0 <= inst_cache_b1w0;
             3'h2:inst_way0 <= inst_cache_b2w0;
@@ -214,7 +185,7 @@ module ICache(
     end
     //way1
     always@(*)begin
-        case(physical_addr[4:2])
+        case(virtual_addr_i[4:2])
             3'h0:inst_way1 <= inst_cache_b0w1;
             3'h1:inst_way1 <= inst_cache_b1w1;
             3'h2:inst_way1 <= inst_cache_b2w1;
@@ -227,8 +198,8 @@ module ICache(
         endcase
     end
     //Tag Hit
-    wire hit_way0 = (tagv_cache_w0==physical_addr[`TagBus])? `HitSuccess : `HitFail;
-    wire hit_way1 = (tagv_cache_w1==physical_addr[`TagBus])? `HitSuccess : `HitFail;
+    wire hit_way0 = (tagv_cache_w0[19:0]==physical_addr[`TagBus] && tagv_cache_w0[20]==`Valid)? `HitSuccess : `HitFail;
+    wire hit_way1 = (tagv_cache_w1[19:0]==physical_addr[`TagBus] && tagv_cache_w1[20]==`Valid)? `HitSuccess : `HitFail;
     assign hit_o = (current_state==`STATE_SCAN_CACHE)? (hit_way0 | hit_way1) :`HitFail;
     
     
@@ -256,14 +227,14 @@ module ICache(
 //////////////////////////////////////////////////////////////////////////////////
     assign cpu_inst_o = (current_state==`STATE_SCAN_CACHE && hit_way0 == `HitSuccess)? inst_way0:
                         (current_state==`STATE_SCAN_CACHE && hit_way1 == `HitSuccess)? inst_way1:
-                        (current_state==`STATE_WRITE_BACK &&physical_addr[4:2] == 3'h0)? read_from_mem[32*1-1:32*0]:
-                        (current_state==`STATE_WRITE_BACK &&physical_addr[4:2] == 3'h1)? read_from_mem[32*2-1:32*1]:
-                        (current_state==`STATE_WRITE_BACK &&physical_addr[4:2] == 3'h2)? read_from_mem[32*3-1:32*2]:
-                        (current_state==`STATE_WRITE_BACK &&physical_addr[4:2] == 3'h3)? read_from_mem[32*4-1:32*3]:
-                        (current_state==`STATE_WRITE_BACK &&physical_addr[4:2] == 3'h4)? read_from_mem[32*5-1:32*4]:
-                        (current_state==`STATE_WRITE_BACK &&physical_addr[4:2] == 3'h5)? read_from_mem[32*6-1:32*5]:
-                        (current_state==`STATE_WRITE_BACK &&physical_addr[4:2] == 3'h6)? read_from_mem[32*7-1:32*6]:
-                        (current_state==`STATE_WRITE_BACK &&physical_addr[4:2] == 3'h7)? read_from_mem[32*8-1:32*7]:
+                        (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h0)? read_from_mem[32*1-1:32*0]:
+                        (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h1)? read_from_mem[32*2-1:32*1]:
+                        (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h2)? read_from_mem[32*3-1:32*2]:
+                        (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h3)? read_from_mem[32*4-1:32*3]:
+                        (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h4)? read_from_mem[32*5-1:32*4]:
+                        (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h5)? read_from_mem[32*6-1:32*5]:
+                        (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h6)? read_from_mem[32*7-1:32*6]:
+                        (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h7)? read_from_mem[32*8-1:32*7]:
                         `ZeroWord;
                         
     assign cpu_inst_valid_o = (current_state==`STATE_SCAN_CACHE && hit_o == `HitSuccess)? `Valid :

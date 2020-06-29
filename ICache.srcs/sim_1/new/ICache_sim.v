@@ -41,7 +41,7 @@ module ICache_sim(
     wire mem_arvalid_o;
     wire [`InstAddrBus]mem_araddr_o;
     
-    reg LRU_pick=1;
+//    reg LRU_pick=1;
     ICache icache1(
         .clk(clk),                       
         .rst(rst), 
@@ -64,31 +64,158 @@ module ICache_sim(
         .mem_ren_o(mem_ren_o),                
         .mem_rready_o(mem_rready_o),             
         .mem_arvalid_o(mem_arvalid_o),            
-        .mem_araddr_o(mem_araddr_o),
+        .mem_araddr_o(mem_araddr_o)
         
         //test
-        .LRU_pick(LRU_pick)
+//        .LRU_pick(LRU_pick)
         );
         
     always #10 clk=~clk;
     initial begin
         #500 rst =0;
+        
+        //valid test: addr==0 but not valid
         #100 cpu_req_i=1;
-        virtual_addr_i = 32'h24687534;
+        virtual_addr_i = 32'hDEBA_D000;
         #20 cpu_req_i=0;
-        wait(mem_arvalid_o)
-         #140   mem_rvalid_i=1;
-         mem_rdata_i=256'h12345678_91023456_78910234_56789102_34567891_02345678_91023456_78910234;
-         #20 mem_rvalid_i=0;
-        wait(cpu_inst_valid_o==`Valid)
-        $display("sucess:not hit, send read request to AXI");
+        wait(mem_arvalid_o)begin
+             #140   mem_rvalid_i=1;
+             mem_rdata_i=256'h12345678_91023456_78910234_56789102_34567891_02345678_91023456_78910234;
+             wait(mem_rready_o==`Ready) #20 mem_rvalid_i=0;
+         end
+        wait(cpu_inst_valid_o==`Valid && hit_o == `HitFail) begin
+            if(cpu_inst_o == 32'h78910234)
+                $display("sucess:not hit, addr==0 but not valid");
+            else    begin
+                $display("FAIL!!!");
+                $stop;
+            end
+        end
         
+        //normal test
+        #500 cpu_req_i=1;
+        virtual_addr_i = 32'h24687_570;
+        #20 cpu_req_i=0;
+        wait(mem_arvalid_o)begin
+             #140   mem_rvalid_i=1;
+             mem_rdata_i=256'h12345678_91023456_78910234_56789102_34567891_02345678_91023456_78910234;
+             wait(mem_rready_o==`Ready) #20 mem_rvalid_i=0;
+         end
+        wait(cpu_inst_valid_o==`Valid && hit_o == `HitFail) begin
+            if(cpu_inst_o == 32'h56789102)
+                $display("sucess:not hit, addr==0 but not valid");
+            else    begin
+                $display("FAIL!!!");
+                $stop;
+            end
+        end
         
+        //hit test: same set but not same addr
         #100    cpu_req_i=1;
-        virtual_addr_i = 32'h24687534;
+        virtual_addr_i = 32'h24687_574;
         #20 cpu_req_i=0;
-        wait(hit_o==`HitSuccess)
-        $display("sucess:hit, directly send data to CPU");;
-        $stop;
+        wait(cpu_inst_valid_o==`Valid && hit_o==`HitSuccess)begin
+            if(cpu_inst_o == 32'h78910234)
+                $display("sucess:hit, directly send data to CPU");
+            else    begin
+                $display("FAIL!!!");
+                $stop;
+            end
+        end
+        
+        //normal test
+        #500 cpu_req_i=1;
+        virtual_addr_i = 32'h33487_570;
+        #20 cpu_req_i=0;
+        wait(mem_arvalid_o)begin
+             #140   mem_rvalid_i=1;
+             mem_rdata_i=256'h12345678_91023456_78910234_56789102_34567891_02345678_91023456_78910234;
+             wait(mem_rready_o==`Ready) #20 mem_rvalid_i=0;
+         end
+        wait(cpu_inst_valid_o==`Valid && hit_o == `HitFail) begin
+            if(cpu_inst_o == 32'h56789102)
+                $display("sucess:not hit, addr==0 but not valid");
+            else    begin
+                $display("FAIL!!!");
+                $stop;
+            end
+        end
+        
+        //hit test: same set but not same addr
+        #100    cpu_req_i=1;
+        virtual_addr_i = 32'h33487_574;
+        #20 cpu_req_i=0;
+        wait(cpu_inst_valid_o==`Valid && hit_o==`HitSuccess)begin
+            if(cpu_inst_o == 32'h78910234)
+                $display("sucess:hit, directly send data to CPU");
+            else    begin
+                $display("FAIL!!!");
+                $stop;
+            end
+        end
+        
+        //replace test: check cache stored before to prove it's not replaced
+        #100    cpu_req_i=1;
+        virtual_addr_i = 32'h24687_578;
+        #20 cpu_req_i=0;
+        wait(cpu_inst_valid_o==`Valid && hit_o==`HitSuccess)begin
+            if(cpu_inst_o == 32'h91023456)
+                $display("sucess:hit, it's not replaced (2-way)");
+            else    begin
+                $display("FAIL!!!");
+                $stop;
+            end
+        end
+        
+        //replace test: check cache stored before to prove it's not replaced
+        #100    cpu_req_i=1;
+        virtual_addr_i = 32'h33487_574;
+        #20 cpu_req_i=0;
+        wait(cpu_inst_valid_o==`Valid && hit_o==`HitSuccess)begin
+            if(cpu_inst_o == 32'h78910234)
+                $display("sucess:hit, directly send data to CPU");
+            else    begin
+                $display("FAIL!!!");
+                $stop;
+            end
+        end
+        
+        //normal test
+        #500 cpu_req_i=1;
+        virtual_addr_i = 32'h57365_570;
+        #20 cpu_req_i=0;
+        wait(mem_arvalid_o)begin
+             #140   mem_rvalid_i=1;
+             mem_rdata_i=256'h12345678_91023456_78910234_56789102_34567891_02345678_91023456_78910234;
+             wait(mem_rready_o==`Ready) #20 mem_rvalid_i=0;
+         end
+        wait(cpu_inst_valid_o==`Valid && hit_o == `HitFail)begin
+            if(cpu_inst_o == 32'h56789102)
+                $display("sucess:not hit");
+            else    begin
+                $display("FAIL!!!");
+                $stop;
+            end
+        end
+            
+        //normal test
+        #500 cpu_req_i=1;
+        virtual_addr_i = 32'h24687_570;
+        #20 cpu_req_i=0;
+        wait(mem_arvalid_o)begin
+             #140   mem_rvalid_i=1;
+             mem_rdata_i=256'h12345678_91023456_78910234_56789102_34567891_02345678_91023456_78910234;
+             wait(mem_rready_o==`Ready) #20 mem_rvalid_i=0;
+         end
+        wait(cpu_inst_valid_o==`Valid && hit_o == `HitFail)begin
+            if(cpu_inst_o == 32'h56789102)begin
+                $display("sucess:not hit, replacement is right");
+                $stop;
+            end
+            else    begin
+                $display("FAIL!!!");
+                $stop;
+            end
+        end
     end
 endmodule

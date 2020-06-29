@@ -15,7 +15,7 @@
 `define SetAccNum 2
 `define WaySize `BlockNum*32
 `define WayBus `BlockNum*32-1:0
-`define SetNum `CacheSize/`WaySize/`SetAccNum
+`define SetNum 128 //`CacheSize/`WaySize/`SetAccNum
 `define SetSize `SetAccNum*`WaySize
 `define StateNum 4
 `define StateNumLog2 2
@@ -24,7 +24,7 @@
 `define OffsetBus 4:0
 `define IndexBus 11:5
 `define TagBus 31:12
-`define TagVBus 19:0
+`define TagVBus 20:0
 `define StateBus `StateNumLog2-1:0
 `define SetBus `SetNum-1:0
 
