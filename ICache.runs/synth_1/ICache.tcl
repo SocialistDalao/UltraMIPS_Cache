@@ -17,8 +17,8 @@ proc create_report { reportName command } {
     send_msg_id runtcl-5 warning "$msg"
   }
 }
-set_msg_config -id {Common 17-41} -limit 10000000
-create_project -in_memory -part xc7k70tfbv676-1
+set_param chipscope.maxJobs 3
+create_project -in_memory -part xc7a200tfbg676-2
 
 set_param project.singleFileAddWarning.threshold 0
 set_param project.compositeFile.enableAutoGeneration 0
@@ -37,11 +37,11 @@ read_verilog -library xil_defaultlib {
   C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/new/TLB.v
   C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/new/ICache.v
 }
-read_ip -quiet C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/tag_ram/tag_ram.xci
-set_property used_in_implementation false [get_files -all c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/tag_ram/tag_ram_ooc.xdc]
-
 read_ip -quiet C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram.xci
 set_property used_in_implementation false [get_files -all c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram_ooc.xdc]
+
+read_ip -quiet C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/tag_ram/tag_ram.xci
+set_property used_in_implementation false [get_files -all c:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/tag_ram/tag_ram_ooc.xdc]
 
 # Mark all dcp files as not used in implementation to prevent them from being
 # stitched into the results of this synthesis run. Any black boxes in the
@@ -51,12 +51,13 @@ set_property used_in_implementation false [get_files -all c:/NSCSCC/Project/ICac
 foreach dcp [get_files -quiet -all -filter file_type=="Design\ Checkpoint"] {
   set_property used_in_implementation false $dcp
 }
-read_xdc dont_touch.xdc
-set_property used_in_implementation false [get_files dont_touch.xdc]
+read_xdc C:/NSCSCC/Project/ICache/ICache.srcs/constrs_1/new/soc_lite.xdc
+set_property used_in_implementation false [get_files C:/NSCSCC/Project/ICache/ICache.srcs/constrs_1/new/soc_lite.xdc]
+
 set_param ips.enableIPCacheLiteLoad 1
 close [open __synthesis_is_running__ w]
 
-synth_design -top ICache -part xc7k70tfbv676-1
+synth_design -top ICache -part xc7a200tfbg676-2
 
 
 # disable binary constraint mode for synth run checkpoints

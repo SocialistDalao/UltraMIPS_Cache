@@ -77,8 +77,8 @@ input wire [31 : 0] dina;
 output wire [31 : 0] douta;
 
   blk_mem_gen_v8_4_4 #(
-    .C_FAMILY("kintex7"),
-    .C_XDEVICEFAMILY("kintex7"),
+    .C_FAMILY("artix7"),
+    .C_XDEVICEFAMILY("artix7"),
     .C_ELABORATION_DIR("./"),
     .C_INTERFACE_TYPE(0),
     .C_AXI_TYPE(1),

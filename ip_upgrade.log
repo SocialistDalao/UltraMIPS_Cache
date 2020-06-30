@@ -1,0 +1,37 @@
+Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
+------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2019.2 (win64) Build 2708876 Wed Nov  6 21:40:23 MST 2019
+| Date         : Tue Jun 30 16:53:11 2020
+| Host         : DESKTOP-DE0831E running 64-bit major release  (build 9200)
+| Command      : upgrade_ip
+| Device       : xc7a200tfbg676-2
+------------------------------------------------------------------------------------
+
+Upgrade Log for IP 'tag_ram'
+
+1. Summary
+----------
+
+SUCCESS in the conversion of tag_ram (xilinx.com:ip:blk_mem_gen:8.4 (Rev. 4)) to Vivado generation flows.
+
+
+
+
+
+
+Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
+------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2019.2 (win64) Build 2708876 Wed Nov  6 21:40:23 MST 2019
+| Date         : Tue Jun 30 16:53:10 2020
+| Host         : DESKTOP-DE0831E running 64-bit major release  (build 9200)
+| Command      : upgrade_ip
+| Device       : xc7a200tfbg676-2
+------------------------------------------------------------------------------------
+
+Upgrade Log for IP 'bank_ram'
+
+1. Summary
+----------
+
+SUCCESS in the conversion of bank_ram (xilinx.com:ip:blk_mem_gen:8.4 (Rev. 4)) to Vivado generation flows.
+

@@ -23,7 +23,14 @@
 module ICache_sim(
 
     );
-    reg clk=0;
+    reg clk_in1=0;     
+    wire clk;
+  clk_wiz_0 clk_cpu
+   (
+    .clk_out1(clk),    
+    .clk_in1(clk_in1)); 
+    always #10 clk_in1=~clk_in1;
+    
     reg rst=1;
     reg cpu_req_i=0;
     reg [`RegBus]virtual_addr_i=0;
@@ -70,7 +77,6 @@ module ICache_sim(
 //        .LRU_pick(LRU_pick)
         );
         
-    always #10 clk=~clk;
     initial begin
         #500 rst =0;
         

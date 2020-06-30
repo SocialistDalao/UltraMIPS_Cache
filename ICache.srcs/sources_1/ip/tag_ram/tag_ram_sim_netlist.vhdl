@@ -1,14 +1,14 @@
 -- Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2019.2 (win64) Build 2708876 Wed Nov  6 21:40:23 MST 2019
--- Date        : Thu Jun 25 16:42:10 2020
+-- Date        : Tue Jun 30 16:54:20 2020
 -- Host        : DESKTOP-DE0831E running 64-bit major release  (build 9200)
 -- Command     : write_vhdl -force -mode funcsim -rename_top tag_ram -prefix
---               tag_ram_ blk_mem_gen_0_sim_netlist.vhdl
--- Design      : blk_mem_gen_0
+--               tag_ram_ bank_ram_sim_netlist.vhdl
+-- Design      : bank_ram
 -- Purpose     : This VHDL netlist is a functional simulation representation of the design and should not be modified or
 --               synthesized. This netlist cannot be used for SDF annotated simulation.
--- Device      : xc7k70tfbv676-1
+-- Device      : xc7a200tfbg676-2
 -- --------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -394,7 +394,7 @@ entity tag_ram_blk_mem_gen_v8_4_4 is
   attribute C_EST_POWER_SUMMARY : string;
   attribute C_EST_POWER_SUMMARY of tag_ram_blk_mem_gen_v8_4_4 : entity is "Estimated Power for IP     :     3.53845 mW";
   attribute C_FAMILY : string;
-  attribute C_FAMILY of tag_ram_blk_mem_gen_v8_4_4 : entity is "kintex7";
+  attribute C_FAMILY of tag_ram_blk_mem_gen_v8_4_4 : entity is "artix7";
   attribute C_HAS_AXI_ID : integer;
   attribute C_HAS_AXI_ID of tag_ram_blk_mem_gen_v8_4_4 : entity is 0;
   attribute C_HAS_ENA : integer;
@@ -428,7 +428,7 @@ entity tag_ram_blk_mem_gen_v8_4_4 is
   attribute C_INITB_VAL : string;
   attribute C_INITB_VAL of tag_ram_blk_mem_gen_v8_4_4 : entity is "0";
   attribute C_INIT_FILE : string;
-  attribute C_INIT_FILE of tag_ram_blk_mem_gen_v8_4_4 : entity is "blk_mem_gen_0.mem";
+  attribute C_INIT_FILE of tag_ram_blk_mem_gen_v8_4_4 : entity is "bank_ram.mem";
   attribute C_INIT_FILE_NAME : string;
   attribute C_INIT_FILE_NAME of tag_ram_blk_mem_gen_v8_4_4 : entity is "no_coe_file_loaded";
   attribute C_INTERFACE_TYPE : integer;
@@ -494,7 +494,7 @@ entity tag_ram_blk_mem_gen_v8_4_4 is
   attribute C_WRITE_WIDTH_B : integer;
   attribute C_WRITE_WIDTH_B of tag_ram_blk_mem_gen_v8_4_4 : entity is 32;
   attribute C_XDEVICEFAMILY : string;
-  attribute C_XDEVICEFAMILY of tag_ram_blk_mem_gen_v8_4_4 : entity is "kintex7";
+  attribute C_XDEVICEFAMILY of tag_ram_blk_mem_gen_v8_4_4 : entity is "artix7";
   attribute downgradeipidentifiedwarnings : string;
   attribute downgradeipidentifiedwarnings of tag_ram_blk_mem_gen_v8_4_4 : entity is "yes";
 end tag_ram_blk_mem_gen_v8_4_4;
@@ -634,7 +634,7 @@ entity tag_ram is
   attribute NotValidForBitStream : boolean;
   attribute NotValidForBitStream of tag_ram : entity is true;
   attribute CHECK_LICENSE_TYPE : string;
-  attribute CHECK_LICENSE_TYPE of tag_ram : entity is "blk_mem_gen_0,blk_mem_gen_v8_4_4,{}";
+  attribute CHECK_LICENSE_TYPE of tag_ram : entity is "bank_ram,blk_mem_gen_v8_4_4,{}";
   attribute downgradeipidentifiedwarnings : string;
   attribute downgradeipidentifiedwarnings of tag_ram : entity is "yes";
   attribute x_core_info : string;
@@ -711,7 +711,7 @@ architecture STRUCTURE of tag_ram is
   attribute C_EST_POWER_SUMMARY : string;
   attribute C_EST_POWER_SUMMARY of U0 : label is "Estimated Power for IP     :     3.53845 mW";
   attribute C_FAMILY : string;
-  attribute C_FAMILY of U0 : label is "kintex7";
+  attribute C_FAMILY of U0 : label is "artix7";
   attribute C_HAS_AXI_ID : integer;
   attribute C_HAS_AXI_ID of U0 : label is 0;
   attribute C_HAS_ENA : integer;
@@ -745,7 +745,7 @@ architecture STRUCTURE of tag_ram is
   attribute C_INITB_VAL : string;
   attribute C_INITB_VAL of U0 : label is "0";
   attribute C_INIT_FILE : string;
-  attribute C_INIT_FILE of U0 : label is "blk_mem_gen_0.mem";
+  attribute C_INIT_FILE of U0 : label is "bank_ram.mem";
   attribute C_INIT_FILE_NAME : string;
   attribute C_INIT_FILE_NAME of U0 : label is "no_coe_file_loaded";
   attribute C_INTERFACE_TYPE : integer;
@@ -811,7 +811,7 @@ architecture STRUCTURE of tag_ram is
   attribute C_WRITE_WIDTH_B : integer;
   attribute C_WRITE_WIDTH_B of U0 : label is 32;
   attribute C_XDEVICEFAMILY : string;
-  attribute C_XDEVICEFAMILY of U0 : label is "kintex7";
+  attribute C_XDEVICEFAMILY of U0 : label is "artix7";
   attribute downgradeipidentifiedwarnings of U0 : label is "yes";
   attribute x_interface_info : string;
   attribute x_interface_info of clka : signal is "xilinx.com:interface:bram:1.0 BRAM_PORTA CLK";
