@@ -1,5 +1,7 @@
 set_property SRC_FILE_INFO {cfile:C:/NSCSCC/Project/ICache/ICache.srcs/constrs_1/new/soc_lite.xdc rfile:../../../ICache.srcs/constrs_1/new/soc_lite.xdc id:1} [current_design]
 set_property src_info {type:XDC file:1 line:3 export:INPUT save:INPUT read:READ} [current_design]
 set_property PACKAGE_PIN AC19 [get_ports clk]
+set_property src_info {type:XDC file:1 line:5 export:INPUT save:INPUT read:READ} [current_design]
+create_clock -period 10.000 -name clk -waveform {0.000 5.000} [get_ports clk]
 set_property src_info {type:XDC file:1 line:8 export:INPUT save:INPUT read:READ} [current_design]
 set_property PACKAGE_PIN Y3 [get_ports resetn]

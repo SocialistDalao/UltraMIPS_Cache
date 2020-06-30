@@ -73,10 +73,11 @@ set rc [catch {
   set_property parent.project_path C:/NSCSCC/Project/ICache/ICache.xpr [current_project]
   set_property ip_output_repo C:/NSCSCC/Project/ICache/ICache.cache/ip [current_project]
   set_property ip_cache_permissions {read write} [current_project]
-  set_property XPM_LIBRARIES XPM_MEMORY [current_project]
+  set_property XPM_LIBRARIES {XPM_CDC XPM_MEMORY} [current_project]
   add_files -quiet C:/NSCSCC/Project/ICache/ICache.runs/synth_1/ICache.dcp
   read_ip -quiet C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/bank_ram/bank_ram.xci
   read_ip -quiet C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/tag_ram/tag_ram.xci
+  read_ip -quiet C:/NSCSCC/Project/ICache/ICache.srcs/sources_1/ip/clk_wiz_0/clk_wiz_0.xci
   read_xdc C:/NSCSCC/Project/ICache/ICache.srcs/constrs_1/new/soc_lite.xdc
   link_design -top ICache -part xc7a200tfbg676-2
   close_msg_db -file init_design.pb

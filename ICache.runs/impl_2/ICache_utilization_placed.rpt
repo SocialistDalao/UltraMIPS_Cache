@@ -1,7 +1,7 @@
 Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2019.2 (win64) Build 2708876 Wed Nov  6 21:40:23 MST 2019
-| Date         : Tue Jun 30 17:18:55 2020
+| Date         : Tue Jun 30 19:05:41 2020
 | Host         : DESKTOP-DE0831E running 64-bit major release  (build 9200)
 | Command      : report_utilization -file ICache_utilization_placed.rpt -pb ICache_utilization_placed.pb
 | Design       : ICache
@@ -67,9 +67,9 @@ Table of Contents
 +--------------------------------------------+------+-------+-----------+-------+
 |                  Site Type                 | Used | Fixed | Available | Util% |
 +--------------------------------------------+------+-------+-----------+-------+
-| Slice                                      |  252 |     0 |     33450 |  0.75 |
-|   SLICEL                                   |  159 |     0 |           |       |
-|   SLICEM                                   |   93 |     0 |           |       |
+| Slice                                      |  241 |     0 |     33450 |  0.72 |
+|   SLICEL                                   |  158 |     0 |           |       |
+|   SLICEM                                   |   83 |     0 |           |       |
 | LUT as Logic                               |  491 |     0 |    133800 |  0.37 |
 |   using O5 output only                     |    0 |       |           |       |
 |   using O6 output only                     |  468 |       |           |       |
@@ -78,10 +78,10 @@ Table of Contents
 |   LUT as Distributed RAM                   |    0 |     0 |           |       |
 |   LUT as Shift Register                    |    0 |     0 |           |       |
 | Slice Registers                            |  388 |     0 |    267600 |  0.14 |
-|   Register driven from within the Slice    |  131 |       |           |       |
-|   Register driven from outside the Slice   |  257 |       |           |       |
-|     LUT in front of the register is unused |  243 |       |           |       |
-|     LUT in front of the register is used   |   14 |       |           |       |
+|   Register driven from within the Slice    |  132 |       |           |       |
+|   Register driven from outside the Slice   |  256 |       |           |       |
+|     LUT in front of the register is unused |  249 |       |           |       |
+|     LUT in front of the register is used   |    7 |       |           |       |
 | Unique Control Sets                        |    2 |       |     33450 | <0.01 |
 +--------------------------------------------+------+-------+-----------+-------+
 * Note: Available Control Sets calculated as Slice Registers / 8, Review the Control Sets Report for more information regarding control sets.
@@ -117,9 +117,9 @@ Table of Contents
 +-----------------------------+------+-------+-----------+-------+
 |          Site Type          | Used | Fixed | Available | Util% |
 +-----------------------------+------+-------+-----------+-------+
-| Bonded IOB                  |  362 |     1 |       400 | 90.50 |
-|   IOB Master Pads           |  174 |       |           |       |
-|   IOB Slave Pads            |  173 |       |           |       |
+| Bonded IOB                  |  362 |     0 |       400 | 90.50 |
+|   IOB Master Pads           |  173 |       |           |       |
+|   IOB Slave Pads            |  174 |       |           |       |
 | Bonded IPADs                |    0 |     0 |        26 |  0.00 |
 | Bonded OPADs                |    0 |     0 |        16 |  0.00 |
 | PHY_CONTROL                 |    0 |     0 |        10 |  0.00 |
@@ -144,10 +144,10 @@ Table of Contents
 +------------+------+-------+-----------+-------+
 |  Site Type | Used | Fixed | Available | Util% |
 +------------+------+-------+-----------+-------+
-| BUFGCTRL   |    1 |     0 |        32 |  3.13 |
+| BUFGCTRL   |    2 |     0 |        32 |  6.25 |
 | BUFIO      |    0 |     0 |        40 |  0.00 |
 | MMCME2_ADV |    0 |     0 |        10 |  0.00 |
-| PLLE2_ADV  |    0 |     0 |        10 |  0.00 |
+| PLLE2_ADV  |    1 |     0 |        10 | 10.00 |
 | BUFMRCE    |    0 |     0 |        20 |  0.00 |
 | BUFHCE     |    0 |     0 |       120 |  0.00 |
 | BUFR       |    0 |     0 |        40 |  0.00 |
@@ -175,25 +175,26 @@ Table of Contents
 8. Primitives
 -------------
 
-+----------+------+---------------------+
-| Ref Name | Used | Functional Category |
-+----------+------+---------------------+
-| LUT6     |  425 |                 LUT |
-| FDRE     |  387 |        Flop & Latch |
-| IBUF     |  293 |                  IO |
-| OBUF     |   69 |                  IO |
-| MUXF7    |   69 |               MuxFx |
-| LUT2     |   36 |                 LUT |
-| LUT5     |   35 |                 LUT |
-| RAMB18E1 |   18 |        Block Memory |
-| CARRY4   |   10 |          CarryLogic |
-| LUT4     |    8 |                 LUT |
-| LUT1     |    7 |                 LUT |
-| LUT3     |    3 |                 LUT |
-| MUXF8    |    2 |               MuxFx |
-| FDSE     |    1 |        Flop & Latch |
-| BUFG     |    1 |               Clock |
-+----------+------+---------------------+
++-----------+------+---------------------+
+|  Ref Name | Used | Functional Category |
++-----------+------+---------------------+
+| LUT6      |  425 |                 LUT |
+| FDRE      |  387 |        Flop & Latch |
+| IBUF      |  293 |                  IO |
+| OBUF      |   69 |                  IO |
+| MUXF7     |   69 |               MuxFx |
+| LUT2      |   36 |                 LUT |
+| LUT5      |   35 |                 LUT |
+| RAMB18E1  |   18 |        Block Memory |
+| CARRY4    |   10 |          CarryLogic |
+| LUT4      |    8 |                 LUT |
+| LUT1      |    7 |                 LUT |
+| LUT3      |    3 |                 LUT |
+| MUXF8     |    2 |               MuxFx |
+| BUFG      |    2 |               Clock |
+| PLLE2_ADV |    1 |               Clock |
+| FDSE      |    1 |        Flop & Latch |
++-----------+------+---------------------+
 
 
 9. Black Boxes
@@ -207,11 +208,12 @@ Table of Contents
 10. Instantiated Netlists
 -------------------------
 
-+----------+------+
-| Ref Name | Used |
-+----------+------+
-| bank_ram |   16 |
-| tag_ram  |    2 |
-+----------+------+
++-----------+------+
+|  Ref Name | Used |
++-----------+------+
+| bank_ram  |   16 |
+| tag_ram   |    2 |
+| clk_wiz_0 |    1 |
++-----------+------+
 
 

@@ -1,7 +1,7 @@
 Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version     : Vivado v.2019.2 (win64) Build 2708876 Wed Nov  6 21:40:23 MST 2019
-| Date             : Tue Jun 30 17:19:52 2020
+| Date             : Tue Jun 30 19:06:39 2020
 | Host             : DESKTOP-DE0831E running 64-bit major release  (build 9200)
 | Command          : report_power -file ICache_power_routed.rpt -pb ICache_power_summary_routed.pb -rpx ICache_power_routed.rpx
 | Design           : ICache
@@ -30,14 +30,14 @@ Table of Contents
 ----------
 
 +--------------------------+--------------+
-| Total On-Chip Power (W)  | 0.201        |
+| Total On-Chip Power (W)  | 0.281        |
 | Design Power Budget (W)  | Unspecified* |
 | Power Budget Margin (W)  | NA           |
-| Dynamic (W)              | 0.069        |
+| Dynamic (W)              | 0.149        |
 | Device Static (W)        | 0.132        |
 | Effective TJA (C/W)      | 1.9          |
-| Max Ambient (C)          | 84.6         |
-| Junction Temperature (C) | 25.4         |
+| Max Ambient (C)          | 84.5         |
+| Junction Temperature (C) | 25.5         |
 | Confidence Level         | Low          |
 | Setting File             | ---          |
 | Simulation Activity File | ---          |
@@ -52,18 +52,19 @@ Table of Contents
 +----------------+-----------+----------+-----------+-----------------+
 | On-Chip        | Power (W) | Used     | Available | Utilization (%) |
 +----------------+-----------+----------+-----------+-----------------+
-| Clocks         |     0.004 |        3 |       --- |             --- |
-| Slice Logic    |     0.002 |     1023 |       --- |             --- |
-|   LUT as Logic |     0.002 |      491 |    133800 |            0.37 |
+| Clocks         |     0.003 |        5 |       --- |             --- |
+| Slice Logic    |     0.002 |     1025 |       --- |             --- |
+|   LUT as Logic |     0.001 |      491 |    133800 |            0.37 |
 |   F7/F8 Muxes  |    <0.001 |       71 |    133800 |            0.05 |
 |   Register     |    <0.001 |      388 |    267600 |            0.14 |
 |   CARRY4       |    <0.001 |       10 |     33450 |            0.03 |
-|   Others       |     0.000 |       40 |       --- |             --- |
-| Signals        |     0.011 |     1558 |       --- |             --- |
-| Block RAM      |     0.038 |        9 |       365 |            2.47 |
-| I/O            |     0.016 |      362 |       400 |           90.50 |
+|   Others       |     0.000 |       42 |       --- |             --- |
+| Signals        |     0.008 |     1558 |       --- |             --- |
+| Block RAM      |     0.028 |        9 |       365 |            2.47 |
+| PLL            |     0.098 |        1 |        10 |           10.00 |
+| I/O            |     0.012 |      362 |       400 |           90.50 |
 | Static Power   |     0.132 |          |           |                 |
-| Total          |     0.201 |          |           |                 |
+| Total          |     0.281 |          |           |                 |
 +----------------+-----------+----------+-----------+-----------------+
 
 
@@ -73,16 +74,16 @@ Table of Contents
 +-----------+-------------+-----------+-------------+------------+
 | Source    | Voltage (V) | Total (A) | Dynamic (A) | Static (A) |
 +-----------+-------------+-----------+-------------+------------+
-| Vccint    |       1.000 |     0.083 |       0.052 |      0.031 |
-| Vccaux    |       1.800 |     0.032 |       0.001 |      0.031 |
+| Vccint    |       1.000 |     0.079 |       0.048 |      0.031 |
+| Vccaux    |       1.800 |     0.081 |       0.050 |      0.031 |
 | Vcco33    |       3.300 |     0.000 |       0.000 |      0.000 |
 | Vcco25    |       2.500 |     0.000 |       0.000 |      0.000 |
-| Vcco18    |       1.800 |     0.012 |       0.007 |      0.005 |
+| Vcco18    |       1.800 |     0.010 |       0.005 |      0.005 |
 | Vcco15    |       1.500 |     0.000 |       0.000 |      0.000 |
 | Vcco135   |       1.350 |     0.000 |       0.000 |      0.000 |
 | Vcco12    |       1.200 |     0.000 |       0.000 |      0.000 |
 | Vccaux_io |       1.800 |     0.000 |       0.000 |      0.000 |
-| Vccbram   |       1.000 |     0.004 |       0.003 |      0.001 |
+| Vccbram   |       1.000 |     0.003 |       0.002 |      0.001 |
 | MGTAVcc   |       1.000 |     0.000 |       0.000 |      0.000 |
 | MGTAVtt   |       1.200 |     0.000 |       0.000 |      0.000 |
 | Vccadc    |       1.800 |     0.020 |       0.000 |      0.020 |
@@ -126,11 +127,13 @@ Table of Contents
 2.2 Clock Constraints
 ---------------------
 
-+-------+--------+-----------------+
-| Clock | Domain | Constraint (ns) |
-+-------+--------+-----------------+
-| clk   | clk    |            10.0 |
-+-------+--------+-----------------+
++--------------------+---------------------------------+-----------------+
+| Clock              | Domain                          | Constraint (ns) |
++--------------------+---------------------------------+-----------------+
+| clk_in1            | clk_in1                         |            10.0 |
+| clk_out1_clk_wiz_0 | clk_cpu/inst/clk_out1_clk_wiz_0 |            13.3 |
+| clkfbout_clk_wiz_0 | clk_cpu/inst/clkfbout_clk_wiz_0 |            40.0 |
++--------------------+---------------------------------+-----------------+
 
 
 3. Detailed Reports
@@ -142,7 +145,7 @@ Table of Contents
 +------------------------+-----------+
 | Name                   | Power (W) |
 +------------------------+-----------+
-| ICache                 |     0.069 |
+| ICache                 |     0.149 |
 |   Bank0_way0           |     0.002 |
 |     U0                 |     0.002 |
 |       inst_blk_mem_gen |     0.002 |
@@ -197,6 +200,8 @@ Table of Contents
 |   TagV1                |     0.002 |
 |     U0                 |     0.002 |
 |       inst_blk_mem_gen |     0.002 |
+|   clk_cpu              |     0.098 |
+|     inst               |     0.098 |
 +------------------------+-----------+
 
 

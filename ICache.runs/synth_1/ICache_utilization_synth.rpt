@@ -1,7 +1,7 @@
 Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
 -------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2019.2 (win64) Build 2708876 Wed Nov  6 21:40:23 MST 2019
-| Date         : Tue Jun 30 17:18:18 2020
+| Date         : Tue Jun 30 19:05:03 2020
 | Host         : DESKTOP-DE0831E running 64-bit major release  (build 9200)
 | Command      : report_utilization -file ICache_utilization_synth.rpt -pb ICache_utilization_synth.pb
 | Design       : ICache
@@ -90,7 +90,7 @@ Table of Contents
 +-----------------------------+------+-------+-----------+-------+
 |          Site Type          | Used | Fixed | Available | Util% |
 +-----------------------------+------+-------+-----------+-------+
-| Bonded IOB                  |  362 |     0 |       400 | 90.50 |
+| Bonded IOB                  |  361 |     0 |       400 | 90.25 |
 | Bonded IPADs                |    0 |     0 |        26 |  0.00 |
 | Bonded OPADs                |    0 |     0 |        16 |  0.00 |
 | PHY_CONTROL                 |    0 |     0 |        10 |  0.00 |
@@ -115,7 +115,7 @@ Table of Contents
 +------------+------+-------+-----------+-------+
 |  Site Type | Used | Fixed | Available | Util% |
 +------------+------+-------+-----------+-------+
-| BUFGCTRL   |    1 |     0 |        32 |  3.13 |
+| BUFGCTRL   |    0 |     0 |        32 |  0.00 |
 | BUFIO      |    0 |     0 |        40 |  0.00 |
 | MMCME2_ADV |    0 |     0 |        10 |  0.00 |
 | PLLE2_ADV  |    0 |     0 |        10 |  0.00 |
@@ -151,7 +151,7 @@ Table of Contents
 +----------+------+---------------------+
 | LUT6     |  425 |                 LUT |
 | FDRE     |  387 |        Flop & Latch |
-| IBUF     |  293 |                  IO |
+| IBUF     |  292 |                  IO |
 | OBUF     |   69 |                  IO |
 | MUXF7    |   69 |               MuxFx |
 | LUT2     |   36 |                 LUT |
@@ -162,19 +162,19 @@ Table of Contents
 | LUT3     |    3 |                 LUT |
 | MUXF8    |    2 |               MuxFx |
 | FDSE     |    1 |        Flop & Latch |
-| BUFG     |    1 |               Clock |
 +----------+------+---------------------+
 
 
 8. Black Boxes
 --------------
 
-+----------+------+
-| Ref Name | Used |
-+----------+------+
-| bank_ram |   16 |
-| tag_ram  |    2 |
-+----------+------+
++-----------+------+
+|  Ref Name | Used |
++-----------+------+
+| bank_ram  |   16 |
+| tag_ram   |    2 |
+| clk_wiz_0 |    1 |
++-----------+------+
 
 
 9. Instantiated Netlists

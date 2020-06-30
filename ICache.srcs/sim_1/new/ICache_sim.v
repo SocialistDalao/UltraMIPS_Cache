@@ -23,13 +23,8 @@
 module ICache_sim(
 
     );
-    reg clk_in1=0;     
-    wire clk;
-  clk_wiz_0 clk_cpu
-   (
-    .clk_out1(clk),    
-    .clk_in1(clk_in1)); 
-    always #10 clk_in1=~clk_in1;
+    reg clk=0;     
+    always #10 clk=~clk;
     
     reg rst=1;
     reg cpu_req_i=0;
@@ -50,7 +45,7 @@ module ICache_sim(
     
 //    reg LRU_pick=1;
     ICache icache1(
-        .clk(clk),                       
+        .clk_in1(clk),                       
         .rst(rst), 
         
         //read inst request           
