@@ -45,7 +45,7 @@ module ICache_sim(
     
 //    reg LRU_pick=1;
     ICache icache1(
-        .clk_in1(clk),                       
+        .clk(clk),                       
         .rst(rst), 
         
         //read inst request           

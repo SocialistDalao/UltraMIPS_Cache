@@ -19,13 +19,14 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module ICache(
+module DCache(
 
     input wire clk,
     input wire rst,
     
     //read inst request
-    input wire cpu_req_i,
+    input wire cpu_rreq_i,
+    input wire cpu_wreq_i,
     input wire [`RegBus]virtual_addr_i,
     
     //read inst result
@@ -45,7 +46,6 @@ module ICache(
     
     //test
     );
-    //test
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////≥ı º∂®“Â//////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
@@ -137,7 +137,7 @@ module ICache(
         next_state <= `STATE_LOOK_UP;
         case(current_state)
             `STATE_LOOK_UP:begin
-                if(cpu_req_i)begin
+                if(cpu_rreq_i)begin
                     next_state <= `STATE_SCAN_CACHE;
                 end
                 else
