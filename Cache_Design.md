@@ -52,15 +52,37 @@
 
 ###### 全局信号：时钟clk，复位rst
 
-###### CPU指令读写命令：读使能cpu_rreq_i,写使能cpu_wreq_i，虚拟地址virtual_addr_i
+###### CPU指令读写命令：读使能cpu_req_i，虚拟地址virtual_addr_i
 
 输出：
 
-###### 是否能够接收CPU读命令：req_ready_o
+###### CPU指令读命令结果：是否命中cache hit_o，当前数据是否有效 inst_valid_o，当前输出的数据inst_o
+
+###### 总线slave信号：读数据有效mem_rvalid_i，读地址可以接收mem_arready_i，主存送入的块数据mem_rdata_i
+
+###### 总线master信号：读使能mem_ren_o，读数据可以接收mem_rready_o，读地址有效mem_arvalid_o，读地址mem_araddr_o
+
+注意：
+
+###### hit_o：在req_i给出的下一个周期，其数据有效
+
+#### DCache接口设置
+
+输入：
+
+###### 全局信号：时钟clk，复位rst
+
+###### CPU指令读写命令：读使能cpu_rreq_i，写使能cpu_wreq_i，虚拟地址virtual_addr_i，写数据cpu_wdata_i
+
+输出：
 
 ###### CPU指令读命令结果：是否命中cache hit_o，当前数据是否有效 inst_valid_o，当前输出的数据inst_o
 
-具体信号描述：
+###### 总线slave信号：读数据有效mem_rvalid_i，读地址可以接收mem_arready_i，主存送入的块数据mem_rdata_i
+
+###### 总线master信号：读使能mem_ren_o，读数据可以接收mem_rready_o，读地址有效mem_arvalid_o，读地址mem_araddr_o
+
+注意：
 
 ###### hit_o：在req_i给出的下一个周期，其数据有效
 
@@ -98,11 +120,24 @@
 - 经过地址寻址，交付给cache_ram取出对应的数据。
 - 进行对比确定是否命中，命中则返回。
 
+#### 主存读命令：未命中Cache
 
+- 相应地址使能等交付给总线，之后开始等待。
+- 数据返回后送出，同时将数据送给ram进行写回。
+
+#### 主存写命令：命中Cache
+
+- 首先，将用TLB换算出来的物理地址拿出。
+
+- 经过地址寻址，交付给cache_ram取出对应的数据。
+- 进行对比之后，将拿出的数据进行重写。
+- 将数据进行写回。
 
 ### 设计迭代：
 
+##### 第一代
 
+ICache的输入输出接口均为半成品，能够支持完成一定的功能，但是不能够进行完整的接口配置。其内部功能已经初步仿真正确，并且可综合和实现。
 
 首先，采用状态机而非流水对对应的模块进行开发，读数据状态分配如下：
 
@@ -118,11 +153,11 @@
 
 ###### Look Up: 将地址传给TLB进行虚实地址转换，并将该地址给予RAM。下一阶段进入Scan Cache
 
-###### Scan Cache: 取出对应的cache数据，判断是否命中，若命中。命中后跳转到状态Look Up，没有则跳转到Read Fail。
+###### Scan Cache: 取出对应的cache数据，判断是否命中，若命中。命中后跳转到状态Write Back，没有则跳转到Hit Fail。
 
 ###### Hit Fail: 等待至数据返回，（传递数据和地址给ram，下个周期才会写回），然后返回状态Look Up。
 
-###### Write Back:拿到总线的数据之后直接将CPU需要的对应的数据送出，同时将对应的数据写回至cache中，下个周期返回状态Look Up。
+###### Write Back:将相应的数据回写至RAM，并且设置脏位。
 
 对于不同阶段，都有固有的组合逻辑器件进行操作，状态机只相当于“流水线”中间分割的寄存器。
 
@@ -136,6 +171,7 @@
 - 写回型store的实现
 - 总线块打包
 - 写入缓冲FIFO（完整的cache）
+- 4路组相联16KBcache
 - 流水切割（初具成果的cache）
 - Cache指令
 - 硬件初始化（决赛的基本要求）
@@ -145,7 +181,7 @@
 
 ### 待实现的拓展优化：
 
-
+#### 双发射同时执行两条访存指令
 
 #### VIPT
 

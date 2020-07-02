@@ -27,6 +27,7 @@
 `define TagVBus 20:0
 `define StateBus `StateNumLog2-1:0
 `define SetBus `SetNum-1:0
+`define DirtyBus 2*`SetNum-1:0
 
 //State
 `define STATE_LOOK_UP `StateNumLog2'h0
