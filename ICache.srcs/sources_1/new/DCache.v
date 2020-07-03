@@ -27,13 +27,13 @@ module DCache(
     //read inst request
     input wire cpu_rreq_i,
     input wire cpu_wreq_i,
-    input wire [`RegAddrBus]virtual_addr_i,
-    input wire [`RegBus]cpu_wdata_i,
+    input wire [`DataAddrBus]virtual_addr_i,
+    input wire [`DataBus]cpu_wdata_i,
     
     //read inst result
     output wire hit_o,
-    output wire cpu_inst_valid_o,
-    output wire [`InstBus] cpu_inst_o,
+    output wire cpu_data_valid_o,
+    output wire [`InstBus] cpu_data_o,
     
     //from_mem read result
     input wire mem_rvalid_i,
@@ -43,9 +43,10 @@ module DCache(
     output wire mem_ren_o,
     output wire mem_rready_o,
     output wire mem_arvalid_o,
-    output wire[`InstAddrBus]mem_araddr_o
+    output wire[`InstAddrBus]mem_araddr_o,
     
     //test
+    output [`DirtyBus] dirty
     );
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////初始定义//////////////////////////////////////////
@@ -53,31 +54,23 @@ module DCache(
     //keep the data
     reg [`InstAddrBus]virtual_addr;
     reg [`RegBus]cpu_wdata;
+    reg func;//高电平为写，低电平为读
     always@(posedge clk)begin
         if(rst)begin
             virtual_addr<= `ZeroWord;
             cpu_wdata<= `ZeroWord;
+            func <= `Invalid;
         end
         else if(current_state == `STATE_LOOK_UP)begin
             virtual_addr <= virtual_addr_i;
             cpu_wdata <= cpu_wdata_i;
+            func <= cpu_wreq_i;
         end
         else begin
             virtual_addr <= virtual_addr;
             cpu_wdata <= cpu_wdata_i;
-        end
-    end
-    reg func;//高电平为写，低电平为读
-    always@(posedge clk)begin
-        if(current_state != `STATE_LOOK_UP)begin
             func <= func;
         end
-        else if(cpu_wreq_i)
-            func <= `WriteEnable;
-        else if(cpu_rreq_i)
-            func <= `WriteDisable;
-        else
-            func <= func;
     end
     wire [`InstAddrBus]physical_addr;
     wire index = physical_addr[`IndexBus];
@@ -142,9 +135,9 @@ module DCache(
     always@(posedge clk)begin
         if(rst)
             LRU <= 0;
-        else if(cpu_inst_valid_o == `Valid && hit_o == `HitSuccess)
+        else if(cpu_data_valid_o == `Valid && hit_o == `HitSuccess)
             LRU[virtual_addr[`IndexBus]] <= hit_way0;
-        else if(cpu_inst_valid_o == `Valid && hit_o == `HitFail)
+        else if(cpu_data_valid_o == `Valid && hit_o == `HitFail)
             LRU[virtual_addr[`IndexBus]] <= wea_way0;
         else
             LRU <= LRU;
@@ -156,7 +149,7 @@ module DCache(
         if(rst)
             dirty<=0;
         else if(current_state == `STATE_WRITE_BACK && func == `WriteEnable)
-            dirty[virtual_addr[`IndexBus]] <= `True;
+            dirty[virtual_addr[`IndexBus]] <= `Dirty;
         else
             dirty <= dirty;
     end
@@ -318,7 +311,7 @@ module DCache(
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////输出控制//////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
-    assign cpu_inst_o = (current_state==`STATE_SCAN_CACHE && hit_way0 == `HitSuccess)? inst_way0:
+    assign cpu_data_o = (current_state==`STATE_SCAN_CACHE && hit_way0 == `HitSuccess)? inst_way0:
                         (current_state==`STATE_SCAN_CACHE && hit_way1 == `HitSuccess)? inst_way1:
                         (current_state==`STATE_WRITE_BACK &&virtual_addr[4:2] == 3'h0)? read_from_mem[32*1-1:32*0]:
                         (current_state==`STATE_WRITE_BACK &&virtual_addr[4:2] == 3'h1)? read_from_mem[32*2-1:32*1]:
@@ -330,7 +323,7 @@ module DCache(
                         (current_state==`STATE_WRITE_BACK &&virtual_addr[4:2] == 3'h7)? read_from_mem[32*8-1:32*7]:
                         `ZeroWord;
                         
-    assign cpu_inst_valid_o = (current_state==`STATE_SCAN_CACHE && hit_o == `HitSuccess)? `Valid :
+    assign cpu_data_valid_o = (current_state==`STATE_SCAN_CACHE && hit_o == `HitSuccess)? `Valid :
                               (current_state==`STATE_WRITE_BACK)                        ? `Valid :
                               `Invalid ;
 endmodule

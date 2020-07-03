@@ -6,6 +6,8 @@
 `define Disable 1'b0
 `define Ready 1'b1
 `define NotReady 1'b0
+`define Dirty 1'b1
+`define NotDirty 1'b0
 `define Valid 1'b1
 `define Invalid 1'b0
 
@@ -28,6 +30,8 @@
 `define StateBus `StateNumLog2-1:0
 `define SetBus `SetNum-1:0
 `define DirtyBus 2*`SetNum-1:0
+`define DataAddrBus 31:0
+`define DataBus 31:0
 
 //State
 `define STATE_LOOK_UP `StateNumLog2'h0
