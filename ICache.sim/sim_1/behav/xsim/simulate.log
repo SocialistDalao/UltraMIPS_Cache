@@ -1,30 +1,24 @@
 Vivado Simulator 2019.2
 Time resolution is 1 ps
-Block Memory Generator module ICache_sim.icache1.Bank0_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-Block Memory Generator module ICache_sim.icache1.Bank1_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-Block Memory Generator module ICache_sim.icache1.Bank2_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-Block Memory Generator module ICache_sim.icache1.Bank3_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-Block Memory Generator module ICache_sim.icache1.Bank4_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-Block Memory Generator module ICache_sim.icache1.Bank5_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-Block Memory Generator module ICache_sim.icache1.Bank6_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-Block Memory Generator module ICache_sim.icache1.Bank7_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-Block Memory Generator module ICache_sim.icache1.Bank0_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-Block Memory Generator module ICache_sim.icache1.Bank1_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-Block Memory Generator module ICache_sim.icache1.Bank2_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-Block Memory Generator module ICache_sim.icache1.Bank3_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-Block Memory Generator module ICache_sim.icache1.Bank4_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-Block Memory Generator module ICache_sim.icache1.Bank5_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-Block Memory Generator module ICache_sim.icache1.Bank6_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-Block Memory Generator module ICache_sim.icache1.Bank7_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-Block Memory Generator module ICache_sim.icache1.TagV0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-Block Memory Generator module ICache_sim.icache1.TagV1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
-sucess:not hit, addr==0 but not valid
-sucess:not hit, addr==0 but not valid
-sucess:hit, directly send data to CPU
-sucess:not hit, addr==0 but not valid
-sucess:hit, directly send data to CPU
-sucess:hit, it's not replaced (2-way)
-sucess:hit, directly send data to CPU
-sucess:not hit
-sucess:not hit, replacement is right
-$stop called at time : 4070 ns : File "C:/NSCSCC/Project/ICache/ICache.srcs/sim_1/new/ICache_sim.v" Line 213
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank0_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank1_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank2_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank3_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank4_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank5_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank6_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank7_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank0_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank1_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank2_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank3_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank4_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank5_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank6_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank7_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.TagV0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.TagV1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+sucess:not hit, send to way0
+sucess:dirty write success
+sucess:write success
+$stop called at time : 2780 ns : File "C:/NSCSCC/Project/ICache/ICache.srcs/sim_1/new/DCache_sim_dirty.v" Line 130

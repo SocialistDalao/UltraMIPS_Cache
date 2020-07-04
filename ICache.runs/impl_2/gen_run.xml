@@ -1,80 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GenRun Id="impl_2" LaunchPart="xc7a200tfbg676-2" LaunchTime="1593515054">
   <File Type="BITSTR-BMM" Name="ICache_bd.bmm"/>
-  <File Type="OPT-METHODOLOGY-DRC" Name="ICache_methodology_drc_opted.rpt"/>
-  <File Type="INIT-TIMING" Name="ICache_timing_summary_init.rpt"/>
-  <File Type="ROUTE-PWR" Name="ICache_power_routed.rpt"/>
   <File Type="PA-TCL" Name="ICache.tcl"/>
-  <File Type="OPT-TIMING" Name="ICache_timing_summary_opted.rpt"/>
   <File Type="OPT-DCP" Name="ICache_opt.dcp"/>
-  <File Type="ROUTE-PWR-SUM" Name="ICache_power_summary_routed.pb"/>
   <File Type="REPORTS-TCL" Name="ICache_reports.tcl"/>
-  <File Type="OPT-DRC" Name="ICache_drc_opted.rpt"/>
   <File Type="OPT-HWDEF" Name="ICache.hwdef"/>
   <File Type="PWROPT-DCP" Name="ICache_pwropt.dcp"/>
-  <File Type="PWROPT-DRC" Name="ICache_drc_pwropted.rpt"/>
-  <File Type="PWROPT-TIMING" Name="ICache_timing_summary_pwropted.rpt"/>
   <File Type="PLACE-DCP" Name="ICache_placed.dcp"/>
-  <File Type="PLACE-IO" Name="ICache_io_placed.rpt"/>
-  <File Type="PLACE-CLK" Name="ICache_clock_utilization_placed.rpt"/>
-  <File Type="PLACE-UTIL" Name="ICache_utilization_placed.rpt"/>
-  <File Type="PLACE-UTIL-PB" Name="ICache_utilization_placed.pb"/>
-  <File Type="PLACE-CTRL" Name="ICache_control_sets_placed.rpt"/>
-  <File Type="PLACE-SIMILARITY" Name="ICache_incremental_reuse_placed.rpt"/>
   <File Type="PLACE-PRE-SIMILARITY" Name="ICache_incremental_reuse_pre_placed.rpt"/>
-  <File Type="PLACE-TIMING" Name="ICache_timing_summary_placed.rpt"/>
   <File Type="POSTPLACE-PWROPT-DCP" Name="ICache_postplace_pwropt.dcp"/>
   <File Type="BG-BIN" Name="ICache.bin"/>
-  <File Type="POSTPLACE-PWROPT-TIMING" Name="ICache_timing_summary_postplace_pwropted.rpt"/>
   <File Type="PHYSOPT-DCP" Name="ICache_physopt.dcp"/>
-  <File Type="PHYSOPT-DRC" Name="ICache_drc_physopted.rpt"/>
   <File Type="BITSTR-MSK" Name="ICache.msk"/>
-  <File Type="PHYSOPT-TIMING" Name="ICache_timing_summary_physopted.rpt"/>
   <File Type="ROUTE-ERROR-DCP" Name="ICache_routed_error.dcp"/>
   <File Type="ROUTE-DCP" Name="ICache_routed.dcp"/>
   <File Type="ROUTE-BLACKBOX-DCP" Name="ICache_routed_bb.dcp"/>
-  <File Type="ROUTE-DRC" Name="ICache_drc_routed.rpt"/>
-  <File Type="ROUTE-DRC-PB" Name="ICache_drc_routed.pb"/>
-  <File Type="ROUTE-DRC-RPX" Name="ICache_drc_routed.rpx"/>
   <File Type="BITSTR-MMI" Name="ICache.mmi"/>
-  <File Type="ROUTE-METHODOLOGY-DRC" Name="ICache_methodology_drc_routed.rpt"/>
-  <File Type="ROUTE-METHODOLOGY-DRC-RPX" Name="ICache_methodology_drc_routed.rpx"/>
-  <File Type="ROUTE-METHODOLOGY-DRC-PB" Name="ICache_methodology_drc_routed.pb"/>
-  <File Type="ROUTE-PWR-RPX" Name="ICache_power_routed.rpx"/>
-  <File Type="ROUTE-STATUS" Name="ICache_route_status.rpt"/>
-  <File Type="ROUTE-STATUS-PB" Name="ICache_route_status.pb"/>
-  <File Type="ROUTE-TIMINGSUMMARY" Name="ICache_timing_summary_routed.rpt"/>
   <File Type="ROUTE-TIMING-PB" Name="ICache_timing_summary_routed.pb"/>
-  <File Type="ROUTE-TIMING-RPX" Name="ICache_timing_summary_routed.rpx"/>
-  <File Type="ROUTE-SIMILARITY" Name="ICache_incremental_reuse_routed.rpt"/>
-  <File Type="ROUTE-CLK" Name="ICache_clock_utilization_routed.rpt"/>
-  <File Type="ROUTE-BUS-SKEW" Name="ICache_bus_skew_routed.rpt"/>
-  <File Type="ROUTE-BUS-SKEW-PB" Name="ICache_bus_skew_routed.pb"/>
-  <File Type="ROUTE-BUS-SKEW-RPX" Name="ICache_bus_skew_routed.rpx"/>
   <File Type="POSTROUTE-PHYSOPT-DCP" Name="ICache_postroute_physopt.dcp"/>
   <File Type="POSTROUTE-PHYSOPT-BLACKBOX-DCP" Name="ICache_postroute_physopt_bb.dcp"/>
-  <File Type="POSTROUTE-PHYSOPT-TIMING" Name="ICache_timing_summary_postroute_physopted.rpt"/>
-  <File Type="POSTROUTE-PHYSOPT-TIMING-PB" Name="ICache_timing_summary_postroute_physopted.pb"/>
-  <File Type="POSTROUTE-PHYSOPT-TIMING-RPX" Name="ICache_timing_summary_postroute_physopted.rpx"/>
-  <File Type="POSTROUTE-PHYSOPT-BUS-SKEW" Name="ICache_bus_skew_postroute_physopted.rpt"/>
-  <File Type="POSTROUTE-PHYSOPT-BUS-SKEW-PB" Name="ICache_bus_skew_postroute_physopted.pb"/>
   <File Type="BG-BIT" Name="ICache.bit"/>
-  <File Type="POSTROUTE-PHYSOPT-BUS-SKEW-RPX" Name="ICache_bus_skew_postroute_physopted.rpx"/>
   <File Type="BITSTR-RBT" Name="ICache.rbt"/>
   <File Type="BITSTR-NKY" Name="ICache.nky"/>
   <File Type="PDI-FILE" Name="ICache.pdi"/>
   <File Type="RCFI_FILE" Name="ICache.rcfi"/>
+  <File Type="WBT-USG" Name="usage_statistics_webtalk.html"/>
   <File Type="CFI_FILE" Name="ICache.cfi"/>
   <File Type="RNPI_FILE" Name="ICache.rnpi"/>
   <File Type="NPI_FILE" Name="ICache.npi"/>
   <File Type="RBD_FILE" Name="ICache.rbd"/>
-  <File Type="BITSTR-LTX" Name="debug_nets.ltx"/>
   <File Type="BITSTR-LTX" Name="ICache.ltx"/>
   <File Type="BITSTR-SYSDEF" Name="ICache.sysdef"/>
   <File Type="BG-BGN" Name="ICache.bgn"/>
   <File Type="BG-DRC" Name="ICache.drc"/>
   <File Type="RDI-RDI" Name="ICache.vdi"/>
-  <File Type="WBT-USG" Name="usage_statistics_webtalk.html"/>
   <FileSet Name="sources" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
     <Filter Type="Srcs"/>
     <File Path="$PSRCDIR/sources_1/new/defines_cache.v">
@@ -142,6 +101,7 @@
     <Step Id="route_design"/>
     <Step Id="post_route_phys_opt_design"/>
     <Step Id="write_bitstream"/>
+    <Step Id="write_device_image"/>
   </Strategy>
   <BlockFileSet Type="BlockSrcs" Name="bank_ram"/>
   <BlockFileSet Type="BlockSrcs" Name="tag_ram"/>

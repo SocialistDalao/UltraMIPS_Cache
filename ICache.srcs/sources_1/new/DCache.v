@@ -18,7 +18,8 @@
 //--------STATE_SCAN_CACHE
 //////////////////////////////////////////////////////////////////////////////////
 
-
+`include"defines.v";
+`include"defines_cache.v";
 module DCache(
 
     input wire clk,
@@ -33,7 +34,7 @@ module DCache(
     //read inst result
     output wire hit_o,
     output wire cpu_data_valid_o,
-    output wire [`InstBus] cpu_data_o,
+    output wire [`DataBus] cpu_data_o,
     
     //from_mem read result
     input wire mem_rvalid_i,
@@ -43,7 +44,7 @@ module DCache(
     output wire mem_ren_o,
     output wire mem_rready_o,
     output wire mem_arvalid_o,
-    output wire[`InstAddrBus]mem_araddr_o,
+    output wire[`DataAddrBus]mem_araddr_o,
     
     //test
     output [`DirtyBus] dirty
@@ -149,7 +150,7 @@ module DCache(
         if(rst)
             dirty<=0;
         else if(current_state == `STATE_WRITE_BACK && func == `WriteEnable)
-            dirty[virtual_addr[`IndexBus]] <= `Dirty;
+            dirty[{virtual_addr[`IndexBus],hit_way1_reg}] <= `Dirty;
         else
             dirty <= dirty;
     end
@@ -172,7 +173,7 @@ module DCache(
         next_state <= `STATE_LOOK_UP;
         case(current_state)
             `STATE_LOOK_UP:begin
-                if(cpu_rreq_i)begin
+                if(cpu_rreq_i | cpu_wreq_i)begin
                     next_state <= `STATE_SCAN_CACHE;
                 end
                 else
@@ -259,7 +260,8 @@ module DCache(
     
     
    //STATE_HIT_FAIL
-   assign mem_ren_o = (current_state==`STATE_HIT_FAIL  &&  mem_arready_i == `Ready)?`ReadEnable : `ReadDisable;
+   assign mem_ren_o = (current_state==`STATE_HIT_FAIL  &&  mem_arready_i == `Ready)?`ReadEnable :`ReadDisable;
+//                      (current_state==`STATE_WRITE_BACK  &&  func == `WriteEnable)? `ReadEnable :  `ReadDisable;
    assign mem_rready_o = (current_state==`STATE_HIT_FAIL  &&  mem_rvalid_i == `Valid)?`ReadEnable : `ReadDisable;
    assign mem_arvalid_o = (current_state==`STATE_HIT_FAIL  &&  mem_arready_i == `Ready)?`Valid : `Invalid;
    assign mem_araddr_o = physical_addr;
@@ -268,8 +270,8 @@ module DCache(
    always@(posedge clk) begin 
         if(current_state==`STATE_HIT_FAIL )
             read_from_mem<= mem_rdata_i;
-        else if(current_state == `STATE_WRITE_BACK && func == `WriteEnable)begin
-            if(hit_way0_reg <= `HitSuccess)begin
+        else if(current_state == `STATE_SCAN_CACHE && func == `WriteEnable)begin
+            if(hit_way0 == `HitSuccess)begin
                 case(virtual_addr[4:2])
                     3'h0:read_from_mem <= {inst_cache_b7w0,inst_cache_b6w0,inst_cache_b5w0,inst_cache_b4w0,inst_cache_b3w0,inst_cache_b2w0,inst_cache_b1w0,cpu_wdata};
                     3'h1:read_from_mem <= {inst_cache_b7w0,inst_cache_b6w0,inst_cache_b5w0,inst_cache_b4w0,inst_cache_b3w0,inst_cache_b2w0,cpu_wdata,inst_cache_b0w0};
@@ -282,7 +284,7 @@ module DCache(
                     default:read_from_mem<={inst_cache_b7w0,inst_cache_b6w0,inst_cache_b5w0,inst_cache_b4w0,inst_cache_b3w0,inst_cache_b2w0,inst_cache_b1w0,inst_cache_b0w0};
                 endcase
             end//if
-            else if(hit_way1_reg <= `HitSuccess)begin
+            else if(hit_way1 == `HitSuccess)begin
                 case(virtual_addr[4:2])
                     3'h0:read_from_mem <= {inst_cache_b7w1,inst_cache_b6w1,inst_cache_b5w1,inst_cache_b4w1,inst_cache_b3w1,inst_cache_b2w1,inst_cache_b1w1,cpu_wdata};
                     3'h1:read_from_mem <= {inst_cache_b7w1,inst_cache_b6w1,inst_cache_b5w1,inst_cache_b4w1,inst_cache_b3w1,inst_cache_b2w1,cpu_wdata,inst_cache_b0w1};
@@ -304,9 +306,12 @@ module DCache(
    
    
    //STATE_WRITE_BACK
-    assign wea_way0 = (current_state==`STATE_WRITE_BACK && LRU_pick == 1'b0)? 4'b1111 : 4'h0;
-    assign wea_way1 = (current_state==`STATE_WRITE_BACK && LRU_pick == 1'b1)? 4'b1111 : 4'h0;
-    assign mem_ren_o = (current_state==`STATE_WRITE_BACK);
+    assign wea_way0 = (current_state==`STATE_WRITE_BACK && LRU_pick == 1'b0 && func == `WriteDisable)? 4'b1111 :
+                     (current_state==`STATE_WRITE_BACK && hit_way0_reg == `HitSuccess && func == `WriteEnable)? 4'b1111 : 4'h0;
+    
+    assign wea_way1 = (current_state==`STATE_WRITE_BACK && LRU_pick == 1'b1 && func == `WriteDisable)? 4'b1111 :
+                     (current_state==`STATE_WRITE_BACK && hit_way1_reg == `HitSuccess && func == `WriteEnable)? 4'b1111 : 4'h0;
+//    assign mem_ren_o
     
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////Êä³ö¿ØÖÆ//////////////////////////////////////////

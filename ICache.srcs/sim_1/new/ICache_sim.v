@@ -104,7 +104,7 @@ module ICache_sim(
          end
         wait(cpu_inst_valid_o==`Valid && hit_o == `HitFail) begin
             if(cpu_inst_o == 32'h56789102)
-                $display("sucess:not hit, addr==0 but not valid");
+                $display("sucess:not hit, send to way0");
             else    begin
                 $display("FAIL!!!");
                 $stop;
