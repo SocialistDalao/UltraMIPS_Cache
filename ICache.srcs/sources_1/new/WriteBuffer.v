@@ -46,6 +46,10 @@ module WriteBuffer(
     input wire mem_bvalid,
     output wire mem_bready
     );
+	//地址对齐处理
+	wire [`DataAddrBus]cpu_awaddr = {cpu_awaddr_i[31:5],5'h0};
+	wire [`DataAddrBus]cpu_araddr = {cpu_araddr_i[31:5],5'h0};
+	
     //当前队列状态
     reg[`FIFONumLog2-1:0] count;
     always@(posedge clk)begin
@@ -99,104 +103,87 @@ module WriteBuffer(
 			FIFO_valid <= FIFO_valid;
         end
     end
-    //数据写入
+	
+    //数据写入，包括写冲突
     reg [`FIFONum-1:0]FIFO_data[`WayBus];
     reg [`FIFONum-1:0]FIFO_addr[`DataAddrBus];
     always@(posedge clk)begin
-        if(cpu_wreq_i == `WriteEnable)begin//增加写入
-            FIFO_data[tail] <= cpu_wdata_i;
-            FIFO_addr[tail] <= cpu_awaddr_i;
-        end
-    end
-	//读写冲突
+        if(cpu_wreq_i == `WriteEnable)begin
+			if(cpu_awaddr == FIFO_addr[0] && FIFO_valid[0])begin
+                FIFO_data[0] <= cpu_wdata_i;
+			end
+			if(cpu_awaddr == FIFO_addr[1] && FIFO_valid[1])begin
+                FIFO_data[1] <= cpu_wdata_i;
+			end
+			if(cpu_awaddr == FIFO_addr[2] && FIFO_valid[2])begin
+                FIFO_data[2] <= cpu_wdata_i;
+			end
+			if(cpu_awaddr == FIFO_addr[3] && FIFO_valid[3])begin
+                FIFO_data[3] <= cpu_wdata_i;
+			end
+			if(cpu_awaddr == FIFO_addr[4] && FIFO_valid[4])begin
+                FIFO_data[4] <= cpu_wdata_i;
+			end
+			if(cpu_awaddr == FIFO_addr[5] && FIFO_valid[5])begin
+                FIFO_data[5] <= cpu_wdata_i;
+			end
+			if(cpu_awaddr == FIFO_addr[6] && FIFO_valid[6])begin
+                FIFO_data[6] <= cpu_wdata_i;
+			end
+			if(cpu_awaddr == FIFO_addr[7] && FIFO_valid[7])begin
+                FIFO_data[7] <= cpu_wdata_i;
+			end
+			else begin//没有冲突的入队操作
+                FIFO_data[tail] <= cpu_wdata_i;
+                FIFO_addr[tail] <= cpu_awaddr;
+            end
+        end//if
+		//其他的时候保持原状
+    end//always
+	
 	//读冲突
 	always@(*)begin
 		if(cpu_rreq_i)begin
-			if(cpu_araddr_i == FIFO_addr[0] && FIFO_valid[0])begin
+			if(cpu_araddr == FIFO_addr[0] && FIFO_valid[0])begin
 				read_hit_o <= `HitSuccess;
 				cpu_rdata_o <= FIFO_data[0];
 			end
-			if(cpu_araddr_i == FIFO_addr[1] && FIFO_valid[1])begin
+			if(cpu_araddr == FIFO_addr[1] && FIFO_valid[1])begin
 				read_hit_o <= `HitSuccess;
 				cpu_rdata_o <= FIFO_data[1];
 			end
-			if(cpu_araddr_i == FIFO_addr[2] && FIFO_valid[2])begin
+			if(cpu_araddr == FIFO_addr[2] && FIFO_valid[2])begin
 				read_hit_o <= `HitSuccess;
 				cpu_rdata_o <= FIFO_data[2];
 			end
-			if(cpu_araddr_i == FIFO_addr[3] && FIFO_valid[3])begin
+			if(cpu_araddr == FIFO_addr[3] && FIFO_valid[3])begin
 				read_hit_o <= `HitSuccess;
 				cpu_rdata_o <= FIFO_data[3];
 			end
-			if(cpu_araddr_i == FIFO_addr[4] && FIFO_valid[4])begin
+			if(cpu_araddr == FIFO_addr[4] && FIFO_valid[4])begin
 				read_hit_o <= `HitSuccess;
 				cpu_rdata_o <= FIFO_data[4];
 			end
-			if(cpu_araddr_i == FIFO_addr[5] && FIFO_valid[5])begin
+			if(cpu_araddr == FIFO_addr[5] && FIFO_valid[5])begin
 				read_hit_o <= `HitSuccess;
 				cpu_rdata_o <= FIFO_data[5];
 			end
-			if(cpu_araddr_i == FIFO_addr[6] && FIFO_valid[6])begin
+			if(cpu_araddr == FIFO_addr[6] && FIFO_valid[6])begin
 				read_hit_o <= `HitSuccess;
 				cpu_rdata_o <= FIFO_data[6];
 			end
-			if(cpu_araddr_i == FIFO_addr[7] && FIFO_valid[7])begin
+			if(cpu_araddr == FIFO_addr[7] && FIFO_valid[7])begin
 				read_hit_o <= `HitSuccess;
 				cpu_rdata_o <= FIFO_data[7];
 			end
 			else begin
-				read_hit_o <= 0;
-				cpu_rdata_o <= 0;
+				read_hit_o <= `HitFail;
+				cpu_rdata_o <= `ZeroWay;
 			end
 		end
 		else begin
-				read_hit_o <= 0;
-				cpu_rdata_o <= 0;
-		end
-	end
-	//写冲突
-	always@(*)begin
-		if(cpu_wreq_i)begin
-			if(cpu_araddr_i == FIFO_addr[0] && FIFO_valid[0])begin
-				read_hit_o <= `HitSuccess;
-				cpu_rdata_o <= FIFO_data[0];
-			end
-			if(cpu_araddr_i == FIFO_addr[1] && FIFO_valid[1])begin
-				read_hit_o <= `HitSuccess;
-				cpu_rdata_o <= FIFO_data[1];
-			end
-			if(cpu_araddr_i == FIFO_addr[2] && FIFO_valid[2])begin
-				read_hit_o <= `HitSuccess;
-				cpu_rdata_o <= FIFO_data[2];
-			end
-			if(cpu_araddr_i == FIFO_addr[3] && FIFO_valid[3])begin
-				read_hit_o <= `HitSuccess;
-				cpu_rdata_o <= FIFO_data[3];
-			end
-			if(cpu_araddr_i == FIFO_addr[4] && FIFO_valid[4])begin
-				read_hit_o <= `HitSuccess;
-				cpu_rdata_o <= FIFO_data[4];
-			end
-			if(cpu_araddr_i == FIFO_addr[5] && FIFO_valid[5])begin
-				read_hit_o <= `HitSuccess;
-				cpu_rdata_o <= FIFO_data[5];
-			end
-			if(cpu_araddr_i == FIFO_addr[6] && FIFO_valid[6])begin
-				read_hit_o <= `HitSuccess;
-				cpu_rdata_o <= FIFO_data[6];
-			end
-			if(cpu_araddr_i == FIFO_addr[7] && FIFO_valid[7])begin
-				read_hit_o <= `HitSuccess;
-				cpu_rdata_o <= FIFO_data[7];
-			end
-			else begin
-				read_hit_o <= 0;
-				cpu_rdata_o <= 0;
-			end
-		end
-		else begin
-				read_hit_o <= 0;
-				cpu_rdata_o <= 0;
+				read_hit_o <= `HitFail;
+				cpu_rdata_o <= `ZeroWay;
 		end
 	end
     

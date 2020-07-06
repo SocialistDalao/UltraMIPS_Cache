@@ -25,13 +25,13 @@ module DCache(
     input wire clk,
     input wire rst,
     
-    //read inst request
+    //cpu data request
     input wire cpu_rreq_i,
     input wire cpu_wreq_i,
     input wire [`DataAddrBus]virtual_addr_i,
     input wire [`DataBus]cpu_wdata_i,
     
-    //read inst result
+    //cpu date result
     output wire hit_o,
     output wire cpu_data_valid_o,
     output wire [`DataBus] cpu_data_o,
@@ -45,6 +45,16 @@ module DCache(
     output wire mem_rready_o,
     output wire mem_arvalid_o,
     output wire[`DataAddrBus]mem_araddr_o,
+	//mem write
+    input wire mem_wready_i,
+    output wire mem_wvalid_o,
+    output wire[`WayBus] mem_wdata_o,//一个块的大小
+    input wire mem_awready_i,
+    output wire mem_awvalid_o,
+    output wire [`DataAddrBus]mem_awaddr_o,
+    input wire mem_bvalid,
+    output wire mem_bready
+    );
     
     //test
     output [`DirtyBus] dirty
@@ -69,7 +79,7 @@ module DCache(
         end
         else begin
             virtual_addr <= virtual_addr;
-            cpu_wdata <= cpu_wdata_i;
+            cpu_wdata <= cpu_wdata;
             func <= func;
         end
     end
@@ -81,6 +91,36 @@ module DCache(
     .rst(rst),
     .virtual_addr_i(virtual_addr),
     .physical_addr_o(physical_addr)
+    );
+	//WriteBuffer
+	reg [`WayBus]FIFO_rdata;
+	reg FIFO_hit;
+	reg FIFO_wreq;
+    WriteBuffer WB0(
+        .clk(clk),
+        .rst(rst),
+        //CPU write request
+        .cpu_wreq_i(FIFO_wreq),
+        .cpu_awaddr_i(physical_addr),
+        .cpu_wdata_i(cpu_wdata),//一个块的大小
+        //CPU read request and response
+        .cpu_rreq_i(cpu_rreq_i),
+        .cpu_araddr_i(physical_addr),
+        .read_hit_o(FIFO_hit_o),
+        .cpu_rdata_o(FIFO_rdata),
+        
+        //state
+        .state_o(state_o),
+        
+        //MEM 
+        .mem_wready_i(mem_wready_i),
+        .mem_wvalid_o(mem_wvalid_o),
+        .mem_wdata_o(mem_wdata_o),//一个块的大小
+        .mem_awready_i(mem_awready_i),
+        .mem_awvalid_o(mem_awvalid_o),
+        .mem_awaddr_o(mem_awaddr_o),
+        .mem_bvalid(mem_bvalid),
+        .mem_bready(mem_bready)
     );
    
     
@@ -204,7 +244,7 @@ module DCache(
 ////////////////////////////////组合逻辑//////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
     
-    //STATE_SCAN_CACHE：选择ram中对应的bank
+    //STATE_LOOK_UP：选择ram中对应的bank
     reg [`InstBus]inst_way0;
     reg [`InstBus]inst_way1;
     //way0
@@ -235,6 +275,9 @@ module DCache(
             default: inst_way1 <= `ZeroWord;
         endcase
     end
+	
+	
+    //STATE_SCAN_CACHE：选择ram中对应的bank
     //Tag Hit
     wire hit_way0 = (tagv_cache_w0[19:0]==physical_addr[`TagBus] && tagv_cache_w0[20]==`Valid)? `HitSuccess : `HitFail;
     wire hit_way1 = (tagv_cache_w1[19:0]==physical_addr[`TagBus] && tagv_cache_w1[20]==`Valid)? `HitSuccess : `HitFail;

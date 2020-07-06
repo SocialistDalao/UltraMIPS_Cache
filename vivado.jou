@@ -1,0 +1,35 @@
+#-----------------------------------------------------------
+# Vivado v2019.2 (64-bit)
+# SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+# IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+# Start of session at: Mon Jul  6 18:56:49 2020
+# Process ID: 13940
+# Current directory: C:/NSCSCC/Project/ICache
+# Command line: vivado.exe -gui_launcher_event rodinguilauncherevent7440 C:\NSCSCC\Project\ICache\ICache.xpr
+# Log file: C:/NSCSCC/Project/ICache/vivado.log
+# Journal file: C:/NSCSCC/Project/ICache\vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_project C:/NSCSCC/Project/ICache/ICache.xpr
+update_compile_order -fileset sources_1
+set_property SOURCE_SET sources_1 [get_filesets sim_1]
+close [ open C:/NSCSCC/Project/ICache/ICache.srcs/sim_1/new/WriteBuffer_sim.v w ]
+add_files -fileset sim_1 C:/NSCSCC/Project/ICache/ICache.srcs/sim_1/new/WriteBuffer_sim.v
+update_compile_order -fileset sim_1
+# Disabling source management mode.  This is to allow the top design properties to be set without GUI intervention.
+set_property source_mgmt_mode None [current_project]
+set_property top ICache_sim [get_filesets sim_1]
+set_property top_lib xil_defaultlib [get_filesets sim_1]
+# Re-enabling previously disabled source management mode.
+set_property source_mgmt_mode All [current_project]
+update_compile_order -fileset sim_1
+launch_simulation
+open_wave_config C:/NSCSCC/Project/ICache/ICache_sim_behav.wcfg
+source ICache_sim.tcl
+relaunch_sim
+relaunch_sim
+update_compile_order -fileset sources_1
+update_compile_order -fileset sim_1
+update_compile_order -fileset sources_1
+update_compile_order -fileset sim_1
+close_sim
