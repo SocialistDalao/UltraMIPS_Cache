@@ -35,6 +35,9 @@ module DCache(
     output wire hit_o,
     output wire cpu_data_valid_o,
     output wire [`DataBus] cpu_data_o,
+	
+	//cache state
+	output cache_busy_o
     
     //from_mem read result
     input wire mem_rvalid_i,
@@ -53,8 +56,7 @@ module DCache(
     output wire mem_awvalid_o,
     output wire [`DataAddrBus]mem_awaddr_o,
     input wire mem_bvalid,
-    output wire mem_bready
-    );
+    output wire mem_bready,
     
     //test
     output [`DirtyBus] dirty
@@ -106,7 +108,7 @@ module DCache(
         //CPU read request and response
         .cpu_rreq_i(cpu_rreq_i),
         .cpu_araddr_i(physical_addr),
-        .read_hit_o(FIFO_hit_o),
+        .read_hit_o(FIFO_hit),
         .cpu_rdata_o(FIFO_rdata),
         
         //state
@@ -127,6 +129,9 @@ module DCache(
     //BANK 0~7 WAY 0~1
     //biwj indicates bank_i way_j
 //    reg [`WayBus] data_cache;
+    wire [`InstAddrBus]ram_addr = (current_state == `STATE_LOOK_UP) virtual_addr_i : physical_addr; 
+	reg [`WayBus]read_from_mem;
+	
     wire [3:0]wea_way0;
     wire [3:0]wea_way1;
     
@@ -138,14 +143,14 @@ module DCache(
     wire [`RegBus]inst_cache_b5w0;
     wire [`RegBus]inst_cache_b6w0;
     wire [`RegBus]inst_cache_b7w0;
-    bank_ram Bank0_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr[`IndexBus]), .dina(read_from_mem[32*1-1:32*0]),.douta(inst_cache_b0w0));
-    bank_ram Bank1_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr[`IndexBus]), .dina(read_from_mem[32*2-1:32*1]),.douta(inst_cache_b1w0));
-    bank_ram Bank2_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr[`IndexBus]), .dina(read_from_mem[32*3-1:32*2]),.douta(inst_cache_b2w0));
-    bank_ram Bank3_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr[`IndexBus]), .dina(read_from_mem[32*4-1:32*3]),.douta(inst_cache_b3w0));
-    bank_ram Bank4_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr[`IndexBus]), .dina(read_from_mem[32*5-1:32*4]),.douta(inst_cache_b4w0));
-    bank_ram Bank5_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr[`IndexBus]), .dina(read_from_mem[32*6-1:32*5]),.douta(inst_cache_b5w0));
-    bank_ram Bank6_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr[`IndexBus]), .dina(read_from_mem[32*7-1:32*6]),.douta(inst_cache_b6w0));
-    bank_ram Bank7_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr[`IndexBus]), .dina(read_from_mem[32*8-1:32*7]),.douta(inst_cache_b7w0));
+    bank_ram Bank0_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(ram_addr[`IndexBus]), .dina(read_from_mem[32*1-1:32*0]),.douta(inst_cache_b0w0));
+    bank_ram Bank1_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(ram_addr[`IndexBus]), .dina(read_from_mem[32*2-1:32*1]),.douta(inst_cache_b1w0));
+    bank_ram Bank2_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(ram_addr[`IndexBus]), .dina(read_from_mem[32*3-1:32*2]),.douta(inst_cache_b2w0));
+    bank_ram Bank3_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(ram_addr[`IndexBus]), .dina(read_from_mem[32*4-1:32*3]),.douta(inst_cache_b3w0));
+    bank_ram Bank4_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(ram_addr[`IndexBus]), .dina(read_from_mem[32*5-1:32*4]),.douta(inst_cache_b4w0));
+    bank_ram Bank5_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(ram_addr[`IndexBus]), .dina(read_from_mem[32*6-1:32*5]),.douta(inst_cache_b5w0));
+    bank_ram Bank6_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(ram_addr[`IndexBus]), .dina(read_from_mem[32*7-1:32*6]),.douta(inst_cache_b6w0));
+    bank_ram Bank7_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(ram_addr[`IndexBus]), .dina(read_from_mem[32*8-1:32*7]),.douta(inst_cache_b7w0));
     
     wire [`RegBus]inst_cache_b0w1;
     wire [`RegBus]inst_cache_b1w1;
@@ -155,20 +160,20 @@ module DCache(
     wire [`RegBus]inst_cache_b5w1;
     wire [`RegBus]inst_cache_b6w1;
     wire [`RegBus]inst_cache_b7w1;                              
-    bank_ram Bank0_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr[`IndexBus]), .dina(read_from_mem[32*1-1:32*0]),.douta(inst_cache_b0w1));
-    bank_ram Bank1_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr[`IndexBus]), .dina(read_from_mem[32*2-1:32*1]),.douta(inst_cache_b1w1));
-    bank_ram Bank2_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr[`IndexBus]), .dina(read_from_mem[32*3-1:32*2]),.douta(inst_cache_b2w1));
-    bank_ram Bank3_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr[`IndexBus]), .dina(read_from_mem[32*4-1:32*3]),.douta(inst_cache_b3w1));
-    bank_ram Bank4_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr[`IndexBus]), .dina(read_from_mem[32*5-1:32*4]),.douta(inst_cache_b4w1));
-    bank_ram Bank5_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr[`IndexBus]), .dina(read_from_mem[32*6-1:32*5]),.douta(inst_cache_b5w1));
-    bank_ram Bank6_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr[`IndexBus]), .dina(read_from_mem[32*7-1:32*6]),.douta(inst_cache_b6w1));
-    bank_ram Bank7_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr[`IndexBus]), .dina(read_from_mem[32*8-1:32*7]),.douta(inst_cache_b7w1));
+    bank_ram Bank0_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(ram_addr[`IndexBus]), .dina(read_from_mem[32*1-1:32*0]),.douta(inst_cache_b0w1));
+    bank_ram Bank1_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(ram_addr[`IndexBus]), .dina(read_from_mem[32*2-1:32*1]),.douta(inst_cache_b1w1));
+    bank_ram Bank2_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(ram_addr[`IndexBus]), .dina(read_from_mem[32*3-1:32*2]),.douta(inst_cache_b2w1));
+    bank_ram Bank3_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(ram_addr[`IndexBus]), .dina(read_from_mem[32*4-1:32*3]),.douta(inst_cache_b3w1));
+    bank_ram Bank4_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(ram_addr[`IndexBus]), .dina(read_from_mem[32*5-1:32*4]),.douta(inst_cache_b4w1));
+    bank_ram Bank5_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(ram_addr[`IndexBus]), .dina(read_from_mem[32*6-1:32*5]),.douta(inst_cache_b5w1));
+    bank_ram Bank6_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(ram_addr[`IndexBus]), .dina(read_from_mem[32*7-1:32*6]),.douta(inst_cache_b6w1));
+    bank_ram Bank7_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(ram_addr[`IndexBus]), .dina(read_from_mem[32*8-1:32*7]),.douta(inst_cache_b7w1));
 
     //Tag+Valid
     wire [`TagVBus]tagv_cache_w0;
     wire [`TagVBus]tagv_cache_w1;
-    tag_ram TagV0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr[`IndexBus]),.dina({1'b1,physical_addr[`TagBus]}),.douta(tagv_cache_w0));
-    tag_ram TagV1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr[`IndexBus]),.dina({1'b1,physical_addr[`TagBus]}),.douta(tagv_cache_w1));
+    tag_ram TagV0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(ram_addr[`IndexBus]),.dina({1'b1,physical_addr[`TagBus]}),.douta(tagv_cache_w0));
+    tag_ram TagV1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(ram_addr[`IndexBus]),.dina({1'b1,physical_addr[`TagBus]}),.douta(tagv_cache_w1));
     
     //LRU
     reg [`SetBus]LRU;
@@ -184,13 +189,15 @@ module DCache(
             LRU <= LRU;
     end
     
-    //Dirty
+    //Dirty 
     reg [`DirtyBus] dirty;
     always@(posedge clk)begin
         if(rst)
             dirty<=0;
-        else if(current_state == `STATE_WRITE_BACK && func == `WriteEnable)
-            dirty[{virtual_addr[`IndexBus],hit_way1_reg}] <= `Dirty;
+		else if(current_state == `STATE_FETCH_DATA && mem_arvalid_o == `Valid && func == `WriteEnable)
+            dirty[{virtual_addr[`IndexBus],wea_way1}] <= `Dirty;
+		else if(current_state == `STATE_FETCH_DATA && mem_arvalid_o == `Valid && func == `WriteDisable)
+            dirty[{virtual_addr[`IndexBus],wea_way1}] <= `NotDirty;
         else
             dirty <= dirty;
     end
@@ -208,33 +215,30 @@ module DCache(
             current_state <= next_state;
     end
     
-//    状态转移表 
+//    状态转移表
+	reg write_dirty; 
+	wire bus_read_success = mem_rvalid_i;//总线读数据成功
     always@(*)begin
         next_state <= `STATE_LOOK_UP;
         case(current_state)
             `STATE_LOOK_UP:begin
                 if(cpu_rreq_i | cpu_wreq_i)begin
-                    next_state <= `STATE_SCAN_CACHE;
+                    next_state <= `STATE_FETCH_DATA;
                 end
                 else
                     next_state <= `STATE_LOOK_UP;
             end
-            `STATE_SCAN_CACHE:begin
-                if(hit_o && func == `WriteDisable)
+            `STATE_FETCH_DATA:begin
+                if(hit_o == `HitSuccess)//读写命中
                     next_state <= `STATE_LOOK_UP;
-                if(hit_o && func == `WriteEnable)
-                    next_state <= `STATE_WRITE_BACK;
-                else
-                    next_state <= `STATE_HIT_FAIL;
-            end
-            `STATE_HIT_FAIL:begin
-                if(read_success)
-                    next_state <= `STATE_WRITE_BACK;
-                else
-                    next_state <= `STATE_HIT_FAIL;
-            end
-            `STATE_WRITE_BACK:
+                else if(bus_read_success == `Success && write_dirty == `WriteDisable)//读写不命中但是不需要回写脏块
                     next_state <= `STATE_LOOK_UP;
+                else if(bus_read_success == `Fail && write_dirty == `WriteEnable)//读写不命中但是需要回写脏块
+                    next_state <= `STATE_WRITE_DATA;
+            end
+            `STATE_WRITE_DATA:begin
+                    next_state <= `STATE_LOOK_UP;
+            end
             default:;
         endcase
     end//always
@@ -245,43 +249,58 @@ module DCache(
 //////////////////////////////////////////////////////////////////////////////////
     
     //STATE_LOOK_UP：选择ram中对应的bank
-    reg [`InstBus]inst_way0;
-    reg [`InstBus]inst_way1;
+    reg [`InstBus]data_way0;
+    reg [`InstBus]data_way1;
+    reg [`InstBus]data_FIFO;
     //way0
     always@(*)begin
         case(virtual_addr[4:2])
-            3'h0:inst_way0 <= inst_cache_b0w0;
-            3'h1:inst_way0 <= inst_cache_b1w0;
-            3'h2:inst_way0 <= inst_cache_b2w0;
-            3'h3:inst_way0 <= inst_cache_b3w0;
-            3'h4:inst_way0 <= inst_cache_b4w0;
-            3'h5:inst_way0 <= inst_cache_b5w0;
-            3'h6:inst_way0 <= inst_cache_b6w0;
-            3'h7:inst_way0 <= inst_cache_b7w0;
-            default: inst_way0 <= `ZeroWord;
+            3'h0:data_way0 <= inst_cache_b0w0;
+            3'h1:data_way0 <= inst_cache_b1w0;
+            3'h2:data_way0 <= inst_cache_b2w0;
+            3'h3:data_way0 <= inst_cache_b3w0;
+            3'h4:data_way0 <= inst_cache_b4w0;
+            3'h5:data_way0 <= inst_cache_b5w0;
+            3'h6:data_way0 <= inst_cache_b6w0;
+            3'h7:data_way0 <= inst_cache_b7w0;
+            default: data_way0 <= `ZeroWord;
         endcase
     end
     //way1
     always@(*)begin
         case(virtual_addr[4:2])
-            3'h0:inst_way1 <= inst_cache_b0w1;
-            3'h1:inst_way1 <= inst_cache_b1w1;
-            3'h2:inst_way1 <= inst_cache_b2w1;
-            3'h3:inst_way1 <= inst_cache_b3w1;
-            3'h4:inst_way1 <= inst_cache_b4w1;
-            3'h5:inst_way1 <= inst_cache_b5w1;
-            3'h6:inst_way1 <= inst_cache_b6w1;
-            3'h7:inst_way1 <= inst_cache_b7w1;
-            default: inst_way1 <= `ZeroWord;
+            3'h0:data_way1 <= inst_cache_b0w1;
+            3'h1:data_way1 <= inst_cache_b1w1;
+            3'h2:data_way1 <= inst_cache_b2w1;
+            3'h3:data_way1 <= inst_cache_b3w1;
+            3'h4:data_way1 <= inst_cache_b4w1;
+            3'h5:data_way1 <= inst_cache_b5w1;
+            3'h6:data_way1 <= inst_cache_b6w1;
+            3'h7:data_way1 <= inst_cache_b7w1;
+            default: data_way1 <= `ZeroWord;
+        endcase
+    end
+    //FIFO
+    always@(*)begin
+        case(virtual_addr[4:2])
+            3'h0:data_FIFO <= FIFO_rdata[32*1-1:32*0];
+            3'h1:data_FIFO <= FIFO_rdata[32*2-1:32*1];
+            3'h2:data_FIFO <= FIFO_rdata[32*3-1:32*2];
+            3'h3:data_FIFO <= FIFO_rdata[32*4-1:32*3];
+            3'h4:data_FIFO <= FIFO_rdata[32*5-1:32*4];
+            3'h5:data_FIFO <= FIFO_rdata[32*6-1:32*5];
+            3'h6:data_FIFO <= FIFO_rdata[32*7-1:32*6];
+            3'h7:data_FIFO <= FIFO_rdata[32*8-1:32*7];
+            default: data_FIFO <= `ZeroWord;
         endcase
     end
 	
 	
-    //STATE_SCAN_CACHE：选择ram中对应的bank
+    //STATE_FETCH_DATA
     //Tag Hit
     wire hit_way0 = (tagv_cache_w0[19:0]==physical_addr[`TagBus] && tagv_cache_w0[20]==`Valid)? `HitSuccess : `HitFail;
     wire hit_way1 = (tagv_cache_w1[19:0]==physical_addr[`TagBus] && tagv_cache_w1[20]==`Valid)? `HitSuccess : `HitFail;
-    assign hit_o = (current_state==`STATE_SCAN_CACHE)? (hit_way0 | hit_way1) :`HitFail;
+    assign hit_o = (current_state==`STATE_FETCH_DATA)? (hit_way0 | hit_way1 | FIFO_hit) :`HitFail;
     reg hit_way0_reg;
     reg hit_way1_reg;
     always@(posedge clk)begin
@@ -302,14 +321,14 @@ module DCache(
     end
     
     
-   //STATE_HIT_FAIL
-   assign mem_ren_o = (current_state==`STATE_HIT_FAIL  &&  mem_arready_i == `Ready)?`ReadEnable :`ReadDisable;
+   //Tag not hit
+   //AXI
+   assign mem_ren_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitFail) ? `ReadEnable :`ReadDisable;
 //                      (current_state==`STATE_WRITE_BACK  &&  func == `WriteEnable)? `ReadEnable :  `ReadDisable;
-   assign mem_rready_o = (current_state==`STATE_HIT_FAIL  &&  mem_rvalid_i == `Valid)?`ReadEnable : `ReadDisable;
-   assign mem_arvalid_o = (current_state==`STATE_HIT_FAIL  &&  mem_arready_i == `Ready)?`Valid : `Invalid;
+   assign mem_rready_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitFail) ? `ReadEnable : `ReadDisable;
+   assign mem_arvalid_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitFail) ? `Valid : `Invalid;
    assign mem_araddr_o = physical_addr;
-   wire read_success = mem_rvalid_i;
-   reg [`WayBus]read_from_mem;
+   //
    always@(posedge clk) begin 
         if(current_state==`STATE_HIT_FAIL )
             read_from_mem<= mem_rdata_i;
@@ -348,27 +367,28 @@ module DCache(
    end
    
    
-   //STATE_WRITE_BACK
-    assign wea_way0 = (current_state==`STATE_WRITE_BACK && LRU_pick == 1'b0 && func == `WriteDisable)? 4'b1111 :
-                     (current_state==`STATE_WRITE_BACK && hit_way0_reg == `HitSuccess && func == `WriteEnable)? 4'b1111 : 4'h0;
+    assign wea_way0 = (bus_read_success==`Valid && LRU_pick == 1'b0 && func == `WriteDisable)? 4'b1111 :
+                     (bus_read_success==`Valid && hit_way0 == `HitSuccess && func == `WriteEnable)? 4'b1111 : 4'h0;
     
-    assign wea_way1 = (current_state==`STATE_WRITE_BACK && LRU_pick == 1'b1 && func == `WriteDisable)? 4'b1111 :
-                     (current_state==`STATE_WRITE_BACK && hit_way1_reg == `HitSuccess && func == `WriteEnable)? 4'b1111 : 4'h0;
+    assign wea_way1 = (bus_read_success==`Valid && LRU_pick == 1'b1 && func == `WriteDisable)? 4'b1111 :
+                     (bus_read_success==`Valid && hit_way1 == `HitSuccess && func == `WriteEnable)? 4'b1111 : 4'h0;
 //    assign mem_ren_o
     
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////输出控制//////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
-    assign cpu_data_o = (current_state==`STATE_SCAN_CACHE && hit_way0 == `HitSuccess)? inst_way0:
-                        (current_state==`STATE_SCAN_CACHE && hit_way1 == `HitSuccess)? inst_way1:
-                        (current_state==`STATE_WRITE_BACK &&virtual_addr[4:2] == 3'h0)? read_from_mem[32*1-1:32*0]:
-                        (current_state==`STATE_WRITE_BACK &&virtual_addr[4:2] == 3'h1)? read_from_mem[32*2-1:32*1]:
-                        (current_state==`STATE_WRITE_BACK &&virtual_addr[4:2] == 3'h2)? read_from_mem[32*3-1:32*2]:
-                        (current_state==`STATE_WRITE_BACK &&virtual_addr[4:2] == 3'h3)? read_from_mem[32*4-1:32*3]:
-                        (current_state==`STATE_WRITE_BACK &&virtual_addr[4:2] == 3'h4)? read_from_mem[32*5-1:32*4]:
-                        (current_state==`STATE_WRITE_BACK &&virtual_addr[4:2] == 3'h5)? read_from_mem[32*6-1:32*5]:
-                        (current_state==`STATE_WRITE_BACK &&virtual_addr[4:2] == 3'h6)? read_from_mem[32*7-1:32*6]:
-                        (current_state==`STATE_WRITE_BACK &&virtual_addr[4:2] == 3'h7)? read_from_mem[32*8-1:32*7]:
+    assign cpu_data_o = (current_state==`STATE_SCAN_CACHE && hit_way0 == `HitSuccess)? data_way0:
+                        (current_state==`STATE_SCAN_CACHE && hit_way1 == `HitSuccess)? data_way1:
+                        (current_state==`STATE_SCAN_CACHE && hit_FIFO == `HitSuccess)? data_FIFO:
+						//关键字优先读取
+                        (current_state==`STATE_SCAN_CACHE && bus_read_success ==`Success && virtual_addr[4:2] == 3'h0)? read_from_mem[32*1-1:32*0]:
+                        (current_state==`STATE_SCAN_CACHE && bus_read_success ==`Success && virtual_addr[4:2] == 3'h1)? read_from_mem[32*2-1:32*1]:
+                        (current_state==`STATE_SCAN_CACHE && bus_read_success ==`Success && virtual_addr[4:2] == 3'h2)? read_from_mem[32*3-1:32*2]:
+                        (current_state==`STATE_SCAN_CACHE && bus_read_success ==`Success && virtual_addr[4:2] == 3'h3)? read_from_mem[32*4-1:32*3]:
+                        (current_state==`STATE_SCAN_CACHE && bus_read_success ==`Success && virtual_addr[4:2] == 3'h4)? read_from_mem[32*5-1:32*4]:
+                        (current_state==`STATE_SCAN_CACHE && bus_read_success ==`Success && virtual_addr[4:2] == 3'h5)? read_from_mem[32*6-1:32*5]:
+                        (current_state==`STATE_SCAN_CACHE && bus_read_success ==`Success && virtual_addr[4:2] == 3'h6)? read_from_mem[32*7-1:32*6]:
+                        (current_state==`STATE_SCAN_CACHE && bus_read_success ==`Success && virtual_addr[4:2] == 3'h7)? read_from_mem[32*8-1:32*7]:
                         `ZeroWord;
                         
     assign cpu_data_valid_o = (current_state==`STATE_SCAN_CACHE && hit_o == `HitSuccess)? `Valid :

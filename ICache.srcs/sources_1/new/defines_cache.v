@@ -10,6 +10,8 @@
 `define NotDirty 1'b0
 `define Valid 1'b1
 `define Invalid 1'b0
+`define Success 1'b1
+`define Fail 1'b0
 `define ZeroWay `WaySize'h0
 
 //Num
