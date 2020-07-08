@@ -105,38 +105,56 @@ module WriteBuffer(
     end
 	
     //数据写入，包括写冲突
+	//冲突检测
+	reg [`FIFONum-1:0]hit;
+	always@(*)begin
+		hit <= `FIFONum'h0;
+		if(cpu_araddr == FIFO_addr[0] && FIFO_valid[0])begin
+			hit[0] <= `HitSuccess;
+		end
+		else if(cpu_araddr == FIFO_addr[1] && FIFO_valid[1])begin
+			hit[1] <= `HitSuccess;
+		end
+		else if(cpu_araddr == FIFO_addr[2] && FIFO_valid[2])begin
+			hit[2] <= `HitSuccess;
+		end
+		else if(cpu_araddr == FIFO_addr[3] && FIFO_valid[3])begin
+			hit[3] <= `HitSuccess;
+		end
+		else if(cpu_araddr == FIFO_addr[4] && FIFO_valid[4])begin
+			hit[4] <= `HitSuccess;
+		end
+		else if(cpu_araddr == FIFO_addr[5] && FIFO_valid[5])begin
+			hit[5] <= `HitSuccess;
+		end
+		else if(cpu_araddr == FIFO_addr[6] && FIFO_valid[6])begin
+			hit[6] <= `HitSuccess;
+		end
+		else if(cpu_araddr == FIFO_addr[7] && FIFO_valid[7])begin
+			hit[7] <= `HitSuccess;
+		end
+	end
+	
+	//队列本体
+	//写入（包括写冲突）
     reg [`FIFONum-1:0]FIFO_data[`WayBus];
     reg [`FIFONum-1:0]FIFO_addr[`DataAddrBus];
     always@(posedge clk)begin
         if(cpu_wreq_i == `WriteEnable)begin
-			if(cpu_awaddr == FIFO_addr[0] && FIFO_valid[0])begin
-                FIFO_data[0] <= cpu_wdata_i;
-			end
-			if(cpu_awaddr == FIFO_addr[1] && FIFO_valid[1])begin
-                FIFO_data[1] <= cpu_wdata_i;
-			end
-			if(cpu_awaddr == FIFO_addr[2] && FIFO_valid[2])begin
-                FIFO_data[2] <= cpu_wdata_i;
-			end
-			if(cpu_awaddr == FIFO_addr[3] && FIFO_valid[3])begin
-                FIFO_data[3] <= cpu_wdata_i;
-			end
-			if(cpu_awaddr == FIFO_addr[4] && FIFO_valid[4])begin
-                FIFO_data[4] <= cpu_wdata_i;
-			end
-			if(cpu_awaddr == FIFO_addr[5] && FIFO_valid[5])begin
-                FIFO_data[5] <= cpu_wdata_i;
-			end
-			if(cpu_awaddr == FIFO_addr[6] && FIFO_valid[6])begin
-                FIFO_data[6] <= cpu_wdata_i;
-			end
-			if(cpu_awaddr == FIFO_addr[7] && FIFO_valid[7])begin
-                FIFO_data[7] <= cpu_wdata_i;
-			end
-			else begin//没有冲突的入队操作
-                FIFO_data[tail] <= cpu_wdata_i;
-                FIFO_addr[tail] <= cpu_awaddr;
-            end
+			case(hit)
+				`FIFONum'b00000001: FIFO_data[0] <= cpu_wdata_i;
+				`FIFONum'b00000010: FIFO_data[1] <= cpu_wdata_i;
+				`FIFONum'b00000100: FIFO_data[2] <= cpu_wdata_i;
+				`FIFONum'b00001000: FIFO_data[3] <= cpu_wdata_i;
+				`FIFONum'b00010000: FIFO_data[4] <= cpu_wdata_i;
+				`FIFONum'b00100000: FIFO_data[5] <= cpu_wdata_i;
+				`FIFONum'b01000000: FIFO_data[6] <= cpu_wdata_i;
+				`FIFONum'b10000000: FIFO_data[7] <= cpu_wdata_i;
+				default:begin//没有冲突的入队操作
+					FIFO_data[tail] <= cpu_wdata_i;
+					FIFO_addr[tail] <= cpu_awaddr;
+				end
+			endcase
         end//if
 		//其他的时候保持原状
     end//always
@@ -144,45 +162,19 @@ module WriteBuffer(
 	//读冲突
 	always@(*)begin
 		if(cpu_rreq_i)begin
-			if(cpu_araddr == FIFO_addr[0] && FIFO_valid[0])begin
-				read_hit_o <= `HitSuccess;
-				cpu_rdata_o <= FIFO_data[0];
-			end
-			if(cpu_araddr == FIFO_addr[1] && FIFO_valid[1])begin
-				read_hit_o <= `HitSuccess;
-				cpu_rdata_o <= FIFO_data[1];
-			end
-			if(cpu_araddr == FIFO_addr[2] && FIFO_valid[2])begin
-				read_hit_o <= `HitSuccess;
-				cpu_rdata_o <= FIFO_data[2];
-			end
-			if(cpu_araddr == FIFO_addr[3] && FIFO_valid[3])begin
-				read_hit_o <= `HitSuccess;
-				cpu_rdata_o <= FIFO_data[3];
-			end
-			if(cpu_araddr == FIFO_addr[4] && FIFO_valid[4])begin
-				read_hit_o <= `HitSuccess;
-				cpu_rdata_o <= FIFO_data[4];
-			end
-			if(cpu_araddr == FIFO_addr[5] && FIFO_valid[5])begin
-				read_hit_o <= `HitSuccess;
-				cpu_rdata_o <= FIFO_data[5];
-			end
-			if(cpu_araddr == FIFO_addr[6] && FIFO_valid[6])begin
-				read_hit_o <= `HitSuccess;
-				cpu_rdata_o <= FIFO_data[6];
-			end
-			if(cpu_araddr == FIFO_addr[7] && FIFO_valid[7])begin
-				read_hit_o <= `HitSuccess;
-				cpu_rdata_o <= FIFO_data[7];
-			end
-			else begin
-				read_hit_o <= `HitFail;
-				cpu_rdata_o <= `ZeroWay;
-			end
+			case(hit)
+				`FIFONum'b00000001: cpu_rdata_o <= FIFO_data[0];
+				`FIFONum'b00000010: cpu_rdata_o <= FIFO_data[1];
+				`FIFONum'b00000100: cpu_rdata_o <= FIFO_data[2];
+				`FIFONum'b00001000: cpu_rdata_o <= FIFO_data[3];
+				`FIFONum'b00010000: cpu_rdata_o <= FIFO_data[4];
+				`FIFONum'b00100000: cpu_rdata_o <= FIFO_data[5];
+				`FIFONum'b01000000: cpu_rdata_o <= FIFO_data[6];
+				`FIFONum'b10000000: cpu_rdata_o <= FIFO_data[7];
+				default:  cpu_rdata_o <= `ZeroWay;
+			endcase
 		end
 		else begin
-				read_hit_o <= `HitFail;
 				cpu_rdata_o <= `ZeroWay;
 		end
 	end

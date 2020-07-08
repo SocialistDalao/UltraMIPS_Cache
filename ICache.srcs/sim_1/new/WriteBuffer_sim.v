@@ -78,5 +78,19 @@ module WriteBuffer_sim(
     initial begin
         #500 rst =0;
         #20 cpu_wreq_i=0;
+		
+		#200 cpu_wreq_i=1;
+		cpu_awaddr_i = 32'h24687_570;
+		cpu_wdata_i = 256'h12345678_91023456_78910234_56789102_34567891_02345678_91023456_78910234;
+		#20 cpu_wreq_i=0;
+		wait(cpu_data_valid_o==`Valid && hit_o == `HitFail) begin
+			#30
+			if(dirty[{virtual_addr_i[`IndexBus],1'b0}] == `Dirty)
+				$display("sucess:dirty write success");
+			else    begin
+				$display("FAIL!!!");
+				$stop;
+			end
+		end
     end
 endmodule
