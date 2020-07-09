@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="synth_1" LaunchPart="xc7a200tfbg676-2" LaunchTime="1593515054">
-  <File Type="PA-TCL" Name="ICache.tcl"/>
-  <File Type="REPORTS-TCL" Name="ICache_reports.tcl"/>
-  <File Type="RDS-RDS" Name="ICache.vds"/>
-  <File Type="RDS-DCP" Name="ICache.dcp"/>
+<GenRun Id="synth_1" LaunchPart="xc7a200tfbg676-2" LaunchTime="1594307500">
+  <File Type="PA-TCL" Name="DCache.tcl"/>
+  <File Type="RDS-PROPCONSTRS" Name="DCache_drc_synth.rpt"/>
+  <File Type="REPORTS-TCL" Name="DCache_reports.tcl"/>
+  <File Type="RDS-RDS" Name="DCache.vds"/>
+  <File Type="RDS-UTIL" Name="DCache_utilization_synth.rpt"/>
+  <File Type="RDS-UTIL-PB" Name="DCache_utilization_synth.pb"/>
+  <File Type="RDS-DCP" Name="DCache.dcp"/>
+  <File Type="VDS-TIMINGSUMMARY" Name="DCache_timing_summary_synth.rpt"/>
+  <File Type="VDS-TIMING-PB" Name="DCache_timing_summary_synth.pb"/>
   <FileSet Name="sources" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
     <Filter Type="Srcs"/>
     <File Path="$PSRCDIR/sources_1/new/defines_cache.v">
@@ -29,8 +34,31 @@
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
     </File>
+    <File Path="$PSRCDIR/sources_1/new/WriteBuffer.v">
+      <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="implementation"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PSRCDIR/sources_1/new/DCache.v">
+      <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="implementation"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
     <File Path="$PSRCDIR/sources_1/new/ICache.v">
       <FileInfo>
+        <Attr Name="AutoDisabled" Val="1"/>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="implementation"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PSRCDIR/sources_1/new/CacheAXI_Interface.v">
+      <FileInfo>
+        <Attr Name="AutoDisabled" Val="1"/>
         <Attr Name="UsedIn" Val="synthesis"/>
         <Attr Name="UsedIn" Val="implementation"/>
         <Attr Name="UsedIn" Val="simulation"/>
@@ -38,8 +66,7 @@
     </File>
     <Config>
       <Option Name="DesignMode" Val="RTL"/>
-      <Option Name="TopModule" Val="ICache"/>
-      <Option Name="TopAutoSet" Val="TRUE"/>
+      <Option Name="TopModule" Val="DCache"/>
     </Config>
   </FileSet>
   <FileSet Name="constrs_in" Type="Constrs" RelSrcDir="$PSRCDIR/constrs_1">
@@ -66,5 +93,4 @@
   </Strategy>
   <BlockFileSet Type="BlockSrcs" Name="bank_ram"/>
   <BlockFileSet Type="BlockSrcs" Name="tag_ram"/>
-  <BlockFileSet Type="BlockSrcs" Name="clk_wiz_0"/>
 </GenRun>

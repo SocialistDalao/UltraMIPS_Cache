@@ -30,7 +30,7 @@ module WriteBuffer(
 	//CPU read request and response
     input wire cpu_rreq_i,
     input wire [`DataAddrBus]cpu_araddr_i,
-	output reg read_hit_o,
+	output wire hit_o,
 	output reg [`WayBus]cpu_rdata_o,
 	
     //state
@@ -104,9 +104,14 @@ module WriteBuffer(
         end
     end
 	
+	
+	//队列本体
+    reg [`FIFONum-1:0]FIFO_data[`WayBus];
+    reg [`FIFONum-1:0]FIFO_addr[`DataAddrBus];
     //数据写入，包括写冲突
 	//冲突检测
 	reg [`FIFONum-1:0]hit;
+	assign hit_o = hit[7]| hit[6]| hit[5]| hit[4]| hit[3]| hit[2]| hit[1]| hit[0];
 	always@(*)begin
 		hit <= `FIFONum'h0;
 		if(cpu_araddr == FIFO_addr[0] && FIFO_valid[0])begin
@@ -135,10 +140,7 @@ module WriteBuffer(
 		end
 	end
 	
-	//队列本体
 	//写入（包括写冲突）
-    reg [`FIFONum-1:0]FIFO_data[`WayBus];
-    reg [`FIFONum-1:0]FIFO_addr[`DataAddrBus];
     always@(posedge clk)begin
         if(cpu_wreq_i == `WriteEnable)begin
 			case(hit)

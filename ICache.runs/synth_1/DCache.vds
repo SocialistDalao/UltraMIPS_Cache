@@ -1,13 +1,14 @@
-
-*** Running vivado
-    with args -log DCache.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source DCache.tcl
-
-
-****** Vivado v2019.2 (64-bit)
-  **** SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
-  **** IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
-    ** Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
-
+#-----------------------------------------------------------
+# Vivado v2019.2 (64-bit)
+# SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+# IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+# Start of session at: Thu Jul  9 23:11:43 2020
+# Process ID: 6164
+# Current directory: D:/vivado/Project/ICache/UltraMIPS/ICache.runs/synth_1
+# Command line: vivado.exe -log DCache.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source DCache.tcl
+# Log file: D:/vivado/Project/ICache/UltraMIPS/ICache.runs/synth_1/DCache.vds
+# Journal file: D:/vivado/Project/ICache/UltraMIPS/ICache.runs/synth_1\vivado.jou
+#-----------------------------------------------------------
 source DCache.tcl -notrace
 Command: synth_design -top DCache -part xc7a200tfbg676-2
 Starting synth_design

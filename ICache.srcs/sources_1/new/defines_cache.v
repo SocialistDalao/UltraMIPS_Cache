@@ -46,7 +46,12 @@
 `define FIFOStateBus `StateNumLog2-1:0
 
 //State
-//Cache
+//ICache
+`define STATE_LOOK_UP `StateNumLog2'h0
+`define STATE_SCAN_CACHE `StateNumLog2'h1
+`define STATE_HIT_FAIL `StateNumLog2'h2
+`define STATE_WRITE_BACK `StateNumLog2'h3
+//DCache
 `define STATE_LOOK_UP `StateNumLog2'h0
 `define STATE_FETCH_DATA `StateNumLog2'h1
 `define STATE_WRITE_DATA `StateNumLog2'h2

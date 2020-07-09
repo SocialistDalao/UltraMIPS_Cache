@@ -1,26 +1,26 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// 代码架构：
-//----初始定义：
-//--------CPU输入数据的保存
-//--------TLB：虚实地址转换
-//--------WriteBuffer：写入总线缓存
+// ????????
+//----??????壺
+//--------CPU????????????
+//--------TLB???????????
+//--------WriteBuffer??д?????????
 //--------BANK_RAM
 //--------TAG+VALID_RAM
 //--------LRU
 //--------DIRTY
-//----状态机描述：
-//--------状态转移表
-//----组合逻辑具体操作：
+//----??????????
+//--------??????
+//----???????????????
 //--------STATE_FETCH_DATA
 //------------tag hit
 //------------tag not hit
 //--------STATE_WRITE_DATA
-//----输出控制
+//----???????
 //////////////////////////////////////////////////////////////////////////////////
 
-`include"defines.v";
-`include"defines_cache.v";
+`include"defines.v"
+`include"defines_cache.v"
 module DCache(
 
     input wire clk,
@@ -38,12 +38,12 @@ module DCache(
     output wire [`DataBus] cpu_data_o,
 	
 	//cache state
-	output cache_busy_o
+	output cache_busy_o,
     
     //from_mem read result
     input wire mem_rvalid_i,
     input wire mem_arready_i,
-    input wire [`WayBus]mem_rdata_i,//一个块的大小
+    input wire [`WayBus]mem_rdata_i,//???????С
     //to_mem ready to recieve request 
     output wire mem_ren_o,
     output wire mem_rready_o,
@@ -52,7 +52,7 @@ module DCache(
 	//mem write
     input wire mem_wready_i,
     output wire mem_wvalid_o,
-    output wire[`WayBus] mem_wdata_o,//一个块的大小
+    output wire[`WayBus] mem_wdata_o,//???????С
     input wire mem_awready_i,
     output wire mem_awvalid_o,
     output wire [`DataAddrBus]mem_awaddr_o,
@@ -63,12 +63,12 @@ module DCache(
     output [`DirtyBus] dirty
     );
 //////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////初始定义//////////////////////////////////////////
+////////////////////////////////???????//////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
     //keep the data of STATE_LOOK_UP
     reg [`InstAddrBus]virtual_addr;
     reg [`RegBus]cpu_wdata;
-    reg func;//高电平为写，低电平为读
+    reg func;//?????д?????????
     always@(posedge clk)begin
         if(rst)begin
             virtual_addr<= `ZeroWord;
@@ -96,7 +96,7 @@ module DCache(
     .physical_addr_o(physical_addr)
     );
 	//WriteBuffer
-	reg [`WayBus]FIFO_rdata;
+	wire [`WayBus]FIFO_rdata;
 	reg [`WayBus]FIFO_wdata;
 	wire FIFO_hit;
 	wire FIFO_wreq;
@@ -106,20 +106,18 @@ module DCache(
         //CPU write request
         .cpu_wreq_i(FIFO_wreq),
         .cpu_awaddr_i(physical_addr),
-        .cpu_wdata_i(FIFO_wdata),//一个块的大小
+        .cpu_wdata_i(FIFO_wdata),//???????С
         //CPU read request and response
         .cpu_rreq_i(cpu_rreq_i),
         .cpu_araddr_i(physical_addr),
-        .read_hit_o(FIFO_hit),
+        .hit_o(FIFO_hit),
         .cpu_rdata_o(FIFO_rdata),
-        
         //state
         .state_o(state_o),
-        
         //MEM 
         .mem_wready_i(mem_wready_i),
         .mem_wvalid_o(mem_wvalid_o),
-        .mem_wdata_o(mem_wdata_o),//一个块的大小
+        .mem_wdata_o(mem_wdata_o),//???????С
         .mem_awready_i(mem_awready_i),
         .mem_awvalid_o(mem_awvalid_o),
         .mem_awaddr_o(mem_awaddr_o),
@@ -131,7 +129,7 @@ module DCache(
     //BANK 0~7 WAY 0~1
     //biwj indicates bank_i way_j
 //    reg [`WayBus] data_cache;
-    wire [`InstAddrBus]ram_addr = (current_state == `STATE_LOOK_UP) virtual_addr_i : physical_addr; 
+    wire [`InstAddrBus]ram_addr = (current_state == `STATE_LOOK_UP)? virtual_addr_i : physical_addr; 
 	reg [`WayBus]read_from_mem;
 	
     wire [3:0]wea_way0;
@@ -193,6 +191,7 @@ module DCache(
     
     //Dirty 
     reg [`DirtyBus] dirty;
+	wire write_dirty = dirty[{virtual_addr[`IndexBus],wea_way1}]; 
     always@(posedge clk)begin
         if(rst)
             dirty<=0;
@@ -206,12 +205,12 @@ module DCache(
             dirty <= dirty;
     end
 //////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////状态机描述////////////////////////////////////////
+////////////////////////////////????????////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 
     reg [`StateBus]current_state;
     reg [`StateBus]next_state;
-//  //状态转移动作  
+//  //????????  
     always@(posedge clk)begin
         if(rst)
             current_state <= `STATE_LOOK_UP;
@@ -219,9 +218,8 @@ module DCache(
             current_state <= next_state;
     end
     
-//  //状态转移表
-	reg write_dirty; 
-	wire bus_read_success = mem_rvalid_i;//总线读数据成功
+//  //??????
+	wire bus_read_success = mem_rvalid_i;//???????????
     always@(*)begin
         next_state <= `STATE_LOOK_UP;
         case(current_state)
@@ -233,11 +231,11 @@ module DCache(
                     next_state <= `STATE_LOOK_UP;
             end
             `STATE_FETCH_DATA:begin
-                if(hit_o == `HitSuccess)//读写命中
+                if(hit_o == `HitSuccess)//??д????
                     next_state <= `STATE_LOOK_UP;
-                else if(bus_read_success == `Success && write_dirty == `WriteDisable)//读写不命中但是不需要回写脏块
+                else if(bus_read_success == `Success && write_dirty == `WriteDisable)//??д?????е?????????д???
                     next_state <= `STATE_LOOK_UP;
-                else if(bus_read_success == `Fail && write_dirty == `WriteEnable)//读写不命中但是需要回写脏块
+                else if(bus_read_success == `Fail && write_dirty == `WriteEnable)//??д?????е????????д???
                     next_state <= `STATE_WRITE_DATA;
             end
             `STATE_WRITE_DATA:begin
@@ -249,10 +247,10 @@ module DCache(
     
     
 //////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////组合逻辑//////////////////////////////////////////
+////////////////////////////////??????//////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
     
-    //STATE_LOOK_UP： Detail operation is at the first of this file.
+    //STATE_LOOK_UP?? Detail operation is at the first of this file.
 	
 	
     //STATE_FETCH_DATA
@@ -316,17 +314,20 @@ module DCache(
     
     assign wea_way1 = (bus_read_success==`Valid && LRU_pick == 1'b1 && func == `WriteDisable)? 4'b1111 :
                      (bus_read_success==`Valid && hit_way1 == `HitSuccess && func == `WriteEnable)? 4'b1111 : 4'h0;
+                     
+	assign FIFO_wreq = (current_state == `STATE_FETCH_DATA && FIFO_hit == `HitSuccess)? `WriteEnable:
+	                   (current_state == `STATE_WRITE_DATA)? `WriteEnable: `WriteDisable;
    //AXI read requirements
    assign mem_ren_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitFail) ? `ReadEnable :`ReadDisable;
    assign mem_rready_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitFail) ? `ReadEnable : `ReadDisable;
    assign mem_arvalid_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitFail) ? `Valid : `Invalid;
    assign mem_araddr_o = physical_addr;
-   //写入ram（只有wea信号为真才会被真正执行，也就是不是读命中的时候）
+   //д??ram?????wea??????????????У?????????????е????
    always@(*) begin 
-		if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteDisable)begin//读未命中，总线数据写入
+		if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteDisable)begin//??δ???У?????????д??
 			read_from_mem <= mem_rdata_i;
 		end
-		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteEnable)begin//写未命中，写数据拼接总线数据写入
+		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteEnable)begin//дδ???У?д???????????????д??
 			case(virtual_addr[4:2])
 				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],cpu_wdata};
 				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],cpu_wdata,mem_rdata_i[32*1-1:32*0]};
@@ -339,7 +340,7 @@ module DCache(
 				default: read_from_mem <= mem_rdata_i;
 			endcase
 		end
-		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitSuccess)begin//写命中，脏块写入
+		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitSuccess)begin//д???У????д??
             if(hit_way0 == `HitSuccess)begin
                 case(virtual_addr[4:2])
                     3'h0:read_from_mem <= {inst_cache_b7w0,inst_cache_b6w0,inst_cache_b5w0,inst_cache_b4w0,inst_cache_b3w0,inst_cache_b2w0,inst_cache_b1w0,cpu_wdata};
@@ -366,7 +367,7 @@ module DCache(
                     default:read_from_mem<={inst_cache_b7w1,inst_cache_b6w1,inst_cache_b5w1,inst_cache_b4w1,inst_cache_b3w1,inst_cache_b2w1,inst_cache_b1w1,inst_cache_b0w1};
                 endcase
             end//elseif
-            else if(hit_FIFO == `HitSuccess)begin
+            else if(FIFO_hit == `HitSuccess)begin
                 case(virtual_addr[4:2])
                     3'h0:read_from_mem <= {inst_cache_b7w1,inst_cache_b6w1,inst_cache_b5w1,inst_cache_b4w1,inst_cache_b3w1,inst_cache_b2w1,inst_cache_b1w1,cpu_wdata};
                     3'h1:read_from_mem <= {inst_cache_b7w1,inst_cache_b6w1,inst_cache_b5w1,inst_cache_b4w1,inst_cache_b3w1,inst_cache_b2w1,cpu_wdata,inst_cache_b0w1};
@@ -388,39 +389,52 @@ module DCache(
   
    //STATE_WRITE_DATA
    //write to FIFO 
-	assign FIFO_wreq = (current_state == `STATE_WRITE_DATA)? 4'b1111 : 4'h0;
 	always@(*)begin
-		if(LRU_pick == 1'b0)begin//0路被替换
-			FIFO_wdata <= {inst_cache_b7w0,inst_cache_b6w0,inst_cache_b5w0,inst_cache_b4w0,inst_cache_b3w0,inst_cache_b2w0,inst_cache_b1w0,inst_cache_b0w0};
-		end
-		else if(LRU_pick == 1'b1)begin//1路被替换
-			FIFO_wdata <= {inst_cache_b7w1,inst_cache_b6w1,inst_cache_b5w1,inst_cache_b4w1,inst_cache_b3w1,inst_cache_b2w1,inst_cache_b1w1,inst_cache_b0w1};
-		end
-		else
-			FIFO_wdata<={`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord};
+	   FIFO_wdata <= `ZeroWay;
+	   if(current_state == `STATE_FETCH_DATA)begin
+            case(virtual_addr[4:2])
+                3'h0:FIFO_wdata <= {FIFO_rdata[8*32-1:1*32],cpu_wdata};
+                3'h1:FIFO_wdata <= {FIFO_rdata[8*32-1:2*32],cpu_wdata,FIFO_rdata[1*32-1:0*32]};
+                3'h2:FIFO_wdata <= {FIFO_rdata[8*32-1:3*32],cpu_wdata,FIFO_rdata[2*32-1:1*32]};
+                3'h3:FIFO_wdata <= {FIFO_rdata[8*32-1:4*32],cpu_wdata,FIFO_rdata[3*32-1:2*32]};
+                3'h4:FIFO_wdata <= {FIFO_rdata[8*32-1:5*32],cpu_wdata,FIFO_rdata[4*32-1:3*32]};
+                3'h5:FIFO_wdata <= {FIFO_rdata[8*32-1:6*32],cpu_wdata,FIFO_rdata[5*32-1:4*32]};
+                3'h6:FIFO_wdata <= {FIFO_rdata[8*32-1:7*32],cpu_wdata,FIFO_rdata[6*32-1:5*32]};
+                3'h7:FIFO_wdata <= {cpu_wdata,FIFO_rdata[7*32-1:6*32]};
+                default:;                                         
+            endcase
+	   end
+	   else if(current_state == `STATE_WRITE_DATA)begin
+            if(LRU_pick == 1'b0)begin//0·???滻
+                FIFO_wdata <= {inst_cache_b7w0,inst_cache_b6w0,inst_cache_b5w0,inst_cache_b4w0,inst_cache_b3w0,inst_cache_b2w0,inst_cache_b1w0,inst_cache_b0w0};
+            end
+            else if(LRU_pick == 1'b1)begin//1·???滻
+                FIFO_wdata <= {inst_cache_b7w1,inst_cache_b6w1,inst_cache_b5w1,inst_cache_b4w1,inst_cache_b3w1,inst_cache_b2w1,inst_cache_b1w1,inst_cache_b0w1};
+            end
+       end
 	end
    
    
 //    assign mem_ren_o
     
 //////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////输出控制//////////////////////////////////////////
+////////////////////////////////???????//////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
-    assign cpu_data_o = (current_state==`STATE_SCAN_CACHE && hit_way0 == `HitSuccess)? data_way0:
-                        (current_state==`STATE_SCAN_CACHE && hit_way1 == `HitSuccess)? data_way1:
-                        (current_state==`STATE_SCAN_CACHE && hit_FIFO == `HitSuccess)? data_FIFO:
-						//关键字优先读取
-                        (current_state==`STATE_SCAN_CACHE && bus_read_success ==`Success && virtual_addr[4:2] == 3'h0)? read_from_mem[32*1-1:32*0]:
-                        (current_state==`STATE_SCAN_CACHE && bus_read_success ==`Success && virtual_addr[4:2] == 3'h1)? read_from_mem[32*2-1:32*1]:
-                        (current_state==`STATE_SCAN_CACHE && bus_read_success ==`Success && virtual_addr[4:2] == 3'h2)? read_from_mem[32*3-1:32*2]:
-                        (current_state==`STATE_SCAN_CACHE && bus_read_success ==`Success && virtual_addr[4:2] == 3'h3)? read_from_mem[32*4-1:32*3]:
-                        (current_state==`STATE_SCAN_CACHE && bus_read_success ==`Success && virtual_addr[4:2] == 3'h4)? read_from_mem[32*5-1:32*4]:
-                        (current_state==`STATE_SCAN_CACHE && bus_read_success ==`Success && virtual_addr[4:2] == 3'h5)? read_from_mem[32*6-1:32*5]:
-                        (current_state==`STATE_SCAN_CACHE && bus_read_success ==`Success && virtual_addr[4:2] == 3'h6)? read_from_mem[32*7-1:32*6]:
-                        (current_state==`STATE_SCAN_CACHE && bus_read_success ==`Success && virtual_addr[4:2] == 3'h7)? read_from_mem[32*8-1:32*7]:
+    assign cpu_data_o = (current_state==`STATE_FETCH_DATA && hit_way0 == `HitSuccess)? data_way0:
+                        (current_state==`STATE_FETCH_DATA && hit_way1 == `HitSuccess)? data_way1:
+                        (current_state==`STATE_FETCH_DATA && FIFO_hit == `HitSuccess)? data_FIFO:
+						//???????????
+                        (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h0)? read_from_mem[32*1-1:32*0]:
+                        (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h1)? read_from_mem[32*2-1:32*1]:
+                        (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h2)? read_from_mem[32*3-1:32*2]:
+                        (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h3)? read_from_mem[32*4-1:32*3]:
+                        (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h4)? read_from_mem[32*5-1:32*4]:
+                        (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h5)? read_from_mem[32*6-1:32*5]:
+                        (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h6)? read_from_mem[32*7-1:32*6]:
+                        (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h7)? read_from_mem[32*8-1:32*7]:
                         `ZeroWord;
                         
-    assign cpu_data_valid_o = (current_state==`STATE_SCAN_CACHE && hit_o == `HitSuccess)? `Valid :
-                              (current_state==`STATE_WRITE_BACK)                        ? `Valid :
+    assign cpu_data_valid_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitSuccess)? `Valid :
+                              (current_state==`STATE_WRITE_DATA)                        ? `Valid :
                               `Invalid ;
 endmodule
