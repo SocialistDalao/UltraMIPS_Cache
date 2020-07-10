@@ -37,14 +37,10 @@ module WriteBuffer(
     output reg [`FIFOStateBus]state_o,
 	
     //MEM 
-    input wire mem_wready_i,
-    output wire mem_wvalid_o,
+    input wire mem_bvalid_i,
+    output wire mem_wen_o,
     output wire[`WayBus] mem_wdata_o,//一个块的大小
-    input wire mem_awready_i,
-    output wire mem_awvalid_o,
-    output wire [`DataAddrBus]mem_awaddr_o,
-    input wire mem_bvalid,
-    output wire mem_bready
+    output wire [`DataAddrBus]mem_awaddr_o
     );
 	//地址对齐处理
 	wire [`DataAddrBus]cpu_awaddr = {cpu_awaddr_i[31:5],5'h0};
@@ -55,7 +51,7 @@ module WriteBuffer(
     always@(posedge clk)begin
         if(rst)
             count <= `FIFONumLog2'h0;
-        else if( mem_bvalid == `Valid)
+        else if( mem_bvalid_i == `Valid)
             count <= count - 1;
         else if(cpu_wreq_i == `WriteEnable)
             count <= count + 1;
@@ -89,7 +85,7 @@ module WriteBuffer(
             tail <= `FIFONumLog2'h0;
 			FIFO_valid <= `FIFONum'h0;
         end
-        else if( mem_bvalid == `Valid)begin//写入完毕
+        else if( mem_bvalid_i == `Valid)begin//写入完毕
 			FIFO_valid[head] <= `Invalid;
             head <= head + 1;
 		end
@@ -183,9 +179,7 @@ module WriteBuffer(
     
     
     //总线处理
-    assign mem_bready=1'b1;
-    assign mem_wvalid_o = (state_o == `STATE_EMPTY)? `Invalid:`Valid;
-    assign mem_awvalid_o = (state_o == `STATE_EMPTY)? `Invalid:`Valid;
+    assign mem_wen_o = (state_o == `STATE_EMPTY)? `Invalid:`Valid;
     assign mem_awaddr_o = FIFO_addr[head];
     assign mem_wdata_o = FIFO_data[head];
 endmodule

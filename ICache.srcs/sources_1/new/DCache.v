@@ -42,22 +42,15 @@ module DCache(
     
     //from_mem read result
     input wire mem_rvalid_i,
-    input wire mem_arready_i,
-    input wire [`WayBus]mem_rdata_i,//???????С
+    input wire [`WayBus]mem_rdata_i,
     //to_mem ready to recieve request 
     output wire mem_ren_o,
-    output wire mem_rready_o,
-    output wire mem_arvalid_o,
     output wire[`DataAddrBus]mem_araddr_o,
 	//mem write
-    input wire mem_wready_i,
-    output wire mem_wvalid_o,
-    output wire[`WayBus] mem_wdata_o,//???????С
-    input wire mem_awready_i,
-    output wire mem_awvalid_o,
-    output wire [`DataAddrBus]mem_awaddr_o,
-    input wire mem_bvalid,
-    output wire mem_bready,
+    input wire mem_bvalid_i,
+    output wire mem_wen_o,
+    output wire[`WayBus] mem_wdata_o,//一个块的大小
+    output wire [`DataAddrBus]mem_awaddr_o
     
     //test
     output [`DirtyBus] dirty
@@ -115,14 +108,10 @@ module DCache(
         //state
         .state_o(state_o),
         //MEM 
-        .mem_wready_i(mem_wready_i),
-        .mem_wvalid_o(mem_wvalid_o),
-        .mem_wdata_o(mem_wdata_o),//???????С
-        .mem_awready_i(mem_awready_i),
-        .mem_awvalid_o(mem_awvalid_o),
-        .mem_awaddr_o(mem_awaddr_o),
-        .mem_bvalid(mem_bvalid),
-        .mem_bready(mem_bready)
+        .mem_bvalid_i(mem_bvalid_i),
+        .mem_wen_o(mem_wen_o),
+        .mem_wdata_o(mem_wdata_o),
+        .mem_awaddr_o(mem_awaddr_o)
     );
    
     
@@ -319,8 +308,6 @@ module DCache(
 	                   (current_state == `STATE_WRITE_DATA)? `WriteEnable: `WriteDisable;
    //AXI read requirements
    assign mem_ren_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitFail) ? `ReadEnable :`ReadDisable;
-   assign mem_rready_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitFail) ? `ReadEnable : `ReadDisable;
-   assign mem_arvalid_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitFail) ? `Valid : `Invalid;
    assign mem_araddr_o = physical_addr;
    //д??ram?????wea??????????????У?????????????е????
    always@(*) begin 

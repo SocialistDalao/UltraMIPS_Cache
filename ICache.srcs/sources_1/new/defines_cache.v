@@ -59,3 +59,9 @@
 `define STATE_EMPTY `FIFOStateNumLog2'h0
 `define STATE_WORKING `FIFOStateNumLog2'h0
 `define STATE_FULL `FIFOStateNumLog2'h0
+//CacheAXI_Interface
+`define STATE_WRITE_FREE 1'b0
+`define STATE_WRITE_BUSY 1'b1
+`define STATE_READ_FREE 2'h0
+`define STATE_READ_ICACHE 2'h1
+`define STATE_READ_DCACHE 2'h2

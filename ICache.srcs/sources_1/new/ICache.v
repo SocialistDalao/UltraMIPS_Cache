@@ -35,17 +35,12 @@ module ICache(
     
     //from_mem read result
     input wire mem_rvalid_i,
-    input wire mem_arready_i,
     input wire [`WayBus]mem_rdata_i,//一个块的大小
     //to_mem ready to recieve request 
     output wire mem_ren_o,
-    output wire mem_rready_o,
-    output wire mem_arvalid_o,
     output wire[`InstAddrBus]mem_araddr_o
     
-    //test
     );
-    //test
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////初始定义//////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
@@ -204,9 +199,7 @@ module ICache(
     
     
    //STATE_HIT_FAIL
-   assign mem_ren_o = (current_state==`STATE_HIT_FAIL  &&  mem_arready_i == `Ready)?`ReadEnable : `ReadDisable;
-   assign mem_rready_o = (current_state==`STATE_HIT_FAIL  &&  mem_rvalid_i == `Valid)?`ReadEnable : `ReadDisable;
-   assign mem_arvalid_o = (current_state==`STATE_HIT_FAIL  &&  mem_arready_i == `Ready)?`Valid : `Invalid;
+   assign mem_ren_o = (current_state==`STATE_HIT_FAIL )?`ReadEnable : `ReadDisable;
    assign mem_araddr_o = physical_addr;
    wire read_success = mem_rvalid_i;
    reg [`WayBus]read_from_mem;
