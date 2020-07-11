@@ -80,13 +80,51 @@ module CacheAXI_Interface(
 		else
 			read_state <= read_state;
 	end
-	assign axi_ren_o = (write_state == `STATE_READ_ICACHE || write_state == `STATE_READ_DCACHE) = `ReadEnable : `ReadDisable;
-	assign axi_wlast_o = (write_count == 3'h7) `Valid:`Invalid;//write last word
-	assign axi_waddr_o = {data_awaddr_i[31:5],write_count,2'b00};
-	assign axi_wvalid_o = (write_state == `STATE_WRITE_BUSY ) `Valid: `Invalid;
-	assign data_bvalid_o = ( write_state == `STATE_WRITE_BUSY && wdata_resp_i == `Valid && write_count == 3'h7 )?
+	always@(posedge clk)begin
+		if(read_state == `STATE_READ_FREE)
+			read_count <= 3'h0;
+		else if(rdata_valid_i == `Valid)
+			read_count <= read_count + 1;
+		else	
+			read_count <= read_count;
+	end
+	//AXI
+	assign axi_ren_o = (read_state == `STATE_READ_FREE) = `ReadDisable : `ReadEnable;
+	assign axi_rready_o = axi_ren_o;//ready when starts reading
+	assign axi_raddr_o = (read_state == `STATE_READ_DCACHE)? {data_araddr_i[31:5],write_count,2'b00}:
+						(read_state == `STATE_READ_ICACHE)? {data_araddr_i[31:5],write_count,2'b00}:
+						`ZeroWord;
+	//ICache/DCache
+	assign inst_rvalid_o = ( read_state == `STATE_READ_ICACHE && rdata_valid_i == `Valid && read_count == 3'h7 )?
 							`Valid: `Invalid;//can add key word optimization later
-	
+	assign data_rvalid_o = ( read_state == `STATE_READ_DCACHE && rdata_valid_i == `Valid && read_count == 3'h7 )?
+							`Valid: `Invalid;//can add key word optimization later
+	always@(posedge clk)begin
+		case(read_count)
+			3'h0:	inst_rdata_o[32*1-1:32*0] <= rdata_i;
+			3'h1:	inst_rdata_o[32*2-1:32*1] <= rdata_i;
+			3'h2:	inst_rdata_o[32*3-1:32*2] <= rdata_i;
+			3'h3:	inst_rdata_o[32*4-1:32*3] <= rdata_i;
+			3'h4:	inst_rdata_o[32*5-1:32*4] <= rdata_i;
+			3'h5:	inst_rdata_o[32*6-1:32*5] <= rdata_i;
+			3'h6:	inst_rdata_o[32*7-1:32*6] <= rdata_i;
+			3'h7:	inst_rdata_o[32*8-1:32*7] <= rdata_i;
+			default:	inst_rdata_o <= inst_rdata_o;
+		endcase
+	end
+	always@(posedge clk)begin
+		case(read_count)
+			3'h0:	data_rdata_o[32*1-1:32*0] <= rdata_i;
+			3'h1:	data_rdata_o[32*2-1:32*1] <= rdata_i;
+			3'h2:	data_rdata_o[32*3-1:32*2] <= rdata_i;
+			3'h3:	data_rdata_o[32*4-1:32*3] <= rdata_i;
+			3'h4:	data_rdata_o[32*5-1:32*4] <= rdata_i;
+			3'h5:	data_rdata_o[32*6-1:32*5] <= rdata_i;
+			3'h6:	data_rdata_o[32*7-1:32*6] <= rdata_i;
+			3'h7:	data_rdata_o[32*8-1:32*7] <= rdata_i;
+			default:	data_rdata_o <= data_rdata_o;
+		endcase
+	end
 	
 	
 	//WRITE
@@ -103,12 +141,22 @@ module CacheAXI_Interface(
 		else
 			write_state <= write_state;
 	end
+	always@(posedge clk)begin
+		if(write_state == `STATE_WRITE_FREE)
+			write_count <= 3'h0;
+		else if(write_state == `STATE_WRITE_BUSY && wdata_resp_i == `Valid)
+			write_count <= write_count + 1;
+		else	
+			write_count <= write_count;
+	end
+	//AXI
 	assign axi_wen_o = (write_state == `STATE_WRITE_BUSY) = `WriteEnable : `WriteDisable;
 	assign axi_wlast_o = (write_count == 3'h7) `Valid:`Invalid;//write last word
 	assign axi_waddr_o = {data_awaddr_i[31:5],write_count,2'b00};
 	assign axi_wvalid_o = (write_state == `STATE_WRITE_BUSY ) `Valid: `Invalid;
+	//DCache
 	assign data_bvalid_o = ( write_state == `STATE_WRITE_BUSY && wdata_resp_i == `Valid && write_count == 3'h7 )?
-							`Valid: `Invalid;//can add key word optimization later
+							`Valid: `Invalid;
 	always@(*)begin
 		case(write_count)
 			3'h0:	axi_wdata_o <= data_wdata_i[32*1-1:32*0];
@@ -123,14 +171,6 @@ module CacheAXI_Interface(
 		endcase
 	end
 	
-	always@(posedge clk)begin
-		if(write_state == `STATE_WRITE_FREE)
-			write_count <= 3'h0;
-		else if(write_state == `STATE_WRITE_BUSY && wdata_resp_i == `Valid)
-			write_count <= write_count + 1;
-		else	
-			write_count <= write_count;
-	end
 	
 	
 endmodule

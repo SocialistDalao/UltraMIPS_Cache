@@ -38,7 +38,7 @@ module DCache(
     output wire [`DataBus] cpu_data_o,
 	
 	//cache state
-	output cache_busy_o,
+	output cpu_stall_o,
     
     //from_mem read result
     input wire mem_rvalid_i,
@@ -56,7 +56,7 @@ module DCache(
     output [`DirtyBus] dirty
     );
 //////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////???????//////////////////////////////////////////
+////////////////////////////////Initialization////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
     //keep the data of STATE_LOOK_UP
     reg [`InstAddrBus]virtual_addr;
@@ -79,10 +79,10 @@ module DCache(
             func <= func;
         end
     end
+    //TLB
     wire [`InstAddrBus]physical_addr;
     wire index = physical_addr[`IndexBus];
     wire offset = physical_addr[`OffsetBus];
-    //TLB
     TLB tlb0(
     .rst(rst),
     .virtual_addr_i(virtual_addr),
@@ -93,20 +93,21 @@ module DCache(
 	reg [`WayBus]FIFO_wdata;
 	wire FIFO_hit;
 	wire FIFO_wreq;
+	wire [`FIFOStateNumLog2-1:0]FIFO_state;
     WriteBuffer WB0(
         .clk(clk),
         .rst(rst),
         //CPU write request
         .cpu_wreq_i(FIFO_wreq),
         .cpu_awaddr_i(physical_addr),
-        .cpu_wdata_i(FIFO_wdata),//???????§³
+        .cpu_wdata_i(FIFO_wdata),//WaySize
         //CPU read request and response
         .cpu_rreq_i(cpu_rreq_i),
         .cpu_araddr_i(physical_addr),
         .hit_o(FIFO_hit),
-        .cpu_rdata_o(FIFO_rdata),
+        .cpu_rdata_o(FIFO_rdata),//WaySize
         //state
-        .state_o(state_o),
+        .state_o(FIFO_state),
         //MEM 
         .mem_bvalid_i(mem_bvalid_i),
         .mem_wen_o(mem_wen_o),
@@ -193,13 +194,26 @@ module DCache(
         else
             dirty <= dirty;
     end
+	
+	//Stall
+	always@(*)begin
+		if(current_state != `STATE_LOOK_UP && (cpu_rreq_i | cpu_wreq_i))//req when Cache is busy
+			cpu_stall_o <= `Valid;
+		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `ReadEnable)//read not hit
+			cpu_stall_o <= `Valid;
+		else if (current_state == `STATE_WRITE_DATA && FIFO_state == `STATE_FULL)
+			cpu_stall_o <= `Valid;
+		else
+			cpu_stall_o <= `Invalid;
+	end
 //////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////????????////////////////////////////////////////
+////////////////////////////////State/////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 
+	wire bus_read_success = mem_rvalid_i;//Better understatnding 
+	//state
     reg [`StateBus]current_state;
     reg [`StateBus]next_state;
-//  //????????  
     always@(posedge clk)begin
         if(rst)
             current_state <= `STATE_LOOK_UP;
@@ -207,8 +221,6 @@ module DCache(
             current_state <= next_state;
     end
     
-//  //??????
-	wire bus_read_success = mem_rvalid_i;//???????????
     always@(*)begin
         next_state <= `STATE_LOOK_UP;
         case(current_state)
@@ -220,14 +232,17 @@ module DCache(
                     next_state <= `STATE_LOOK_UP;
             end
             `STATE_FETCH_DATA:begin
-                if(hit_o == `HitSuccess)//??§Õ????
+                if(hit_o == `HitSuccess)//hit 
                     next_state <= `STATE_LOOK_UP;
-                else if(bus_read_success == `Success && write_dirty == `WriteDisable)//??§Õ?????§Ö?????????§Õ???
+                else if(bus_read_success == `Success && write_dirty == `WriteDisable)//hit fail and no dirty bank to write
                     next_state <= `STATE_LOOK_UP;
-                else if(bus_read_success == `Fail && write_dirty == `WriteEnable)//??§Õ?????§Ö????????§Õ???
+                else if(bus_read_success == `Success && write_dirty == `WriteEnable)//hit fail and dirty bank to write
                     next_state <= `STATE_WRITE_DATA;
             end
             `STATE_WRITE_DATA:begin
+				if(FIFO_state == `STATE_FULL)
+					next_state <= `STATE_WRITE_DATA;
+				else
                     next_state <= `STATE_LOOK_UP;
             end
             default:;
@@ -304,17 +319,17 @@ module DCache(
     assign wea_way1 = (bus_read_success==`Valid && LRU_pick == 1'b1 && func == `WriteDisable)? 4'b1111 :
                      (bus_read_success==`Valid && hit_way1 == `HitSuccess && func == `WriteEnable)? 4'b1111 : 4'h0;
                      
-	assign FIFO_wreq = (current_state == `STATE_FETCH_DATA && FIFO_hit == `HitSuccess)? `WriteEnable:
-	                   (current_state == `STATE_WRITE_DATA)? `WriteEnable: `WriteDisable;
+	assign FIFO_wreq = (current_state == `STATE_FETCH_DATA && FIFO_hit == `HitSuccess && func == `WriteEnable)? `WriteEnable:
+	                   (current_state == `STATE_WRITE_DATA && FIFO_state != `STATE_FULL)? `WriteEnable: `WriteDisable;
    //AXI read requirements
    assign mem_ren_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitFail) ? `ReadEnable :`ReadDisable;
    assign mem_araddr_o = physical_addr;
-   //§Õ??ram?????wea??????????????§µ?????????????§Ö????
+   //ram write data
    always@(*) begin 
-		if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteDisable)begin//??¦Ä???§µ?????????§Õ??
+		if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteDisable)begin//read hit fail
 			read_from_mem <= mem_rdata_i;
 		end
-		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteEnable)begin//§Õ¦Ä???§µ?§Õ???????????????§Õ??
+		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteEnable)begin//write hit fail
 			case(virtual_addr[4:2])
 				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],cpu_wdata};
 				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],cpu_wdata,mem_rdata_i[32*1-1:32*0]};

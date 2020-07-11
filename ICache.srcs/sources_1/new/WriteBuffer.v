@@ -27,10 +27,11 @@ module WriteBuffer(
     input wire cpu_wreq_i,
     input wire [`DataAddrBus]cpu_awaddr_i,
     input wire [`WayBus]cpu_wdata_i,//一个块的大小
+	output wire write_hit_o,
 	//CPU read request and response
     input wire cpu_rreq_i,
     input wire [`DataAddrBus]cpu_araddr_i,
-	output wire hit_o,
+	output wire read_hit_o,
 	output reg [`WayBus]cpu_rdata_o,
 	
     //state
@@ -89,7 +90,7 @@ module WriteBuffer(
 			FIFO_valid[head] <= `Invalid;
             head <= head + 1;
 		end
-        else if(cpu_wreq_i == `WriteEnable)begin //增加写入，入队
+        else if(cpu_wreq_i == `WriteEnable && write_hit_o == `HitFail)begin //增加写入，入队
             tail <= tail + 1;
 			FIFO_valid[tail] <= `Valid;
 		end
@@ -107,7 +108,8 @@ module WriteBuffer(
     //数据写入，包括写冲突
 	//冲突检测
 	reg [`FIFONum-1:0]hit;
-	assign hit_o = hit[7]| hit[6]| hit[5]| hit[4]| hit[3]| hit[2]| hit[1]| hit[0];
+	assign read_hit_o = hit[7]| hit[6]| hit[5]| hit[4]| hit[3]| hit[2]| hit[1]| hit[0];
+	assign write_hit_o = read_hit_o & !hit[head];
 	always@(*)begin
 		hit <= `FIFONum'h0;
 		if(cpu_araddr == FIFO_addr[0] && FIFO_valid[0])begin
@@ -138,7 +140,7 @@ module WriteBuffer(
 	
 	//写入（包括写冲突）
     always@(posedge clk)begin
-        if(cpu_wreq_i == `WriteEnable)begin
+        if(cpu_wreq_i == `WriteEnable && write_hit_o == `HitSuccess)begin
 			case(hit)
 				`FIFONum'b00000001: FIFO_data[0] <= cpu_wdata_i;
 				`FIFONum'b00000010: FIFO_data[1] <= cpu_wdata_i;
@@ -154,7 +156,10 @@ module WriteBuffer(
 				end
 			endcase
         end//if
-		//其他的时候保持原状
+		else begin//没有冲突的入队操作
+				FIFO_data[tail] <= cpu_wdata_i;
+				FIFO_addr[tail] <= cpu_awaddr;
+		end
     end//always
 	
 	//读冲突
