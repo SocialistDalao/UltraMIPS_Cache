@@ -38,7 +38,7 @@ module DCache(
     output wire [`DataBus] cpu_data_o,
 	
 	//cache state
-	output cpu_stall_o,
+	output reg cpu_stall_o,
     
     //from_mem read result
     input wire mem_rvalid_i,
@@ -50,7 +50,7 @@ module DCache(
     input wire mem_bvalid_i,
     output wire mem_wen_o,
     output wire[`WayBus] mem_wdata_o,//一个块的大小
-    output wire [`DataAddrBus]mem_awaddr_o
+    output wire [`DataAddrBus]mem_awaddr_o,
     
     //test
     output [`DirtyBus] dirty

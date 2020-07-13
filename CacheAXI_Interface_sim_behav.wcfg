@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="CacheAXI_Interface_sim_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="CacheAXI_Interface_sim" />
+            <top_module name="glbl" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="2409166fs"></ZoomStartTime>
+      <ZoomEndTime time="3118167fs"></ZoomEndTime>
+      <Cursor1Time time="3000000fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="175"></NameColumnWidth>
+      <ValueColumnWidth column_width="283"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="33" />
+   <wvobject fp_name="/CacheAXI_Interface_sim/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/CacheAXI_Interface0/read_state" type="array">
+      <obj_property name="ElementShortName">read_state[1:0]</obj_property>
+      <obj_property name="ObjectShortName">read_state[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/CacheAXI_Interface0/write_state" type="logic">
+      <obj_property name="ElementShortName">write_state</obj_property>
+      <obj_property name="ObjectShortName">write_state</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider97">
+      <obj_property name="label">Iread</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">#800080</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/inst_ren_i" type="logic">
+      <obj_property name="ElementShortName">inst_ren_i</obj_property>
+      <obj_property name="ObjectShortName">inst_ren_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/mem_araddr_i" type="array">
+      <obj_property name="ElementShortName">mem_araddr_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_araddr_i[31:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/inst_rvalid_o" type="logic">
+      <obj_property name="ElementShortName">inst_rvalid_o</obj_property>
+      <obj_property name="ObjectShortName">inst_rvalid_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/inst_rdata_o" type="array">
+      <obj_property name="ElementShortName">inst_rdata_o[255:0]</obj_property>
+      <obj_property name="ObjectShortName">inst_rdata_o[255:0]</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider96">
+      <obj_property name="label">Dread</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">#808080</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/data_ren_i" type="logic">
+      <obj_property name="ElementShortName">data_ren_i</obj_property>
+      <obj_property name="ObjectShortName">data_ren_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/data_araddr_i" type="array">
+      <obj_property name="ElementShortName">data_araddr_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">data_araddr_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/data_rvalid_o" type="logic">
+      <obj_property name="ElementShortName">data_rvalid_o</obj_property>
+      <obj_property name="ObjectShortName">data_rvalid_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/data_rdata_o" type="array">
+      <obj_property name="ElementShortName">data_rdata_o[255:0]</obj_property>
+      <obj_property name="ObjectShortName">data_rdata_o[255:0]</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider95">
+      <obj_property name="label">Dwrite</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">#008080</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/data_wen_i" type="logic">
+      <obj_property name="ElementShortName">data_wen_i</obj_property>
+      <obj_property name="ObjectShortName">data_wen_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/data_wdata_i" type="array">
+      <obj_property name="ElementShortName">data_wdata_i[255:0]</obj_property>
+      <obj_property name="ObjectShortName">data_wdata_i[255:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/data_awaddr_i" type="array">
+      <obj_property name="ElementShortName">data_awaddr_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">data_awaddr_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/data_bvalid_o" type="logic">
+      <obj_property name="ElementShortName">data_bvalid_o</obj_property>
+      <obj_property name="ObjectShortName">data_bvalid_o</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider98">
+      <obj_property name="label">AXI</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">#808000</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/axi_ce_o" type="logic">
+      <obj_property name="ElementShortName">axi_ce_o</obj_property>
+      <obj_property name="ObjectShortName">axi_ce_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/rdata_i" type="array">
+      <obj_property name="ElementShortName">rdata_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">rdata_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/rdata_valid_i" type="logic">
+      <obj_property name="ElementShortName">rdata_valid_i</obj_property>
+      <obj_property name="ObjectShortName">rdata_valid_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/axi_ren_o" type="logic">
+      <obj_property name="ElementShortName">axi_ren_o</obj_property>
+      <obj_property name="ObjectShortName">axi_ren_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/axi_rready_o" type="logic">
+      <obj_property name="ElementShortName">axi_rready_o</obj_property>
+      <obj_property name="ObjectShortName">axi_rready_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/axi_raddr_o" type="array">
+      <obj_property name="ElementShortName">axi_raddr_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">axi_raddr_o[31:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/wdata_resp_i" type="logic">
+      <obj_property name="ElementShortName">wdata_resp_i</obj_property>
+      <obj_property name="ObjectShortName">wdata_resp_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/axi_wen_o" type="logic">
+      <obj_property name="ElementShortName">axi_wen_o</obj_property>
+      <obj_property name="ObjectShortName">axi_wen_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/axi_waddr_o" type="array">
+      <obj_property name="ElementShortName">axi_waddr_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">axi_waddr_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/axi_wdata_o" type="array">
+      <obj_property name="ElementShortName">axi_wdata_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">axi_wdata_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/axi_wvalid_o" type="logic">
+      <obj_property name="ElementShortName">axi_wvalid_o</obj_property>
+      <obj_property name="ObjectShortName">axi_wvalid_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/axi_wlast_o" type="logic">
+      <obj_property name="ElementShortName">axi_wlast_o</obj_property>
+      <obj_property name="ObjectShortName">axi_wlast_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CacheAXI_Interface_sim/i" type="array">
+      <obj_property name="ElementShortName">i[2:0]</obj_property>
+      <obj_property name="ObjectShortName">i[2:0]</obj_property>
+   </wvobject>
+</wave_config>

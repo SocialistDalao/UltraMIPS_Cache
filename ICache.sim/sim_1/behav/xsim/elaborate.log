@@ -1,25 +1,8 @@
 Vivado Simulator 2019.2
 Copyright 1986-1999, 2001-2019 Xilinx, Inc. All Rights Reserved.
-Running: D:/vivado/Vivado/2019.2/bin/unwrapped/win64.o/xelab.exe -wto 0589f301d5864ca9b22964510adc4723 --incr --debug typical --relax --mt 2 -L blk_mem_gen_v8_4_4 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip -L xpm --snapshot ICache_sim_behav xil_defaultlib.ICache_sim xil_defaultlib.glbl -log elaborate.log 
+Running: F:/vivado/Vivado/2019.2/bin/unwrapped/win64.o/xelab.exe -wto 0589f301d5864ca9b22964510adc4723 --incr --debug typical --relax --mt 2 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip -L xpm --snapshot CacheAXI_Interface_sim_behav xil_defaultlib.CacheAXI_Interface_sim xil_defaultlib.glbl -log elaborate.log 
 Using 2 slave threads.
 Starting static elaboration
 Pass Through NonSizing Optimizer
-WARNING: [VRFC 10-3091] actual bit length 21 differs from formal bit length 32 for port 'dina' [D:/vivado/Project/ICache/UltraMIPS/ICache.srcs/sources_1/new/ICache.v:105]
-WARNING: [VRFC 10-3091] actual bit length 21 differs from formal bit length 32 for port 'dina' [D:/vivado/Project/ICache/UltraMIPS/ICache.srcs/sources_1/new/ICache.v:106]
 Completed static elaboration
-Starting simulation data flow analysis
-Completed simulation data flow analysis
-Time Resolution for simulation is 1ps
-Compiling module xil_defaultlib.TLB
-Compiling module blk_mem_gen_v8_4_4.blk_mem_gen_v8_4_4_output_stage(...
-Compiling module blk_mem_gen_v8_4_4.blk_mem_gen_v8_4_4_softecc_outpu...
-Compiling module blk_mem_gen_v8_4_4.blk_mem_gen_v8_4_4_mem_module(C_...
-Compiling module blk_mem_gen_v8_4_4.blk_mem_gen_v8_4_4(C_FAMILY="art...
-Compiling module xil_defaultlib.bank_ram
-Compiling module blk_mem_gen_v8_4_4.blk_mem_gen_v8_4_4_mem_module(C_...
-Compiling module blk_mem_gen_v8_4_4.blk_mem_gen_v8_4_4(C_FAMILY="art...
-Compiling module xil_defaultlib.tag_ram
-Compiling module xil_defaultlib.ICache
-Compiling module xil_defaultlib.ICache_sim
-Compiling module xil_defaultlib.glbl
-Built simulation snapshot ICache_sim_behav
+INFO: [XSIM 43-4323] No Change in HDL. Linking previously generated obj files to create kernel
