@@ -11,9 +11,9 @@ echo "Please update the PATH and LD_LIBRARY_PATH variables below, before executi
 exit
 
 if [ -z "$PATH" ]; then
-  PATH=D:/vivado/Vivado/2019.2/ids_lite/ISE/bin/nt64;D:/vivado/Vivado/2019.2/ids_lite/ISE/lib/nt64:D:/vivado/Vivado/2019.2/bin
+  PATH=F:/vivado/Vivado/2019.2/ids_lite/ISE/bin/nt64;F:/vivado/Vivado/2019.2/ids_lite/ISE/lib/nt64:F:/vivado/Vivado/2019.2/bin
 else
-  PATH=D:/vivado/Vivado/2019.2/ids_lite/ISE/bin/nt64;D:/vivado/Vivado/2019.2/ids_lite/ISE/lib/nt64:D:/vivado/Vivado/2019.2/bin:$PATH
+  PATH=F:/vivado/Vivado/2019.2/ids_lite/ISE/bin/nt64;F:/vivado/Vivado/2019.2/ids_lite/ISE/lib/nt64:F:/vivado/Vivado/2019.2/bin:$PATH
 fi
 export PATH
 
@@ -24,7 +24,7 @@ else
 fi
 export LD_LIBRARY_PATH
 
-HD_PWD='D:/vivado/Project/ICache/UltraMIPS/ICache.runs/synth_1'
+HD_PWD='F:/Cache/ICache.runs/synth_1'
 cd "$HD_PWD"
 
 HD_LOG=runme.log
@@ -40,4 +40,4 @@ EAStep()
      fi
 }
 
-EAStep vivado -log DCache.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source DCache.tcl
+EAStep vivado -log store_buffer.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source store_buffer.tcl

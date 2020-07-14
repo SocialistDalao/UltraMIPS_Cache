@@ -316,97 +316,97 @@ module CacheAXI_Interface_sim(
 //             end
 //			data_ren_i=0;
 			
-			//Read Write at the same time
-            inst_ren_i=1;
-			data_ren_i=1;
-			data_wen_i=1;
-            mem_araddr_i = 32'b1111_0000_0110_1100_0100_0110_101_01000;
-            data_araddr_i = 32'b0000_0000_0110_1100_0100_0110_101_01000;
-            data_wdata_i = 256'h8000000780000006800000058000000480000003800000028000000180000000;
-            data_awaddr_i = 32'b0000_0000_0110_1100_0100_0110_101_01000;
-			//DCache Read
-            for(i=0;i<7;i=i+1)begin
-                 //read
-				wait(axi_ren_o & axi_rready_o)begin
-					#40
-					 if(axi_raddr_o == {27'b0000_0000_0110_1100_0100_0110_101,i,2'b00})begin
-						rdata_i = {29'b1_0000_0000_0000_0000_0000_0000_0000,i};
-						rdata_valid_i = 1;
-						#20 rdata_valid_i = 0;
-					 end
-					 else begin
-						$display("ERROR addr in %d",i);
-						$stop;
-					 end
-                 //write
-				wait(axi_wen_o & axi_wvalid_o)begin
-					#40
-					 if(axi_wdata_o == {29'b1_0000_0000_0000_0000_0000_0000_0000,i})begin
-						wdata_resp_i = 1;
-						#20 wdata_resp_i = 0;
-					 end
-					 else begin
-						$display("ERROR addr in %d",i);
-						$stop;
-					 end
-				end
-				end
-			end
-			//read response
-			#40
-			 if(axi_raddr_o == {27'b0000_0000_0110_1100_0100_0110_101,i,2'b00})begin
-                rdata_i = {29'b1_0000_0000_0000_0000_0000_0000_0000,i};
-                rdata_valid_i = 1;
-                wait(data_rvalid_o == `Valid && data_rdata_o== 256'h8000000780000006800000058000000480000003800000028000000180000000)
-                  $display("success: DCache Read first");
-                #20 rdata_valid_i = 0;
-             end
-             else begin
-                $display("ERROR addr in %d",i);
-                $stop;
-             end
-			data_ren_i=0;
-			//write response
-			if(axi_wdata_o == {29'b1_0000_0000_0000_0000_0000_0000_0000,i})begin
-						wdata_resp_i = 1;
-						wait(data_bvalid_o == `Valid)
-						  $display("success: DCache Write at the same time");
-						#20 wdata_resp_i = 0;
-					 end
-             else begin
-                $display("ERROR addr in %d",i);
-                $stop;
-             end
-			data_wen_i=0;
-			
-			//ICache Read
-            for(i=0;i<7;i=i+1)begin
-				wait(axi_ren_o & axi_rready_o)begin
-					#40
-					 if(axi_raddr_o == {27'b1111_0000_0110_1100_0100_0110_101,i,2'b00})begin
-						rdata_i = {29'h0,i};
-						rdata_valid_i = 1;
-						#20 rdata_valid_i = 0;
-					 end
-					 else begin
-						$display("ERROR addr in %d",i);
-						$stop;
-					 end
-				end
-			end
-			#40
-			 if(axi_raddr_o == {27'b1111_0000_0110_1100_0100_0110_101,i,2'b00})begin
-						rdata_i = {29'h0,i};
-						rdata_valid_i = 1;
-						wait(inst_rvalid_o == `Valid && inst_rdata_o== 256'h0000000700000006000000050000000400000003000000020000000100000000)
-						  $display("success: ICache Read last");
-						#20 rdata_valid_i = 0;
-					 end
-             else begin
-                $display("ERROR addr in %d",i);
-                $stop;
-             end
-             inst_ren_i =0;
+//			//Read Write at the same time
+//           inst_ren_i=1;
+//			data_ren_i=1;
+//			data_wen_i=1;
+//           mem_araddr_i = 32'b1111_0000_0110_1100_0100_0110_101_01000;
+//           data_araddr_i = 32'b0000_0000_0110_1100_0100_0110_101_01000;
+//           data_wdata_i = 256'h8000000780000006800000058000000480000003800000028000000180000000;
+//           data_awaddr_i = 32'b0000_0000_0110_1100_0100_0110_101_01000;
+//			//DCache Read
+//           for(i=0;i<7;i=i+1)begin
+//                //read
+//				wait(axi_ren_o & axi_rready_o)begin
+//					#40
+//					 if(axi_raddr_o == {27'b0000_0000_0110_1100_0100_0110_101,i,2'b00})begin
+//						rdata_i = {29'b1_0000_0000_0000_0000_0000_0000_0000,i};
+//						rdata_valid_i = 1;
+//						#20 rdata_valid_i = 0;
+//					 end
+//					 else begin
+//						$display("ERROR addr in %d",i);
+//						$stop;
+//					 end
+//                //write
+//				wait(axi_wen_o & axi_wvalid_o)begin
+//					#40
+//					 if(axi_wdata_o == {29'b1_0000_0000_0000_0000_0000_0000_0000,i})begin
+//						wdata_resp_i = 1;
+//						#20 wdata_resp_i = 0;
+//					 end
+//					 else begin
+//						$display("ERROR addr in %d",i);
+//						$stop;
+//					 end
+//				end
+//				end
+//			end
+//			//read response
+//			#40
+//			 if(axi_raddr_o == {27'b0000_0000_0110_1100_0100_0110_101,i,2'b00})begin
+//               rdata_i = {29'b1_0000_0000_0000_0000_0000_0000_0000,i};
+//               rdata_valid_i = 1;
+//               wait(data_rvalid_o == `Valid && data_rdata_o== 256'h8000000780000006800000058000000480000003800000028000000180000000)
+//                 $display("success: DCache Read first");
+//               #20 rdata_valid_i = 0;
+//            end
+//            else begin
+//               $display("ERROR addr in %d",i);
+//               $stop;
+//            end
+//			data_ren_i=0;
+//			//write response
+//			if(axi_wdata_o == {29'b1_0000_0000_0000_0000_0000_0000_0000,i})begin
+//						wdata_resp_i = 1;
+//						wait(data_bvalid_o == `Valid)
+//						  $display("success: DCache Write at the same time");
+//						#20 wdata_resp_i = 0;
+//					 end
+//            else begin
+//               $display("ERROR addr in %d",i);
+//               $stop;
+//            end
+//			data_wen_i=0;
+//			
+//			//ICache Read
+//           for(i=0;i<7;i=i+1)begin
+//				wait(axi_ren_o & axi_rready_o)begin
+//					#40
+//					 if(axi_raddr_o == {27'b1111_0000_0110_1100_0100_0110_101,i,2'b00})begin
+//						rdata_i = {29'h0,i};
+//						rdata_valid_i = 1;
+//						#20 rdata_valid_i = 0;
+//					 end
+//					 else begin
+//						$display("ERROR addr in %d",i);
+//						$stop;
+//					 end
+//				end
+//			end
+//			#40
+//			 if(axi_raddr_o == {27'b1111_0000_0110_1100_0100_0110_101,i,2'b00})begin
+//						rdata_i = {29'h0,i};
+//						rdata_valid_i = 1;
+//						wait(inst_rvalid_o == `Valid && inst_rdata_o== 256'h0000000700000006000000050000000400000003000000020000000100000000)
+//						  $display("success: ICache Read last");
+//						#20 rdata_valid_i = 0;
+//					 end
+//            else begin
+//               $display("ERROR addr in %d",i);
+//               $stop;
+//            end
+//            inst_ren_i =0;
              
              
 			 

@@ -86,19 +86,14 @@ module WriteBuffer(
             tail <= `FIFONumLog2'h0;
 			FIFO_valid <= `FIFONum'h0;
         end
-        else if( mem_bvalid_i == `Valid)begin//写入完毕
+        if( mem_bvalid_i == `Valid)begin//写入完毕
 			FIFO_valid[head] <= `Invalid;
             head <= head + 1;
 		end
-        else if(cpu_wreq_i == `WriteEnable && write_hit_o == `HitFail)begin //增加写入，入队
+        if(cpu_wreq_i == `WriteEnable && write_hit_o == `HitFail)begin //增加写入，入队
             tail <= tail + 1;
 			FIFO_valid[tail] <= `Valid;
 		end
-        else begin
-            head <= head;
-            tail <= tail;
-			FIFO_valid <= FIFO_valid;
-        end
     end
 	
 	
@@ -107,41 +102,70 @@ module WriteBuffer(
     reg [`FIFONum-1:0]FIFO_addr[`DataAddrBus];
     //数据写入，包括写冲突
 	//冲突检测
-	reg [`FIFONum-1:0]hit;
-	assign read_hit_o = hit[7]| hit[6]| hit[5]| hit[4]| hit[3]| hit[2]| hit[1]| hit[0];
-	assign write_hit_o = read_hit_o & !hit[head];
+	reg [`FIFONum-1:0]read_hit;
+	assign read_hit_o = read_hit[7]| read_hit[6]| read_hit[5]| read_hit[4]| read_hit[3]| read_hit[2]| read_hit[1]| read_hit[0];
 	always@(*)begin
-		hit <= `FIFONum'h0;
+		read_hit <= `FIFONum'h0;
 		if(cpu_araddr == FIFO_addr[0] && FIFO_valid[0])begin
-			hit[0] <= `HitSuccess;
+			read_hit[0] <= `HitSuccess;
 		end
 		else if(cpu_araddr == FIFO_addr[1] && FIFO_valid[1])begin
-			hit[1] <= `HitSuccess;
+			read_hit[1] <= `HitSuccess;
 		end
 		else if(cpu_araddr == FIFO_addr[2] && FIFO_valid[2])begin
-			hit[2] <= `HitSuccess;
+			read_hit[2] <= `HitSuccess;
 		end
 		else if(cpu_araddr == FIFO_addr[3] && FIFO_valid[3])begin
-			hit[3] <= `HitSuccess;
+			read_hit[3] <= `HitSuccess;
 		end
 		else if(cpu_araddr == FIFO_addr[4] && FIFO_valid[4])begin
-			hit[4] <= `HitSuccess;
+			read_hit[4] <= `HitSuccess;
 		end
 		else if(cpu_araddr == FIFO_addr[5] && FIFO_valid[5])begin
-			hit[5] <= `HitSuccess;
+			read_hit[5] <= `HitSuccess;
 		end
 		else if(cpu_araddr == FIFO_addr[6] && FIFO_valid[6])begin
-			hit[6] <= `HitSuccess;
+			read_hit[6] <= `HitSuccess;
 		end
 		else if(cpu_araddr == FIFO_addr[7] && FIFO_valid[7])begin
-			hit[7] <= `HitSuccess;
+			read_hit[7] <= `HitSuccess;
+		end
+	end
+	
+	reg [`FIFONum-1:0]write_hit;
+	assign write_hit_o = write_hit[7]| write_hit[6]| write_hit[5]| write_hit[4]| write_hit[3]| write_hit[2]| write_hit[1]| write_hit[0];
+	always@(*)begin
+		write_hit <= `FIFONum'h0;
+		if(cpu_awaddr_i == FIFO_addr[tail] && FIFO_valid[tail])begin
+			write_hit[tail] <= `HitSuccess;
+		end
+		else if(cpu_awaddr_i == FIFO_addr[tail-1] && FIFO_valid[tail-1])begin
+			write_hit[tail-1] <= `HitSuccess;
+		end
+		else if(cpu_awaddr_i == FIFO_addr[tail-2] && FIFO_valid[tail-2])begin
+			write_hit[tail-2] <= `HitSuccess;
+		end
+		else if(cpu_awaddr_i == FIFO_addr[tail-3] && FIFO_valid[tail-3])begin
+			write_hit[tail-3] <= `HitSuccess;
+		end
+		else if(cpu_awaddr_i == FIFO_addr[tail-4] && FIFO_valid[tail-4])begin
+			write_hit[tail-4] <= `HitSuccess;
+		end
+		else if(cpu_awaddr_i == FIFO_addr[tail-5] && FIFO_valid[tail-5])begin
+			write_hit[tail-5] <= `HitSuccess;
+		end
+		else if(cpu_awaddr_i == FIFO_addr[tail-6] && FIFO_valid[tail-6])begin
+			write_hit[tail-6] <= `HitSuccess;
+		end
+		else if(cpu_awaddr_i == FIFO_addr[tail-7] && FIFO_valid[tail-7])begin
+			write_hit[tail-7] <= `HitSuccess;
 		end
 	end
 	
 	//写入（包括写冲突）
     always@(posedge clk)begin
         if(cpu_wreq_i == `WriteEnable && write_hit_o == `HitSuccess)begin
-			case(hit)
+			case(write_hit)
 				`FIFONum'b00000001: FIFO_data[0] <= cpu_wdata_i;
 				`FIFONum'b00000010: FIFO_data[1] <= cpu_wdata_i;
 				`FIFONum'b00000100: FIFO_data[2] <= cpu_wdata_i;
@@ -165,7 +189,7 @@ module WriteBuffer(
 	//读冲突
 	always@(*)begin
 		if(cpu_rreq_i)begin
-			case(hit)
+			case(read_hit)
 				`FIFONum'b00000001: cpu_rdata_o <= FIFO_data[0];
 				`FIFONum'b00000010: cpu_rdata_o <= FIFO_data[1];
 				`FIFONum'b00000100: cpu_rdata_o <= FIFO_data[2];

@@ -1,13 +1,14 @@
-
-*** Running vivado
-    with args -log store_buffer.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source store_buffer.tcl
-
-
-****** Vivado v2019.2 (64-bit)
-  **** SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
-  **** IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
-    ** Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
-
+#-----------------------------------------------------------
+# Vivado v2019.2 (64-bit)
+# SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+# IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+# Start of session at: Tue Jul 14 21:21:37 2020
+# Process ID: 5096
+# Current directory: F:/Cache/ICache.runs/synth_1
+# Command line: vivado.exe -log store_buffer.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source store_buffer.tcl
+# Log file: F:/Cache/ICache.runs/synth_1/store_buffer.vds
+# Journal file: F:/Cache/ICache.runs/synth_1\vivado.jou
+#-----------------------------------------------------------
 source store_buffer.tcl -notrace
 Command: synth_design -top store_buffer -part xc7a200tfbg676-2
 Starting synth_design
