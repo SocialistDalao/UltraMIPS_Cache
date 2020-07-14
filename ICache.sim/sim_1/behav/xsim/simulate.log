@@ -1,5 +1,5 @@
 Vivado Simulator 2019.2
 Time resolution is 1 ps
-success: ICache Read
-success: DCache Read
-success: DCache Write
+success: DCache Read first
+success: DCache Write at the same time
+success: ICache Read last

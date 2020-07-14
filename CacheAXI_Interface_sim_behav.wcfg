@@ -11,13 +11,13 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="2409166fs"></ZoomStartTime>
-      <ZoomEndTime time="3118167fs"></ZoomEndTime>
-      <Cursor1Time time="3000000fs"></Cursor1Time>
+      <ZoomStartTime time="329500fs"></ZoomStartTime>
+      <ZoomEndTime time="489026fs"></ZoomEndTime>
+      <Cursor1Time time="993293fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="175"></NameColumnWidth>
-      <ValueColumnWidth column_width="283"></ValueColumnWidth>
+      <ValueColumnWidth column_width="279"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="33" />
    <wvobject fp_name="/CacheAXI_Interface_sim/clk" type="logic">
@@ -70,6 +70,7 @@
    <wvobject fp_name="/CacheAXI_Interface_sim/data_araddr_i" type="array">
       <obj_property name="ElementShortName">data_araddr_i[31:0]</obj_property>
       <obj_property name="ObjectShortName">data_araddr_i[31:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/CacheAXI_Interface_sim/data_rvalid_o" type="logic">
       <obj_property name="ElementShortName">data_rvalid_o</obj_property>
