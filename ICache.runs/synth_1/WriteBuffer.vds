@@ -1,13 +1,14 @@
-
-*** Running vivado
-    with args -log WriteBuffer.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source WriteBuffer.tcl
-
-
-****** Vivado v2019.2 (64-bit)
-  **** SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
-  **** IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
-    ** Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
-
+#-----------------------------------------------------------
+# Vivado v2019.2 (64-bit)
+# SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+# IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+# Start of session at: Thu Jul 16 22:42:04 2020
+# Process ID: 12732
+# Current directory: F:/Cache/ICache.runs/synth_1
+# Command line: vivado.exe -log WriteBuffer.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source WriteBuffer.tcl
+# Log file: F:/Cache/ICache.runs/synth_1/WriteBuffer.vds
+# Journal file: F:/Cache/ICache.runs/synth_1\vivado.jou
+#-----------------------------------------------------------
 source WriteBuffer.tcl -notrace
 Command: synth_design -top WriteBuffer -part xc7a200tfbg676-2
 Starting synth_design

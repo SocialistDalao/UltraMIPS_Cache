@@ -17,7 +17,6 @@ proc create_report { reportName command } {
     send_msg_id runtcl-5 warning "$msg"
   }
 }
-set_param chipscope.maxJobs 2
 create_project -in_memory -part xc7a200tfbg676-2
 
 set_param project.singleFileAddWarning.threshold 0
@@ -32,7 +31,7 @@ set_property ip_cache_permissions {read write} [current_project]
 read_verilog -library xil_defaultlib {
   F:/Cache/ICache.srcs/sources_1/new/defines_cache.v
   F:/Cache/ICache.srcs/sources_1/new/defines.v
-  F:/Cache/ICache.srcs/sources_1/new/store_buffer.v
+  F:/Cache/ICache.srcs/sources_1/new/WriteBuffer.v
 }
 # Mark all dcp files as not used in implementation to prevent them from being
 # stitched into the results of this synthesis run. Any black boxes in the
@@ -48,12 +47,12 @@ set_property used_in_implementation false [get_files F:/Cache/ICache.srcs/constr
 set_param ips.enableIPCacheLiteLoad 1
 close [open __synthesis_is_running__ w]
 
-synth_design -top store_buffer -part xc7a200tfbg676-2
+synth_design -top WriteBuffer -part xc7a200tfbg676-2
 
 
 # disable binary constraint mode for synth run checkpoints
 set_param constraints.enableBinaryConstraints false
-write_checkpoint -force -noxdef store_buffer.dcp
-create_report "synth_1_synth_report_utilization_0" "report_utilization -file store_buffer_utilization_synth.rpt -pb store_buffer_utilization_synth.pb"
+write_checkpoint -force -noxdef WriteBuffer.dcp
+create_report "synth_1_synth_report_utilization_0" "report_utilization -file WriteBuffer_utilization_synth.rpt -pb WriteBuffer_utilization_synth.pb"
 file delete __synthesis_is_running__
 close [open __synthesis_is_complete__ w]

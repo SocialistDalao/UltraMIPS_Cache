@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="synth_1" LaunchPart="xc7a200tfbg676-2" LaunchTime="1594732894">
-  <File Type="PA-TCL" Name="store_buffer.tcl"/>
-  <File Type="RDS-PROPCONSTRS" Name="store_buffer_drc_synth.rpt"/>
-  <File Type="REPORTS-TCL" Name="store_buffer_reports.tcl"/>
-  <File Type="RDS-RDS" Name="store_buffer.vds"/>
-  <File Type="RDS-UTIL" Name="store_buffer_utilization_synth.rpt"/>
-  <File Type="RDS-UTIL-PB" Name="store_buffer_utilization_synth.pb"/>
-  <File Type="RDS-DCP" Name="store_buffer.dcp"/>
-  <File Type="VDS-TIMINGSUMMARY" Name="store_buffer_timing_summary_synth.rpt"/>
-  <File Type="VDS-TIMING-PB" Name="store_buffer_timing_summary_synth.pb"/>
+<GenRun Id="synth_1" LaunchPart="xc7a200tfbg676-2" LaunchTime="1594910521">
+  <File Type="PA-TCL" Name="WriteBuffer.tcl"/>
+  <File Type="RDS-PROPCONSTRS" Name="WriteBuffer_drc_synth.rpt"/>
+  <File Type="REPORTS-TCL" Name="WriteBuffer_reports.tcl"/>
+  <File Type="RDS-RDS" Name="WriteBuffer.vds"/>
+  <File Type="RDS-UTIL" Name="WriteBuffer_utilization_synth.rpt"/>
+  <File Type="RDS-UTIL-PB" Name="WriteBuffer_utilization_synth.pb"/>
+  <File Type="RDS-DCP" Name="WriteBuffer.dcp"/>
+  <File Type="VDS-TIMINGSUMMARY" Name="WriteBuffer_timing_summary_synth.rpt"/>
+  <File Type="VDS-TIMING-PB" Name="WriteBuffer_timing_summary_synth.pb"/>
   <FileSet Name="sources" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
     <Filter Type="Srcs"/>
     <File Path="$PSRCDIR/sources_1/new/defines_cache.v">
@@ -27,14 +27,14 @@
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
     </File>
-    <File Path="$PSRCDIR/sources_1/new/store_buffer.v">
+    <File Path="$PSRCDIR/sources_1/new/WriteBuffer.v">
       <FileInfo>
         <Attr Name="UsedIn" Val="synthesis"/>
         <Attr Name="UsedIn" Val="implementation"/>
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
     </File>
-    <File Path="$PSRCDIR/sources_1/new/dcache_fifo.sv">
+    <File Path="$PSRCDIR/sources_1/new/store_buffer.v">
       <FileInfo>
         <Attr Name="AutoDisabled" Val="1"/>
         <Attr Name="UsedIn" Val="synthesis"/>
@@ -42,7 +42,7 @@
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
     </File>
-    <File Path="$PSRCDIR/sources_1/new/WriteBuffer.v">
+    <File Path="$PSRCDIR/sources_1/new/dcache_fifo.sv">
       <FileInfo>
         <Attr Name="AutoDisabled" Val="1"/>
         <Attr Name="UsedIn" Val="synthesis"/>
@@ -84,7 +84,7 @@
     </File>
     <Config>
       <Option Name="DesignMode" Val="RTL"/>
-      <Option Name="TopModule" Val="store_buffer"/>
+      <Option Name="TopModule" Val="WriteBuffer"/>
     </Config>
   </FileSet>
   <FileSet Name="constrs_in" Type="Constrs" RelSrcDir="$PSRCDIR/constrs_1">

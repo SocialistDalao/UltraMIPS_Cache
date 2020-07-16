@@ -40,4 +40,4 @@ EAStep()
      fi
 }
 
-EAStep vivado -log store_buffer.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source store_buffer.tcl
+EAStep vivado -log WriteBuffer.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source WriteBuffer.tcl
