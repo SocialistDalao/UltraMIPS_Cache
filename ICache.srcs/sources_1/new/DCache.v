@@ -1,22 +1,21 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// ????????
-//----??????‰Ø
-//--------CPU????????????
-//--------TLB???????????
-//--------WriteBuffer??§Õ?????????
-//--------BANK_RAM
-//--------TAG+VALID_RAM
-//--------LRU
-//--------DIRTY
-//----??????????
-//--------??????
-//----???????????????
+//Stucture of DCache
+//----Initialization
+//--------keep input data 
+//--------TLB
+//--------WriteBuffer
+//--------Bank RAM
+//--------Tag+Valid RAM
+//--------Dirty
+//--------Stall
+//----State Transmission
+//----State Operation
 //--------STATE_FETCH_DATA
 //------------tag hit
 //------------tag not hit
 //--------STATE_WRITE_DATA
-//----???????
+//----Output
 //////////////////////////////////////////////////////////////////////////////////
 
 `include"defines.v"
@@ -31,8 +30,6 @@ module DCache(
     input wire cpu_wreq_i,
     input wire [`DataAddrBus]virtual_addr_i,
     input wire [`DataBus]cpu_wdata_i,
-    
-    //cpu date result
     output wire hit_o,
     output wire cpu_data_valid_o,
     output wire [`DataBus] cpu_data_o,
@@ -40,10 +37,9 @@ module DCache(
 	//cache state
 	output reg cpu_stall_o,
     
-    //from_mem read result
+    //mem read
     input wire mem_rvalid_i,
     input wire [`WayBus]mem_rdata_i,
-    //to_mem ready to recieve request 
     output wire mem_ren_o,
     output wire[`DataAddrBus]mem_araddr_o,
 	//mem write
@@ -104,7 +100,7 @@ module DCache(
         //CPU read request and response
         .cpu_rreq_i(cpu_rreq_i),
         .cpu_araddr_i(physical_addr),
-        .hit_o(FIFO_hit),
+        .read_hit_o(FIFO_hit),
         .cpu_rdata_o(FIFO_rdata),//WaySize
         //state
         .state_o(FIFO_state),
@@ -207,7 +203,7 @@ module DCache(
 			cpu_stall_o <= `Invalid;
 	end
 //////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////State/////////////////////////////////////////////
+////////////////////////////////State Transmission/////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 
 	wire bus_read_success = mem_rvalid_i;//Better understatnding 
@@ -251,7 +247,7 @@ module DCache(
     
     
 //////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////??????//////////////////////////////////////////
+////////////////////////////////State Operation//////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
     
     //STATE_LOOK_UP?? Detail operation is at the first of this file.
@@ -420,7 +416,7 @@ module DCache(
 //    assign mem_ren_o
     
 //////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////???????//////////////////////////////////////////
+////////////////////////////////Output//////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
     assign cpu_data_o = (current_state==`STATE_FETCH_DATA && hit_way0 == `HitSuccess)? data_way0:
                         (current_state==`STATE_FETCH_DATA && hit_way1 == `HitSuccess)? data_way1:

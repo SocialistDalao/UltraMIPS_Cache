@@ -27,11 +27,15 @@ module ICache(
     //read inst request
     input wire cpu_req_i,
     input wire [`RegBus]virtual_addr_i,
+	input wire stall_i,
     
     //read inst result
     output wire hit_o,
     output wire cpu_inst_valid_o,
-    output wire [`InstBus] cpu_inst_o,
+    output wire [`InstBus] cpu_inst1_o,
+    output wire [`InstBus] cpu_inst2_o,
+	output wire stall_o,
+	output wire single_shot,
     
     //from_mem read result
     input wire mem_rvalid_i,
@@ -123,6 +127,8 @@ module ICache(
     always@(posedge clk)begin
         if(rst)
             current_state <= `STATE_LOOK_UP;
+		else if(stall_i)
+			current_state <= current_state;
         else
             current_state <= next_state;
     end
@@ -162,34 +168,62 @@ module ICache(
 //////////////////////////////////////////////////////////////////////////////////
     
     //STATE_SCAN_CACHE：选择ram中对应的bank
-    reg [`InstBus]inst_way0;
-    reg [`InstBus]inst_way1;
+    reg [`InstBus]inst1_way0;
+    reg [`InstBus]inst2_way0;
+    reg [`InstBus]inst1_way1;
+    reg [`InstBus]inst2_way1;
     //way0
     always@(*)begin
         case(virtual_addr_i[4:2])
-            3'h0:inst_way0 <= inst_cache_b0w0;
-            3'h1:inst_way0 <= inst_cache_b1w0;
-            3'h2:inst_way0 <= inst_cache_b2w0;
-            3'h3:inst_way0 <= inst_cache_b3w0;
-            3'h4:inst_way0 <= inst_cache_b4w0;
-            3'h5:inst_way0 <= inst_cache_b5w0;
-            3'h6:inst_way0 <= inst_cache_b6w0;
-            3'h7:inst_way0 <= inst_cache_b7w0;
-            default: inst_way0 <= `ZeroWord;
+            3'h0:inst1_way0 <= inst_cache_b0w0;
+            3'h1:inst1_way0 <= inst_cache_b1w0;
+            3'h2:inst1_way0 <= inst_cache_b2w0;
+            3'h3:inst1_way0 <= inst_cache_b3w0;
+            3'h4:inst1_way0 <= inst_cache_b4w0;
+            3'h5:inst1_way0 <= inst_cache_b5w0;
+            3'h6:inst1_way0 <= inst_cache_b6w0;
+            3'h7:inst1_way0 <= inst_cache_b7w0;
+            default: inst1_way0 <= `ZeroWord;
+        endcase
+    end
+    always@(*)begin
+        case(virtual_addr_i[4:2])
+            3'h0:inst2_way0 <= inst_cache_b1w0;
+            3'h1:inst2_way0 <= inst_cache_b2w0;
+            3'h2:inst2_way0 <= inst_cache_b3w0;
+            3'h3:inst2_way0 <= inst_cache_b4w0;
+            3'h4:inst2_way0 <= inst_cache_b5w0;
+            3'h5:inst2_way0 <= inst_cache_b6w0;
+            3'h6:inst2_way0 <= inst_cache_b7w0;
+            3'h7:inst2_way0 <= inst_cache_b0w0;
+            default: inst2_way0 <= `ZeroWord;
         endcase
     end
     //way1
     always@(*)begin
         case(virtual_addr_i[4:2])
-            3'h0:inst_way1 <= inst_cache_b0w1;
-            3'h1:inst_way1 <= inst_cache_b1w1;
-            3'h2:inst_way1 <= inst_cache_b2w1;
-            3'h3:inst_way1 <= inst_cache_b3w1;
-            3'h4:inst_way1 <= inst_cache_b4w1;
-            3'h5:inst_way1 <= inst_cache_b5w1;
-            3'h6:inst_way1 <= inst_cache_b6w1;
-            3'h7:inst_way1 <= inst_cache_b7w1;
-            default: inst_way1 <= `ZeroWord;
+            3'h0:inst1_way1 <= inst_cache_b0w1;
+            3'h1:inst1_way1 <= inst_cache_b1w1;
+            3'h2:inst1_way1 <= inst_cache_b2w1;
+            3'h3:inst1_way1 <= inst_cache_b3w1;
+            3'h4:inst1_way1 <= inst_cache_b4w1;
+            3'h5:inst1_way1 <= inst_cache_b5w1;
+            3'h6:inst1_way1 <= inst_cache_b6w1;
+            3'h7:inst1_way1 <= inst_cache_b7w1;
+            default: inst1_way1 <= `ZeroWord;
+        endcase
+    end
+    always@(*)begin
+        case(virtual_addr_i[4:2])
+            3'h0:inst2_way1 <= inst_cache_b1w1;
+            3'h1:inst2_way1 <= inst_cache_b2w1;
+            3'h2:inst2_way1 <= inst_cache_b3w1;
+            3'h3:inst2_way1 <= inst_cache_b4w1;
+            3'h4:inst2_way1 <= inst_cache_b5w1;
+            3'h5:inst2_way1 <= inst_cache_b6w1;
+            3'h6:inst2_way1 <= inst_cache_b7w1;
+            3'h7:inst2_way1 <= inst_cache_b0w1;
+            default: inst2_way1 <= `ZeroWord;
         endcase
     end
     //Tag Hit
@@ -218,8 +252,8 @@ module ICache(
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////输出控制//////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
-    assign cpu_inst_o = (current_state==`STATE_SCAN_CACHE && hit_way0 == `HitSuccess)? inst_way0:
-                        (current_state==`STATE_SCAN_CACHE && hit_way1 == `HitSuccess)? inst_way1:
+    assign cpu_inst1_o = (current_state==`STATE_SCAN_CACHE && hit_way0 == `HitSuccess)? inst1_way0:
+                        (current_state==`STATE_SCAN_CACHE && hit_way1 == `HitSuccess)? inst1_way1:
                         (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h0)? read_from_mem[32*1-1:32*0]:
                         (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h1)? read_from_mem[32*2-1:32*1]:
                         (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h2)? read_from_mem[32*3-1:32*2]:
@@ -229,8 +263,24 @@ module ICache(
                         (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h6)? read_from_mem[32*7-1:32*6]:
                         (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h7)? read_from_mem[32*8-1:32*7]:
                         `ZeroWord;
-                        
+           
+    assign cpu_inst2_o = (current_state==`STATE_SCAN_CACHE && hit_way0 == `HitSuccess)? inst2_way0:
+                        (current_state==`STATE_SCAN_CACHE && hit_way1 == `HitSuccess)? inst2_way1:
+                        (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h0)? read_from_mem[32*8-1:32*7]:
+                        (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h1)? read_from_mem[32*1-1:32*0]:
+                        (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h2)? read_from_mem[32*2-1:32*1]:
+                        (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h3)? read_from_mem[32*3-1:32*2]:
+                        (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h4)? read_from_mem[32*4-1:32*3]:
+                        (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h5)? read_from_mem[32*5-1:32*4]:
+                        (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h6)? read_from_mem[32*6-1:32*5]:
+                        (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h7)? read_from_mem[32*7-1:32*6]:
+                        `ZeroWord;
+						
     assign cpu_inst_valid_o = (current_state==`STATE_SCAN_CACHE && hit_o == `HitSuccess)? `Valid :
                               (current_state==`STATE_WRITE_BACK)                        ? `Valid :
                               `Invalid ;
+							  
+	assign stall_o = ~cpu_inst_valid_o;//not valid == stall_o
+	
+	assign single_shot = (virtual_addr_i[4:2] == 3'b111)? `Valid:`Invalid;//in the edge
 endmodule

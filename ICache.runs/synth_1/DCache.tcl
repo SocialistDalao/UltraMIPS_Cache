@@ -17,22 +17,38 @@ proc create_report { reportName command } {
     send_msg_id runtcl-5 warning "$msg"
   }
 }
+set_param chipscope.maxJobs 2
 create_project -in_memory -part xc7a200tfbg676-2
 
 set_param project.singleFileAddWarning.threshold 0
 set_param project.compositeFile.enableAutoGeneration 0
 set_param synth.vivado.isSynthRun true
+set_msg_config -source 4 -id {IP_Flow 19-2162} -severity warning -new_severity info
 set_property webtalk.parent_dir F:/Cache/ICache.cache/wt [current_project]
 set_property parent.project_path F:/Cache/ICache.xpr [current_project]
+set_property XPM_LIBRARIES XPM_MEMORY [current_project]
 set_property default_lib xil_defaultlib [current_project]
 set_property target_language Verilog [current_project]
 set_property ip_output_repo f:/Cache/ICache.cache/ip [current_project]
 set_property ip_cache_permissions {read write} [current_project]
+read_verilog -library xil_defaultlib -sv {
+  F:/Cache/ICache.srcs/sources_1/new/dcache_fifo.sv
+  F:/Cache/ICache.srcs/sources_1/new/dual_port_ram.sv
+  F:/Cache/ICache.srcs/sources_1/new/plru.sv
+}
 read_verilog -library xil_defaultlib {
   F:/Cache/ICache.srcs/sources_1/new/defines_cache.v
   F:/Cache/ICache.srcs/sources_1/new/defines.v
+  F:/Cache/ICache.srcs/sources_1/new/TLB.v
   F:/Cache/ICache.srcs/sources_1/new/WriteBuffer.v
+  F:/Cache/ICache.srcs/sources_1/new/DCache.v
 }
+read_ip -quiet F:/Cache/ICache.srcs/sources_1/ip/bank_ram/bank_ram.xci
+set_property used_in_implementation false [get_files -all f:/Cache/ICache.srcs/sources_1/ip/bank_ram/bank_ram_ooc.xdc]
+
+read_ip -quiet F:/Cache/ICache.srcs/sources_1/ip/tag_ram/tag_ram.xci
+set_property used_in_implementation false [get_files -all f:/Cache/ICache.srcs/sources_1/ip/tag_ram/tag_ram_ooc.xdc]
+
 # Mark all dcp files as not used in implementation to prevent them from being
 # stitched into the results of this synthesis run. Any black boxes in the
 # design are intentionally left as such for best results. Dcp files will be
@@ -47,12 +63,12 @@ set_property used_in_implementation false [get_files F:/Cache/ICache.srcs/constr
 set_param ips.enableIPCacheLiteLoad 1
 close [open __synthesis_is_running__ w]
 
-synth_design -top WriteBuffer -part xc7a200tfbg676-2
+synth_design -top DCache -part xc7a200tfbg676-2
 
 
 # disable binary constraint mode for synth run checkpoints
 set_param constraints.enableBinaryConstraints false
-write_checkpoint -force -noxdef WriteBuffer.dcp
-create_report "synth_1_synth_report_utilization_0" "report_utilization -file WriteBuffer_utilization_synth.rpt -pb WriteBuffer_utilization_synth.pb"
+write_checkpoint -force -noxdef DCache.dcp
+create_report "synth_1_synth_report_utilization_0" "report_utilization -file DCache_utilization_synth.rpt -pb DCache_utilization_synth.pb"
 file delete __synthesis_is_running__
 close [open __synthesis_is_complete__ w]

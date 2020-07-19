@@ -61,9 +61,13 @@ Cache的将从状态机版本转化为更为先进的三级流水线设计，三
 
 ###### CPU指令读写命令：读使能cpu_req_i，虚拟地址virtual_addr_i
 
+###### CPU暂停控制：stall_i
+
 输出：
 
-###### CPU指令读命令结果：是否命中cache hit_o，当前数据是否有效 inst_valid_o，当前输出的数据inst_o
+###### CPU指令读命令结果：是否命中cache hit_o，当前数据是否有效 inst_valid_o，当前输出的数据cpu_inst_o
+
+###### CPU控制信号：取数据暂停信号stall_o，取值结果只支持单发single_shot
 
 ###### 总线slave信号：读数据有效mem_rvalid_i，读地址可以接收mem_arready_i，主存送入的块数据mem_rdata_i
 
@@ -71,7 +75,7 @@ Cache的将从状态机版本转化为更为先进的三级流水线设计，三
 
 注意：
 
-###### hit_o：在req_i给出的下一个周期，其数据有效
+###### hit_o：在req_i给出的下一个周期给出，高电平表示命中，低电平表示不命中
 
 #### DCache接口设置
 
