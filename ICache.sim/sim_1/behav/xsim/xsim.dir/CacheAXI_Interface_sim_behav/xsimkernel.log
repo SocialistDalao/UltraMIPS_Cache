@@ -1,7 +1,7 @@
-Running: xsim.dir/CacheAXI_Interface_sim_behav/xsimk.exe -simmode gui -wdb CacheAXI_Interface_sim_behav.wdb -simrunnum 0 -socket 60543
+Running: xsim.dir/CacheAXI_Interface_sim_behav/xsimk.exe -simmode gui -wdb CacheAXI_Interface_sim_behav.wdb -simrunnum 0 -socket 60937
 Design successfully loaded
-Design Loading Memory Usage: 5564 KB (Peak: 5564 KB)
-Design Loading CPU Usage: 15 ms
+Design Loading Memory Usage: 5380 KB (Peak: 5380 KB)
+Design Loading CPU Usage: 0 ms
 Simulation completed
-Simulation Memory Usage: 6328 KB (Peak: 6328 KB)
-Simulation CPU Usage: 31 ms
+Simulation Memory Usage: 5952 KB (Peak: 5952 KB)
+Simulation CPU Usage: 0 ms

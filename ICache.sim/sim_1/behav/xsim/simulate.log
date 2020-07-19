@@ -1,5 +1,14 @@
 Vivado Simulator 2019.2
 Time resolution is 1 ps
-success: DCache Read first
-success: DCache Write at the same time
-success: ICache Read last
+Success: Normal Write
+Success: overflow write STATE_EMPTY
+Success: overflow Write STATE_WORKING
+Success: normal read not hit
+Success: normal read hit
+Success: overflow Write STATE_FULL
+Success: normal read not hit(hit invalid)
+Success: write hit
+Success: read hit head
+Success: write hit head
+Success: write hit head(rewritten)
+Success: write hit head(when bvalid)

@@ -1,5 +1,6 @@
 `timescale 1ns / 1ps
-
+`include"defines.v"
+`include"defines_cache.v"
 module WriteBuffer(
     input clk,
     input rst,
@@ -11,11 +12,11 @@ module WriteBuffer(
 	//CPU read request and response
     input wire cpu_rreq_i,
     input wire [`DataAddrBus]cpu_araddr_i,
-	output wire read_hit_o,
+	output reg read_hit_o,
 	output reg [`WayBus]cpu_rdata_o,
 	
     //state
-    output reg [`FIFOStateBus]state_o,
+    output wire [`FIFOStateBus]state_o,
 	
     //MEM 
     input wire mem_bvalid_i,
@@ -28,37 +29,32 @@ module WriteBuffer(
 	wire [`DataAddrBus]cpu_araddr = {cpu_araddr_i[31:5],5'h0};
 	
     //当前队列状态
-    always@(*)begin
-        if(rst)begin
-            state_o <= `STATE_EMPTY;
-        end
-        else if(FIFO_valid[tail] == `Valid)begin
-            state_o <= `STATE_FULL;
-        end
-        else if(FIFO_valid[head] == `Invalid)begin
-            state_o <= `STATE_EMPTY;
-        end
-        else begin
-            state_o <= `STATE_WORKING;
-        end
-    end
-    
+    //STATE_EMPTY `FIFOStateNumLog2'h0                  
+    //STATE_WORKING `FIFOStateNumLog2'h1                
+    //STATE_FULL `FIFOStateNumLog2'h3
+    wire state_full;
+    wire state_working;
+    assign state_full = (rst == `RstEnable)? `Invalid:
+                        (FIFO_valid[tail] == `Valid)? `Valid: `Invalid;
+    assign state_working = (rst == `RstEnable)? `Invalid:
+                        (FIFO_valid[head] == `Invalid)? `Invalid: `Valid;
+    assign state_o = {state_full,state_working};
     
 	
 
 	//队列本体
-    reg [`FIFONum-1:0]FIFO_data[`WayBus];
-    reg [`FIFONum-1:0]FIFO_addr[`DataAddrBus];
+    reg [`WayBus]FIFO_data[`FIFONum-1:0];
+    reg [`DataAddrBus]FIFO_addr[`FIFONum-1:0];
 	
 	//冲突检测
 	//Write Collision
 	reg sign_rewrite;
-	always@(*) begin
+	always@(posedge clk) begin
 		if(rst)
 			sign_rewrite <= `Invalid;
 		else if(mem_bvalid_i)//write success (prior to write collision)
 			sign_rewrite <= `Invalid;
-		else if(write_hit[head])//write collision
+		else if(write_hit_head)//write collision
 			sign_rewrite <= `Valid;
 		else
 			sign_rewrite <=  sign_rewrite;
@@ -75,7 +71,7 @@ module WriteBuffer(
 			FIFO_valid <= `FIFONum'h0;
         end
         if( mem_bvalid_i == `Valid && !sign_rewrite //写入完毕且没有出现write collision
-			&& !write_hit[head])begin//如果写完队头没有恰好出现collision
+			&& !write_hit_head)begin//如果写完队头没有恰好出现collision
 			//不重写
 			FIFO_valid[head] <= `Invalid;
             head <= head + 1;
@@ -88,15 +84,23 @@ module WriteBuffer(
 	
 	//Read Hit
 	wire [`FIFONum-1:0]read_hit;
-	assign read_hit_o = read_hit[7]| read_hit[6]| read_hit[5]| read_hit[4]| read_hit[3]| read_hit[2]| read_hit[1]| read_hit[0];
+//	assign read_hit_o = read_hit[7]| read_hit[6]| read_hit[5]| read_hit[4]| read_hit[3]| read_hit[2]| read_hit[1]| read_hit[0];
+    //Timing logic
+    always@(posedge clk)begin
+        if(rst)
+            read_hit_o <= `HitFail;
+        else
+            read_hit_o <= |read_hit;
+    end
 	for(genvar i = 0;i < `FIFONum; i = i+1)begin
 		assign read_hit[i] = ((cpu_araddr == FIFO_addr[i]) && FIFO_valid[i])? `HitSuccess: `HitFail;
 	end
 	//Write Hit
 	wire [`FIFONum-1:0]write_hit;
-	assign write_hit_o = write_hit[7]| write_hit[6]| write_hit[5]| write_hit[4]| write_hit[3]| write_hit[2]| write_hit[1]| write_hit[0];
+	wire write_hit_head = write_hit[head] & cpu_wreq_i;
+	assign write_hit_o = |write_hit;
 	for(genvar i = 0;i < `FIFONum; i = i+1)begin
-		assign write_hit[i] = ((cpu_awaddr_i == FIFO_addr[i]) && FIFO_valid[i])? `HitSuccess: `HitFail;
+		assign write_hit[i] = ((cpu_awaddr == FIFO_addr[i]) && FIFO_valid[i])? `HitSuccess: `HitFail;
 	end
 	
 	//Write hit写入（包括写冲突）

@@ -57,8 +57,8 @@
 `define STATE_WRITE_DATA `StateNumLog2'h2
 //Write Buffer
 `define STATE_EMPTY `FIFOStateNumLog2'h0
-`define STATE_WORKING `FIFOStateNumLog2'h0
-`define STATE_FULL `FIFOStateNumLog2'h0
+`define STATE_WORKING `FIFOStateNumLog2'h1
+`define STATE_FULL `FIFOStateNumLog2'h3//ATTENTION: It's 3
 //CacheAXI_Interface
 `define STATE_WRITE_FREE 1'b0
 `define STATE_WRITE_BUSY 1'b1
