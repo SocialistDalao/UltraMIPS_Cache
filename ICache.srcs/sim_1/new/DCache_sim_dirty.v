@@ -84,25 +84,25 @@ module DCache_sim_dirty(
             #500 rst =0;
         
 			///////////////////////////////////////////////////
-			//////////////////read not hit/////////////////////
+			//////////////////Basic Function///////////////////
 			///////////////////////////////////////////////////
-            //normal read not hit
-			cpu_rreq_i=1;
-            virtual_addr_i = 32'h24687_570;
-            #20 cpu_rreq_i=0;
-            wait(mem_ren_o)begin
-                 #140   mem_rvalid_i=1;
-                 mem_rdata_i=256'h12345678_91023456_78910234_56789102_34567891_02345678_91023456_78910234;
-				if(cpu_data_valid_o==`Valid && hit_o == `HitFail) begin
-					if(cpu_data_o == 32'h56789102)
-						$display("sucess: read not hit");
-					else    begin
-						$display("fail: read not hit");
-						$stop;
-					end
-				end
-				 #20 mem_rvalid_i=0;
-             end
+            ////normal read not hit
+			//cpu_rreq_i=1;
+            //virtual_addr_i = 32'h24687_570;
+            //#20 cpu_rreq_i=0;
+            //wait(mem_ren_o)begin
+            //     #140   mem_rvalid_i=1;
+            //     mem_rdata_i=256'h12345678_91023456_78910234_56789102_34567891_02345678_91023456_78910234;
+			//	if(cpu_data_valid_o==`Valid && hit_o == `HitFail) begin
+			//		if(cpu_data_o == 32'h56789102)
+			//			$display("sucess: read not hit");
+			//		else    begin
+			//			$display("fail: read not hit");
+			//			$stop;
+			//		end
+			//	end
+			//	 #20 mem_rvalid_i=0;
+            // end
             
             
 			//valid test: addr==0 but not valid
@@ -123,7 +123,8 @@ module DCache_sim_dirty(
 				#20 mem_rvalid_i=0;
 			 end
 		
-            #505 cpu_wreq_i=1;
+			//write not hit
+            #100 cpu_wreq_i=1;
             virtual_addr_i = 32'h24687_570;
             cpu_wdata_i = 32'h1111_1111;
             #20 cpu_wreq_i=0;
@@ -139,7 +140,7 @@ module DCache_sim_dirty(
             
             
             //write hit
-            #500 cpu_wreq_i=1;
+            #100 cpu_wreq_i=1;
             virtual_addr_i = 32'h24687_570;
             #20 cpu_wreq_i=0;
             wait(cpu_data_valid_o==`Valid && hit_o == `HitSuccess) begin
@@ -151,6 +152,60 @@ module DCache_sim_dirty(
                 end
             end
             
+            //read hit
+            #100 cpu_rreq_i=1;
+            virtual_addr_i = 32'h24687_570;
+            #20 cpu_rreq_i=0;
+            wait(cpu_data_valid_o==`Valid && hit_o == `HitSuccess) begin
+                if(cpu_data_o == 32'h1111_1111)
+                    $display("sucess:write hit");
+                else    begin
+                    $display("fail:write hit");
+                    $stop;
+                end
+            end
+            
+			//read not hit(but in the same set)
+			#100 cpu_rreq_i=1;
+			virtual_addr_i = 32'h59687_570;
+			#20 cpu_rreq_i=0;
+			wait(mem_ren_o)begin
+				 #140   mem_rvalid_i=1;
+				 mem_rdata_i=256'h12345678_91023456_78910234_56789102_34567891_02345678_00000000_78910234;
+				if(cpu_data_valid_o==`Valid && hit_o == `HitFail) begin
+					if(cpu_data_o == 32'h78910234)
+						$display("sucess: read not hit(but in the same set)");
+					else    begin
+						$display("fail: read not hit(but in the same set)");
+						$stop;
+					end
+				end
+				#20 mem_rvalid_i=0;
+			 end
+			 
+            
+			//read not hit(kick dirty out to FIFO)
+			#100 cpu_rreq_i=1;
+			virtual_addr_i = 32'h11687_570;
+			#20 cpu_rreq_i=0;
+			wait(mem_ren_o)begin
+				 #140   mem_rvalid_i=1;
+				 mem_rdata_i=256'h12345678_91023456_78910234_56789102_34567891_00000000_91023456_78910234;
+				if(cpu_data_valid_o==`Valid && hit_o == `HitFail) begin
+					if(cpu_data_o == 32'h78910234)begin
+						$display("sucess: read not hit(kick dirty out to FIFO)");
+					end
+					else    begin
+						$display("fail: read not hit(kick dirty out to FIFO)");
+						$stop;
+					end
+				end
+				#20 mem_rvalid_i=0;
+			 end
+			///////////////////////////////////////////////////
+			//////////////////Advance Function///////////////////
+			///////////////////////////////////////////////////
+			
             #500 $stop;
         end//initial
         
