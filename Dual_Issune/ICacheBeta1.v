@@ -47,15 +47,9 @@ module ICache(
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////≥ı º∂®“Â//////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
-    wire [`RegBus]physical_addr;
+    wire [`RegBus]physical_addr	= virtual_addr_i;
     wire index = physical_addr[`IndexBus];
     wire offset = physical_addr[`OffsetBus];
-    //TLB
-    TLB tlb0(
-    .rst(rst),
-    .virtual_addr_i(virtual_addr_i),
-    .physical_addr_o(physical_addr)
-    );
    
     
     //BANK 0~7 WAY 0~1
