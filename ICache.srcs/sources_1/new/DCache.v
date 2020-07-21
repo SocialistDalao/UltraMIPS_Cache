@@ -167,26 +167,26 @@ module DCache(
     always@(posedge clk)begin
         if(rst)
             LRU <= 0;
-        else if(cpu_data_valid_o == `Valid && hit_o == `HitSuccess)
+        else if(hit_o == `HitSuccess)//hit: set LRU to bit that is not hit
             LRU[virtual_addr[`IndexBus]] <= hit_way0;
-        else if(cpu_data_valid_o == `Valid && hit_o == `HitFail)
-            LRU[virtual_addr[`IndexBus]] <= wea_way0;
+        else if(cpu_data_valid_o == `Valid && hit_o == `HitFail)//not hit: set opposite LRU
+            LRU[virtual_addr[`IndexBus]] <= ~LRU[virtual_addr[`IndexBus]];
         else
             LRU <= LRU;
     end
     
     //Dirty 
     reg [`DirtyBus] dirty;
-	wire write_dirty = dirty[{virtual_addr[`IndexBus],wea_way1}]; 
+	wire write_dirty = dirty[{virtual_addr[`IndexBus],LRU_pick}]; 
     always@(posedge clk)begin
         if(rst)
             dirty<=0;
-		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteDisable)//Read not hit
-            dirty[{virtual_addr[`IndexBus],wea_way1}] <= `NotDirty;
-		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteEnable)//write not hit
-            dirty[{virtual_addr[`IndexBus],wea_way1}] <= `Dirty;
+		else if(current_state == `STATE_FETCH_DATA && cpu_data_valid_o == `Valid && func == `WriteDisable)//Read not hit
+            dirty[{virtual_addr[`IndexBus],LRU_pick}] <= `NotDirty;
+		else if(current_state == `STATE_FETCH_DATA && mem_rvalid_i == `Valid && func == `WriteEnable)//write not hit
+            dirty[{virtual_addr[`IndexBus],LRU_pick}] <= `Dirty;
 		else if(current_state == `STATE_FETCH_DATA && (hit_way0|hit_way1) == `HitSuccess && func == `WriteEnable)//write hit but not FIFO
-            dirty[{virtual_addr[`IndexBus],wea_way1}] <= `Dirty;
+            dirty[{virtual_addr[`IndexBus],hit_way1}] <= `Dirty;
         else
             dirty <= dirty;
     end
@@ -218,7 +218,7 @@ module DCache(
     end
     
     always@(*)begin
-        next_state <= `STATE_LOOK_UP;
+        next_state <= current_state;
         case(current_state)
             `STATE_LOOK_UP:begin
                 if(cpu_rreq_i | cpu_wreq_i)begin
@@ -309,11 +309,11 @@ module DCache(
     
    //Tag not hit
    //write to ram
-    assign wea_way0 = (bus_read_success==`Valid && LRU_pick == 1'b0 && func == `WriteDisable)? 4'b1111 : //Read/Write Not Hit
-                     (bus_read_success==`Valid && hit_way0 == `HitSuccess && func == `WriteEnable)? 4'b1111 : 4'h0;//Write Hit
+    assign wea_way0 =(bus_read_success==`Valid && bus_read_success == `Success && LRU_pick == 1'b0)? 4'b1111 : // Not Hit
+                     (current_state==`STATE_FETCH_DATA && hit_way0 == `HitSuccess && func == `WriteEnable )? 4'b1111 : 4'h0;//Write Hit
     
-    assign wea_way1 = (bus_read_success==`Valid && LRU_pick == 1'b1 && func == `WriteDisable)? 4'b1111 :
-                     (bus_read_success==`Valid && hit_way1 == `HitSuccess && func == `WriteEnable)? 4'b1111 : 4'h0;
+    assign wea_way1 = (bus_read_success==`Valid && bus_read_success == `Success && LRU_pick == 1'b1)? 4'b1111 ://not hit
+                     (current_state==`STATE_FETCH_DATA && hit_way1 == `HitSuccess  && func == `WriteEnable )? 4'b1111 : 4'h0;//write hit
                      
 	assign FIFO_wreq = (current_state == `STATE_FETCH_DATA && FIFO_hit == `HitSuccess && func == `WriteEnable)? `WriteEnable:
 	                   (current_state == `STATE_WRITE_DATA && FIFO_state != `STATE_FULL)? `WriteEnable: `WriteDisable;
@@ -338,7 +338,7 @@ module DCache(
 				default: read_from_mem <= mem_rdata_i;
 			endcase
 		end
-		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitSuccess)begin//§Õ???§µ????§Õ??
+		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitSuccess)begin//hit success
             if(hit_way0 == `HitSuccess)begin
                 case(virtual_addr[4:2])
                     3'h0:read_from_mem <= {inst_cache_b7w0,inst_cache_b6w0,inst_cache_b5w0,inst_cache_b4w0,inst_cache_b3w0,inst_cache_b2w0,inst_cache_b1w0,cpu_wdata};
@@ -421,7 +421,7 @@ module DCache(
     assign cpu_data_o = (current_state==`STATE_FETCH_DATA && hit_way0 == `HitSuccess)? data_way0:
                         (current_state==`STATE_FETCH_DATA && hit_way1 == `HitSuccess)? data_way1:
                         (current_state==`STATE_FETCH_DATA && FIFO_hit == `HitSuccess)? data_FIFO:
-						//???????????
+						//not hit
                         (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h0)? read_from_mem[32*1-1:32*0]:
                         (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h1)? read_from_mem[32*2-1:32*1]:
                         (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h2)? read_from_mem[32*3-1:32*2]:
@@ -432,7 +432,8 @@ module DCache(
                         (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h7)? read_from_mem[32*8-1:32*7]:
                         `ZeroWord;
                         
-    assign cpu_data_valid_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitSuccess)? `Valid :
-                              (current_state==`STATE_WRITE_DATA)                        ? `Valid :
+    assign cpu_data_valid_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitSuccess && func == `WriteDisable)? `Valid :
+                              (current_state==`STATE_FETCH_DATA && bus_read_success == `Success && func == `WriteDisable)? `Valid :
+//                              (current_state==`STATE_WRITE_DATA)                        ? `Valid :
                               `Invalid ;
 endmodule

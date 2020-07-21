@@ -278,7 +278,7 @@ module ICache(
                               `Invalid ;
 							  
 	assign stall_o = (current_state == `STATE_SCAN_CACHE)? ~cpu_inst_valid_o: //not valid == stall_o
-					(current_state == `STATE_LOOK_UP ) cpu_req_i:`Invalid; 
+					(current_state == `STATE_LOOK_UP )? cpu_req_i:`Invalid; 
 	
 	assign single_shot = (virtual_addr_i[4:2] == 3'b111)? `Valid:`Invalid;//in the edge
 endmodule

@@ -23,7 +23,7 @@
 module DCache_sim_dirty(
 
     );
-    reg clk=0;     
+    reg clk=1;     
     always #10 clk=~clk;
     
     reg rst=1;
@@ -38,14 +38,14 @@ module DCache_sim_dirty(
     
    
     //mem read
-    reg mem_rvalid_i;
-    reg [`WayBus]mem_rdata_i;
+    reg mem_rvalid_i=0;
+    reg [`WayBus]mem_rdata_i=0;
     wire mem_ren_o;
     wire[`DataAddrBus]mem_araddr_o;
 	//mem write
-    reg mem_bvalid_i;
+    reg mem_bvalid_i=0;
     wire mem_wen_o;
-    wire[`WayBus] mem_wdata_o;//一个块的大小
+    wire[`WayBus] mem_wdata_o;//�?个块的大�?
     wire [`DataAddrBus]mem_awaddr_o;
     
     wire [`DirtyBus] dirty;
@@ -65,15 +65,15 @@ module DCache_sim_dirty(
         .cpu_data_o(cpu_data_o),     
         
 		//mem read
-		mem_rvalid_i,
-		mem_rdata_i,
-		mem_ren_o,
-		mem_araddr_o,
+		.mem_rvalid_i(mem_rvalid_i),
+		.mem_rdata_i(mem_rdata_i),
+		.mem_ren_o(mem_ren_o),
+		.mem_araddr_o(mem_araddr_o),
 		//mem write
-		mem_bvalid_i,
-		mem_wen_o,
-		mem_wdata_o,//一个块的大小
-		mem_awaddr_o,
+		.mem_bvalid_i(mem_bvalid_i),
+		.mem_wen_o(mem_wen_o),
+		.mem_wdata_o(mem_wdata_o),//�?个块的大�?
+		.mem_awaddr_o(mem_awaddr_o),
         
         //test
         .dirty(dirty)
@@ -112,7 +112,7 @@ module DCache_sim_dirty(
 			wait(mem_ren_o)begin
 				 #140   mem_rvalid_i=1;
 				 mem_rdata_i=256'h12345678_91023456_78910234_56789102_34567891_02345678_91023456_78910234;
-				if(cpu_data_valid_o==`Valid && hit_o == `HitFail) begin
+				#10 if(cpu_data_valid_o==`Valid && hit_o == `HitFail) begin
 					if(cpu_data_o == 32'h78910234)
 						$display("sucess: valid test");
 					else    begin
@@ -120,36 +120,37 @@ module DCache_sim_dirty(
 						$stop;
 					end
 				end
-				#20 mem_rvalid_i=0;
+                else    begin
+                    $display("fail: valid test");
+                    $stop;
+                end
+				#10 mem_rvalid_i=0;
 			 end
 		
 			//write not hit
             #100 cpu_wreq_i=1;
             virtual_addr_i = 32'h24687_570;
             cpu_wdata_i = 32'h1111_1111;
-            #20 cpu_wreq_i=0;
-            wait(cpu_data_valid_o==`Valid && hit_o == `HitFail) begin
-                #30
-                if(dirty[{virtual_addr_i[`IndexBus],1'b0}] == `Dirty)
-                    $display("sucess:dirty write success");
-                else    begin
-                    $display("fail:dirty write success");
-                    $stop;
+            #21 cpu_wreq_i=0;
+            virtual_addr_i = 32'h0;
+            cpu_wdata_i = 32'h0;
+            wait(mem_ren_o)begin
+				 #140   mem_rvalid_i=1;
+				 mem_rdata_i=256'h12345678_91023456_78910234_56789102_34567891_02345678_91023456_78910234;
+                wait(dirty[8'b0101_0110] == `Dirty) begin
+                        $display("sucess:dirty write success");
                 end
+                #20  mem_rvalid_i = 0;
             end
             
             
             //write hit
             #100 cpu_wreq_i=1;
             virtual_addr_i = 32'h24687_570;
-            #20 cpu_wreq_i=0;
-            wait(cpu_data_valid_o==`Valid && hit_o == `HitSuccess) begin
-                if(cpu_data_o == 32'h1111_1111)
+            cpu_wdata_i = 32'h2222_2222;
+            #21 cpu_wreq_i=0;
+            wait(hit_o == `HitSuccess) begin
                     $display("sucess:write hit");
-                else    begin
-                    $display("fail:write hit");
-                    $stop;
-                end
             end
             
             //read hit
@@ -157,10 +158,10 @@ module DCache_sim_dirty(
             virtual_addr_i = 32'h24687_570;
             #20 cpu_rreq_i=0;
             wait(cpu_data_valid_o==`Valid && hit_o == `HitSuccess) begin
-                if(cpu_data_o == 32'h1111_1111)
-                    $display("sucess:write hit");
+                if(cpu_data_o == 32'h2222_2222)
+                    $display("sucess:read hit");
                 else    begin
-                    $display("fail:write hit");
+                    $display("fail:read hit");
                     $stop;
                 end
             end
@@ -172,13 +173,10 @@ module DCache_sim_dirty(
 			wait(mem_ren_o)begin
 				 #140   mem_rvalid_i=1;
 				 mem_rdata_i=256'h12345678_91023456_78910234_56789102_34567891_02345678_00000000_78910234;
-				if(cpu_data_valid_o==`Valid && hit_o == `HitFail) begin
-					if(cpu_data_o == 32'h78910234)
+				wait(cpu_data_valid_o==`Valid && hit_o == `HitFail) begin
+					wait(cpu_data_o == 32'h56789102)
 						$display("sucess: read not hit(but in the same set)");
-					else    begin
-						$display("fail: read not hit(but in the same set)");
-						$stop;
-					end
+					
 				end
 				#20 mem_rvalid_i=0;
 			 end
@@ -191,13 +189,9 @@ module DCache_sim_dirty(
 			wait(mem_ren_o)begin
 				 #140   mem_rvalid_i=1;
 				 mem_rdata_i=256'h12345678_91023456_78910234_56789102_34567891_00000000_91023456_78910234;
-				if(cpu_data_valid_o==`Valid && hit_o == `HitFail) begin
-					if(cpu_data_o == 32'h78910234)begin
+				wait(cpu_data_valid_o==`Valid && hit_o == `HitFail) begin
+					wait(cpu_data_o == 32'h56789102)begin
 						$display("sucess: read not hit(kick dirty out to FIFO)");
-					end
-					else    begin
-						$display("fail: read not hit(kick dirty out to FIFO)");
-						$stop;
 					end
 				end
 				#20 mem_rvalid_i=0;

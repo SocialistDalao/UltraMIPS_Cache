@@ -1,14 +1,26 @@
 Vivado Simulator 2019.2
 Time resolution is 1 ps
-Success: Normal Write
-Success: overflow write STATE_EMPTY
-Success: overflow Write STATE_WORKING
-Success: normal read not hit
-Success: normal read hit
-Success: overflow Write STATE_FULL
-Success: normal read not hit(hit invalid)
-Success: write hit
-Success: read hit head
-Success: write hit head
-Success: write hit head(rewritten)
-Success: write hit head(when bvalid)
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank0_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank1_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank2_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank3_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank4_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank5_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank6_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank7_way0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank0_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank1_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank2_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank3_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank4_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank5_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank6_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.Bank7_way1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.TagV0.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+Block Memory Generator module DCache_sim_dirty.dcache1.TagV1.inst.native_mem_module.blk_mem_gen_v8_4_4_inst is using a behavioral model for simulation which will not precisely model memory collision behavior.
+sucess: valid test
+sucess:dirty write success
+sucess:write hit
+sucess:read hit
+sucess: read not hit(but in the same set)
+sucess: read not hit(kick dirty out to FIFO)
