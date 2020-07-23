@@ -107,7 +107,7 @@ module DCache_sim_dirty(
             
 			//valid test: addr==0 but not valid
 			#100 cpu_rreq_i=1;
-			virtual_addr_i = 32'hDEBA_D000;
+			virtual_addr_i = 32'h0000_D000;
 			#20 cpu_rreq_i=0;
 			wait(mem_ren_o)begin
 				 #140   mem_rvalid_i=1;
@@ -131,16 +131,16 @@ module DCache_sim_dirty(
             #100 cpu_wreq_i=1;
             virtual_addr_i = 32'h24687_570;
             cpu_wdata_i = 32'h1111_1111;
-            #21 cpu_wreq_i=0;
+            #20 cpu_wreq_i=0;
             virtual_addr_i = 32'h0;
             cpu_wdata_i = 32'h0;
             wait(mem_ren_o)begin
 				 #140   mem_rvalid_i=1;
 				 mem_rdata_i=256'h12345678_91023456_78910234_56789102_34567891_02345678_91023456_78910234;
+                #20  mem_rvalid_i = 0;
                 wait(dirty[8'b0101_0110] == `Dirty) begin
                         $display("sucess:dirty write success");
                 end
-                #20  mem_rvalid_i = 0;
             end
             
             
@@ -148,7 +148,7 @@ module DCache_sim_dirty(
             #100 cpu_wreq_i=1;
             virtual_addr_i = 32'h24687_570;
             cpu_wdata_i = 32'h2222_2222;
-            #21 cpu_wreq_i=0;
+            #20 cpu_wreq_i=0;
             wait(hit_o == `HitSuccess) begin
                     $display("sucess:write hit");
             end
@@ -173,12 +173,16 @@ module DCache_sim_dirty(
 			wait(mem_ren_o)begin
 				 #140   mem_rvalid_i=1;
 				 mem_rdata_i=256'h12345678_91023456_78910234_56789102_34567891_02345678_00000000_78910234;
-				wait(cpu_data_valid_o==`Valid && hit_o == `HitFail) begin
-					wait(cpu_data_o == 32'h56789102)
+				 #20 begin
+				if(cpu_data_valid_o==`Valid && hit_o == `HitFail) begin
+					if(cpu_data_o == 32'h56789102)
 						$display("sucess: read not hit(but in the same set)");
-					
+					else
+					   $stop;
 				end
-				#20 mem_rvalid_i=0;
+                else
+                   $stop;
+				 mem_rvalid_i=0;end
 			 end
 			 
             
@@ -199,6 +203,31 @@ module DCache_sim_dirty(
 			///////////////////////////////////////////////////
 			//////////////////Advance Function///////////////////
 			///////////////////////////////////////////////////
+			
+			//read hit FIFO
+			
+            #100 cpu_rreq_i=1;
+            virtual_addr_i = 32'h24687_570;
+            #20 cpu_rreq_i=0;
+            wait(cpu_data_valid_o==`Valid && hit_o == `HitSuccess) begin
+                if(cpu_data_o == 32'h2222_2222)
+                    $display("sucess:read hit FIFO");
+                else    begin
+                    $display("fail:read hit FIFO");
+                    $stop;
+                end
+            end
+			
+			
+			//write hit FIFO
+            #100 cpu_wreq_i=1;
+            virtual_addr_i = 32'h24687_570;
+            cpu_wdata_i = 32'h2222_2222;
+            #21 cpu_wreq_i=0;
+            wait(hit_o == `HitSuccess) begin
+				wait(mem_wdata_o == 256'h12345678_91023456_78910234_2222_2222_34567891_02345678_91023456_78910234)
+                    $display("sucess:write hit FIFO");
+            end
 			
             #500 $stop;
         end//initial

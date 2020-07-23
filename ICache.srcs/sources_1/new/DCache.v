@@ -80,7 +80,6 @@ module DCache(
     wire index = physical_addr[`IndexBus];
     wire offset = physical_addr[`OffsetBus];
     TLB tlb0(
-    .rst(rst),
     .virtual_addr_i(virtual_addr),
     .physical_addr_o(physical_addr)
     );
@@ -197,7 +196,7 @@ module DCache(
 			cpu_stall_o <= `Valid;
 		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `ReadEnable)//read not hit
 			cpu_stall_o <= `Valid;
-		else if (current_state == `STATE_WRITE_DATA && FIFO_state == `STATE_FULL)
+		else if (bus_read_success == `Success && FIFO_state == `STATE_FULL)
 			cpu_stall_o <= `Valid;
 		else
 			cpu_stall_o <= `Invalid;
@@ -230,17 +229,17 @@ module DCache(
             `STATE_FETCH_DATA:begin
                 if(hit_o == `HitSuccess)//hit 
                     next_state <= `STATE_LOOK_UP;
-                else if(bus_read_success == `Success && write_dirty == `WriteDisable)//hit fail and no dirty bank to write
+                else if(bus_read_success == `Success)//hit fail and no dirty bank to write
                     next_state <= `STATE_LOOK_UP;
-                else if(bus_read_success == `Success && write_dirty == `WriteEnable)//hit fail and dirty bank to write
-                    next_state <= `STATE_WRITE_DATA;
+//                else if(bus_read_success == `Success && write_dirty == `WriteEnable)//hit fail and dirty bank to write
+//                    next_state <= `STATE_WRITE_DATA;
             end
-            `STATE_WRITE_DATA:begin
-				if(FIFO_state == `STATE_FULL)
-					next_state <= `STATE_WRITE_DATA;
-				else
-                    next_state <= `STATE_LOOK_UP;
-            end
+//            `STATE_WRITE_DATA:begin
+//				if(FIFO_state == `STATE_FULL)
+//					next_state <= `STATE_WRITE_DATA;
+//				else
+//                    next_state <= `STATE_LOOK_UP;
+//            end
             default:;
         endcase
     end//always
@@ -316,7 +315,7 @@ module DCache(
                      (current_state==`STATE_FETCH_DATA && hit_way1 == `HitSuccess  && func == `WriteEnable )? 4'b1111 : 4'h0;//write hit
                      
 	assign FIFO_wreq = (current_state == `STATE_FETCH_DATA && FIFO_hit == `HitSuccess && func == `WriteEnable)? `WriteEnable:
-	                   (current_state == `STATE_WRITE_DATA && FIFO_state != `STATE_FULL)? `WriteEnable: `WriteDisable;
+	                   (bus_read_success == `Success && FIFO_state != `STATE_FULL && func==`WriteEnable && write_dirty == `Dirty)? `WriteEnable: `WriteDisable;
    //AXI read requirements
    assign mem_ren_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitFail) ? `ReadEnable :`ReadDisable;
    assign mem_araddr_o = physical_addr;
@@ -402,7 +401,7 @@ module DCache(
                 default:;                                         
             endcase
 	   end
-	   else if(current_state == `STATE_WRITE_DATA)begin
+	   else if(bus_read_success == `Success)begin
             if(LRU_pick == 1'b0)begin//0¡¤???I
                 FIFO_wdata <= {inst_cache_b7w0,inst_cache_b6w0,inst_cache_b5w0,inst_cache_b4w0,inst_cache_b3w0,inst_cache_b2w0,inst_cache_b1w0,inst_cache_b0w0};
             end

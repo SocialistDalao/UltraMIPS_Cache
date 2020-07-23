@@ -16,7 +16,7 @@ WARNING: [VRFC 10-3380] identifier 'current_state' is used before its declaratio
 WARNING: [VRFC 10-3380] identifier 'hit_way1' is used before its declaration [F:/Cache/ICache.srcs/sources_1/new/DCache.v:189]
 WARNING: [VRFC 10-3380] identifier 'current_state' is used before its declaration [F:/Cache/ICache.srcs/sources_1/new/DCache.v:196]
 WARNING: [VRFC 10-3380] identifier 'current_state' is used before its declaration [F:/Cache/ICache.srcs/sources_1/new/DCache.v:198]
-WARNING: [VRFC 10-3380] identifier 'current_state' is used before its declaration [F:/Cache/ICache.srcs/sources_1/new/DCache.v:200]
+WARNING: [VRFC 10-3380] identifier 'bus_read_success' is used before its declaration [F:/Cache/ICache.srcs/sources_1/new/DCache.v:200]
 INFO: [VRFC 10-2263] Analyzing Verilog file "F:/Cache/ICache.srcs/sources_1/new/TLB.v" into library xil_defaultlib
 INFO: [VRFC 10-311] analyzing module TLB
 INFO: [VRFC 10-2263] Analyzing Verilog file "F:/Cache/ICache.srcs/sources_1/new/WriteBuffer.v" into library xil_defaultlib

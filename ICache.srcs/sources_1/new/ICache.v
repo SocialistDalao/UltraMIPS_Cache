@@ -52,7 +52,6 @@ module ICache(
     wire offset = physical_addr[`OffsetBus];
     //TLB
     TLB tlb0(
-    .rst(rst),
     .virtual_addr_i(virtual_addr_i),
     .physical_addr_o(physical_addr)
     );

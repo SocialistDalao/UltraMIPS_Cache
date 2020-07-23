@@ -21,19 +21,13 @@
 
 
 module TLB(
-    input wire rst,
-    
-    input wire [`RegBus]virtual_addr_i,
-    output reg [`RegBus]physical_addr_o
+    input wire [`DataAddrBus]virtual_addr_i,
+    output wire [`DataAddrBus]physical_addr_o
     );
     
 
-    always@(*)begin
-        if(rst)
-            physical_addr_o <= `ZeroWord;
-        else
-//            physical_addr_o <= virtual_addr_i+32'h21453_000;
-            physical_addr_o <= virtual_addr_i;
-    end
+	assign physical_addr_o = (virtual_addr_i[31:28]==4'h8)||(virtual_addr_i[31:28]==4'h9)
+									||(virtual_addr_i[31:28]==4'ha)||(virtual_addr_i[31:28]==4'hb)? 
+										virtual_addr_i & {3'b0,29'h1fffffff}: virtual_addr_i ;
 
 endmodule
