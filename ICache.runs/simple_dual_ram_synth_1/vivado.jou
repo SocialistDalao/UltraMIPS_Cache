@@ -1,0 +1,12 @@
+#-----------------------------------------------------------
+# Vivado v2019.2 (64-bit)
+# SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+# IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+# Start of session at: Sat Jul 25 21:44:25 2020
+# Process ID: 11312
+# Current directory: F:/Cache/ICache.runs/simple_dual_ram_synth_1
+# Command line: vivado.exe -log simple_dual_ram.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source simple_dual_ram.tcl
+# Log file: F:/Cache/ICache.runs/simple_dual_ram_synth_1/simple_dual_ram.vds
+# Journal file: F:/Cache/ICache.runs/simple_dual_ram_synth_1\vivado.jou
+#-----------------------------------------------------------
+source simple_dual_ram.tcl -notrace
