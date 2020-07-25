@@ -46,10 +46,10 @@ module DCache(
     input wire mem_bvalid_i,
     output wire mem_wen_o,
     output wire[`WayBus] mem_wdata_o,//一个块的大小
-    output wire [`DataAddrBus]mem_awaddr_o,
+    output wire [`DataAddrBus]mem_awaddr_o
     
     //test
-    output [`DirtyBus] dirty
+    //output [`DirtyBus] dirty
     );
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////Initialization////////////////////////////////////

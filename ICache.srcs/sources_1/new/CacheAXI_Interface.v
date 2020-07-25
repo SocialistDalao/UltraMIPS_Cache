@@ -24,39 +24,39 @@ module CacheAXI_Interface(
     input clk,
     input rst,
 	//ICahce: Read Channel
-    input wire inst_ren_i,
-    input wire[`InstAddrBus]inst_araddr_i,
-	output reg inst_rvalid_o,
-	output reg [`WayBus]inst_rdata_o,//DCache: Read Channel
+    input wire 					inst_ren_i,
+    input wire [`InstAddrBus] 	inst_araddr_i,
+	output reg 					inst_rvalid_o,
+	output reg [`WayBus]		inst_rdata_o,//DCache: Read Channel
 	
 	//DCache: Read Channel
-    input wire data_ren_i,
-    input wire[`DataAddrBus]data_araddr_i,
-    output reg data_rvalid_o,
-    output reg [`WayBus]data_rdata_o,//一个块的大小
+    input wire 					data_ren_i,
+    input wire [`DataAddrBus]	data_araddr_i,
+    output reg 					data_rvalid_o,
+    output reg [`WayBus]		data_rdata_o,//一个块的大小
 	
 	//DCache: Write Channel
-    input wire data_wen_i,
-    input wire[`WayBus]data_wdata_i,//一个块的大小
-    input wire [`DataAddrBus]data_awaddr_i,
-    output reg data_bvalid_o,
+    input wire 					data_wen_i,
+    input wire [`WayBus]		data_wdata_i,//一个块的大小
+    input wire [`DataAddrBus]	data_awaddr_i,
+    output reg 					data_bvalid_o,
 	
 	//AXI Communicate
-	output wire             axi_ce_o,
-	output wire[3:0]        axi_sel_o,
+	output wire             	axi_ce_o,
+	output wire[3:0]        	axi_sel_o,
 	//AXI read
-	input wire[`RegBus]    rdata_i,        //返回到cache的读取数据
-	input wire             rdata_valid_i,  //返回数据可获取
-	output wire             axi_ren_o,
-	output wire             axi_rready_o,   //cache端准备好读
-	output wire[`RegBus]    axi_raddr_o,
+	input wire[`RegBus]    		rdata_i,        //返回到cache的读取数据
+	input wire             		rdata_valid_i,  //返回数据可获取
+	output wire             	axi_ren_o,
+	output wire             	axi_rready_o,   //cache端准备好读
+	output wire	[`RegBus]    	axi_raddr_o,
 	//AXI write
-	input wire             wdata_resp_i,   //写响应,每个beat发一次，成功则可以传下一数据
-	output wire             axi_wen_o,
-	output wire[`RegBus]    axi_waddr_o,
-	output reg[`RegBus]    axi_wdata_o,    //cache最好保证在每个时钟沿更新要写的内容
-	output wire             axi_wvalid_o,   //cache端准备好写的数据，最好是持续
-	output wire             axi_wlast_o    //cache写最后一个数据
+	input wire             		wdata_resp_i,   //写响应,每个beat发一次，成功则可以传下一数据
+	output wire             	axi_wen_o,
+	output wire	[`RegBus]    	axi_waddr_o,
+	output reg [`RegBus]    	axi_wdata_o,    //cache最好保证在每个时钟沿更新要写的内容
+	output wire             	axi_wvalid_o,   //cache端准备好写的数据，最好是持续
+	output wire             	axi_wlast_o    //cache写最后一个数据
     );
 	assign  axi_ce_o = (rst == `RstEnable)? `ChipDisable: `ChipEnable;
 	assign  axi_sel_o = 4'b1111;//byte select
