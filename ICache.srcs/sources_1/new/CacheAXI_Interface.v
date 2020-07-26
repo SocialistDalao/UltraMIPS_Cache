@@ -50,16 +50,20 @@ module CacheAXI_Interface(
 	output wire             	axi_ren_o,
 	output wire             	axi_rready_o,   //cache端准备好读
 	output wire	[`RegBus]    	axi_raddr_o,
+	output wire [3:0]          axi_rlen_o,    
 	//AXI write
 	input wire             		wdata_resp_i,   //写响应,每个beat发一次，成功则可以传下一数据
 	output wire             	axi_wen_o,
 	output wire	[`RegBus]    	axi_waddr_o,
 	output reg [`RegBus]    	axi_wdata_o,    //cache最好保证在每个时钟沿更新要写的内容
 	output wire             	axi_wvalid_o,   //cache端准备好写的数据，最好是持续
-	output wire             	axi_wlast_o    //cache写最后一个数据
+	output wire             	axi_wlast_o,    //cache写最后一个数据
+	output wire [3:0]          axi_wlen_o    
     );
 	assign  axi_ce_o = (rst == `RstEnable)? `ChipDisable: `ChipEnable;
 	assign  axi_sel_o = 4'b1111;//byte select
+	assign  axi_wlen_o = 4'h7;//byte select
+	assign  axi_rlen_o = 4'h7;//byte select
 	
 	
 	//READ(DCache first)

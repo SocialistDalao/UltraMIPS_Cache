@@ -30,6 +30,7 @@ module DCache(
     input wire cpu_wreq_i,
     input wire [`DataAddrBus]virtual_addr_i,
     input wire [`DataBus]cpu_wdata_i,
+    input wire [`DataBus]cpu_wsel_i,
     output wire hit_o,
     output wire cpu_data_valid_o,
     output wire [`DataBus] cpu_data_o,
