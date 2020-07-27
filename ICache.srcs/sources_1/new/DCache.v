@@ -98,10 +98,10 @@ module DCache(
     wire [`InstAddrBus]physical_addr=virtual_addr;
     wire index = physical_addr[`IndexBus];
     wire offset = physical_addr[`OffsetBus];
-    TLB tlb0(
-    .virtual_addr_i(virtual_addr),
-    .physical_addr_o(physical_addr)
-    );
+    //TLB tlb0(
+    //.virtual_addr_i(virtual_addr),
+    //.physical_addr_o(physical_addr)
+    //);
 	//WriteBuffer
 	wire [`WayBus]FIFO_rdata;
 	reg [`WayBus]FIFO_wdata;

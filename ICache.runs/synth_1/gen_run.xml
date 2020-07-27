@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GenRun Id="synth_1" LaunchPart="xc7a200tfbg676-2" LaunchTime="1595760294">
   <File Type="PA-TCL" Name="Cache.tcl"/>
-  <File Type="RDS-PROPCONSTRS" Name="Cache_drc_synth.rpt"/>
   <File Type="REPORTS-TCL" Name="Cache_reports.tcl"/>
   <File Type="RDS-RDS" Name="Cache.vds"/>
   <File Type="RDS-UTIL" Name="Cache_utilization_synth.rpt"/>
   <File Type="RDS-UTIL-PB" Name="Cache_utilization_synth.pb"/>
   <File Type="RDS-DCP" Name="Cache.dcp"/>
-  <File Type="VDS-TIMINGSUMMARY" Name="Cache_timing_summary_synth.rpt"/>
-  <File Type="VDS-TIMING-PB" Name="Cache_timing_summary_synth.pb"/>
   <FileSet Name="sources" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
     <Filter Type="Srcs"/>
     <File Path="$PSRCDIR/sources_1/new/defines_cache.v">
