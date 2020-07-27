@@ -30,7 +30,7 @@ module DCache(
     input wire cpu_wreq_i,
     input wire [`DataAddrBus]virtual_addr_i,
     input wire [`DataBus]cpu_wdata_i,
-    input wire [`DataBus]cpu_wsel_i,
+    input wire [3:0]cpu_wsel_i,
     output wire hit_o,
     output wire cpu_data_valid_o,
     output wire [`DataBus] cpu_data_o,
@@ -55,10 +55,28 @@ module DCache(
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////Initialization////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
+    
+	reg [127:0]total_dcache_hit;
+	reg [127:0]total_dcache_req;
+	always@(posedge clk)begin
+		if(rst)
+			total_dcache_hit <= 0;
+		else if(hit_o)
+			total_dcache_hit <= total_dcache_hit + 1;
+		if(rst)
+			total_dcache_req <= 0;
+		else if(current_state == `STATE_LOOK_UP && (cpu_rreq_i|cpu_wreq_i))
+			total_dcache_req <= total_dcache_req + 1;
+	end
+	
+    wire [31:0]wsel_expand;
+    assign wsel_expand={{8{cpu_wsel_i[3]}} , {8{cpu_wsel_i[2]}} , {8{cpu_wsel_i[1]}} , {8{cpu_wsel_i[0]}}};
     //keep the data of STATE_LOOK_UP
     reg [`InstAddrBus]virtual_addr;
     reg [`RegBus]cpu_wdata;
     reg func;//?????§Õ?????????
+    
+	
     always@(posedge clk)begin
         if(rst)begin
             virtual_addr<= `ZeroWord;
@@ -77,7 +95,7 @@ module DCache(
         end
     end
     //TLB
-    wire [`InstAddrBus]physical_addr;
+    wire [`InstAddrBus]physical_addr=virtual_addr;
     wire index = physical_addr[`IndexBus];
     wire offset = physical_addr[`OffsetBus];
     TLB tlb0(
@@ -193,11 +211,13 @@ module DCache(
 	
 	//Stall
 	always@(*)begin
-		if(current_state != `STATE_LOOK_UP && (cpu_rreq_i | cpu_wreq_i))//req when Cache is busy
+		if(current_state == `STATE_LOOK_UP && (cpu_rreq_i | cpu_wreq_i))//req when Cache is busy
 			cpu_stall_o <= `Valid;
-		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `ReadEnable)//read not hit
-			cpu_stall_o <= `Valid;
-		else if (bus_read_success == `Success && FIFO_state == `STATE_FULL)
+		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteDisable)//read not hit
+			cpu_stall_o <= ~bus_read_success;//not successful
+		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteEnable && (cpu_rreq_i | cpu_wreq_i))//write not hit but request comes in
+			cpu_stall_o <= `Valid;//not successful
+		else if (bus_read_success == `Success && FIFO_state == `STATE_FULL)//FIFO full
 			cpu_stall_o <= `Valid;
 		else
 			cpu_stall_o <= `Invalid;
@@ -310,15 +330,15 @@ module DCache(
    //Tag not hit
    //write to ram
     assign wea_way0 =(bus_read_success==`Valid && bus_read_success == `Success && LRU_pick == 1'b0)? 4'b1111 : // Not Hit
-                     (current_state==`STATE_FETCH_DATA && hit_way0 == `HitSuccess && func == `WriteEnable )? 4'b1111 : 4'h0;//Write Hit
+                     (current_state==`STATE_FETCH_DATA && hit_way0 == `HitSuccess && func == `WriteEnable )? cpu_wsel_i: 4'h0;//Write Hit
     
     assign wea_way1 = (bus_read_success==`Valid && bus_read_success == `Success && LRU_pick == 1'b1)? 4'b1111 ://not hit
-                     (current_state==`STATE_FETCH_DATA && hit_way1 == `HitSuccess  && func == `WriteEnable )? 4'b1111 : 4'h0;//write hit
+                     (current_state==`STATE_FETCH_DATA && hit_way1 == `HitSuccess  && func == `WriteEnable )? cpu_wsel_i : 4'h0;//write hit
                      
 	assign FIFO_wreq = (current_state == `STATE_FETCH_DATA && FIFO_hit == `HitSuccess && func == `WriteEnable)? `WriteEnable:
 	                   (bus_read_success == `Success && FIFO_state != `STATE_FULL && func==`WriteEnable && write_dirty == `Dirty)? `WriteEnable: `WriteDisable;
    //AXI read requirements
-   assign mem_ren_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitFail) ? `ReadEnable :`ReadDisable;
+   assign mem_ren_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitFail) ?  ~bus_read_success:`ReadDisable;
    assign mem_araddr_o = physical_addr;
    //ram write data
    always@(*) begin 
@@ -327,14 +347,14 @@ module DCache(
 		end
 		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteEnable)begin//write hit fail
 			case(virtual_addr[4:2])
-				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],cpu_wdata};
-				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],cpu_wdata,mem_rdata_i[32*1-1:32*0]};
-				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],cpu_wdata,mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
-				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],cpu_wdata,mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
-				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],cpu_wdata,mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
-				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],cpu_wdata,mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
-				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],cpu_wdata,mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
-				3'h0:read_from_mem <= {cpu_wdata,mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
+				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*1-1:32*0] & ~wsel_expand)};
+				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*1-1:32*0] & ~wsel_expand),mem_rdata_i[32*2-1:32*1]};
+				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*3-1:32*2] & ~wsel_expand),mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
+				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*4-1:32*3] & ~wsel_expand),mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
+				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*5-1:32*4] & ~wsel_expand),mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
+				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*6-1:32*5] & ~wsel_expand),mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
+				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*7-1:32*6] & ~wsel_expand),mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
+				3'h0:read_from_mem <= {(cpu_wdata & wsel_expand)|(mem_rdata_i[32*8-1:32*7] & ~wsel_expand),mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
 				default: read_from_mem <= mem_rdata_i;
 			endcase
 		end

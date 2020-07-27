@@ -21,27 +21,26 @@
 
 module ICache(
 
-    input wire clk,
-    input wire rst,
+    input wire 					clk,
+    input wire 					rst,
     
     //read inst request
-    input wire cpu_req_i,
-    input wire [`RegBus]virtual_addr_i,
+    input wire 					cpu_req_i,
+    input wire [`RegBus]		virtual_addr_i,//inst read virtual addr
     
     //read inst result
-    output wire hit_o,
-    output wire cpu_inst_valid_o,
-    output wire [`InstBus] cpu_inst1_o,
-    output wire [`InstBus] cpu_inst2_o,
-	output wire stall_o,
-	output wire single_shot,
+    output wire 				hit_o,
+    output wire 				cpu_inst_valid_o,
+    output wire [`InstBus] 		cpu_inst1_o,
+    output wire [`InstBus] 		cpu_inst2_o,
+	output wire 				stall_o,
+	output wire 				single_issue_o,
     
-    //from_mem read result
-    input wire mem_rvalid_i,
-    input wire [`WayBus]mem_rdata_i,//一个块的大小
-    //to_mem ready to recieve request 
-    output wire mem_ren_o,
-    output wire[`InstAddrBus]mem_araddr_o
+    //read from mem
+    input wire 					mem_inst_rvalid_i,
+    input wire [`WayBus]		mem_inst_rdata_i,//一个块的大小
+    output wire 				mem_inst_ren_o,
+    output wire[`InstAddrBus]	mem_inst_araddr_o
     
     );
 //////////////////////////////////////////////////////////////////////////////////
@@ -62,39 +61,42 @@ module ICache(
     wire [3:0]wea_way0;
     wire [3:0]wea_way1;
     
-    wire [`RegBus]inst_cache_b0w0;
-    wire [`RegBus]inst_cache_b1w0;
-    wire [`RegBus]inst_cache_b2w0;
-    wire [`RegBus]inst_cache_b3w0;
-    wire [`RegBus]inst_cache_b4w0;
-    wire [`RegBus]inst_cache_b5w0;
-    wire [`RegBus]inst_cache_b6w0;
-    wire [`RegBus]inst_cache_b7w0;
-    bank_ram Bank0_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*1-1:32*0]),.douta(inst_cache_b0w0));
-    bank_ram Bank1_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*2-1:32*1]),.douta(inst_cache_b1w0));
-    bank_ram Bank2_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*3-1:32*2]),.douta(inst_cache_b2w0));
-    bank_ram Bank3_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*4-1:32*3]),.douta(inst_cache_b3w0));
-    bank_ram Bank4_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*5-1:32*4]),.douta(inst_cache_b4w0));
-    bank_ram Bank5_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*6-1:32*5]),.douta(inst_cache_b5w0));
-    bank_ram Bank6_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*7-1:32*6]),.douta(inst_cache_b6w0));
-    bank_ram Bank7_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*8-1:32*7]),.douta(inst_cache_b7w0));
+	wire [`InstBus]way0_cache[`BlockNum-1:0];
+    //porta:write  portb:read
+    simple_dual_ram Bank0_way0 (.clka(clk),.ena(|wea_way0),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*1-1:32*0]),.clkb(clk),.enb(`Enable),.addrb(virtual_addr_i[`IndexBus]),.doutb(way0_cache[0]));
+    simple_dual_ram Bank1_way0 (.clka(clk),.ena(|wea_way0),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*2-1:32*1]),.clkb(clk),.enb(`Enable),.addrb(virtual_addr_i[`IndexBus]),.doutb(way0_cache[1]));
+    simple_dual_ram Bank2_way0 (.clka(clk),.ena(|wea_way0),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*3-1:32*2]),.clkb(clk),.enb(`Enable),.addrb(virtual_addr_i[`IndexBus]),.doutb(way0_cache[2]));
+    simple_dual_ram Bank3_way0 (.clka(clk),.ena(|wea_way0),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*4-1:32*3]),.clkb(clk),.enb(`Enable),.addrb(virtual_addr_i[`IndexBus]),.doutb(way0_cache[3]));
+    simple_dual_ram Bank4_way0 (.clka(clk),.ena(|wea_way0),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*5-1:32*4]),.clkb(clk),.enb(`Enable),.addrb(virtual_addr_i[`IndexBus]),.doutb(way0_cache[4]));
+    simple_dual_ram Bank5_way0 (.clka(clk),.ena(|wea_way0),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*6-1:32*5]),.clkb(clk),.enb(`Enable),.addrb(virtual_addr_i[`IndexBus]),.doutb(way0_cache[5]));
+    simple_dual_ram Bank6_way0 (.clka(clk),.ena(|wea_way0),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*7-1:32*6]),.clkb(clk),.enb(`Enable),.addrb(virtual_addr_i[`IndexBus]),.doutb(way0_cache[6]));
+    simple_dual_ram Bank7_way0 (.clka(clk),.ena(|wea_way0),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*8-1:32*7]),.clkb(clk),.enb(`Enable),.addrb(virtual_addr_i[`IndexBus]),.doutb(way0_cache[7]));
+//    bank_ram Bank0_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*1-1:32*0]),.douta(way0_cache[0]));
+//    bank_ram Bank1_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*2-1:32*1]),.douta(way0_cache[1]));
+//    bank_ram Bank2_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*3-1:32*2]),.douta(way0_cache[2]));
+//    bank_ram Bank3_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*4-1:32*3]),.douta(way0_cache[3]));
+//    bank_ram Bank4_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*5-1:32*4]),.douta(way0_cache[4]));
+//    bank_ram Bank5_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*6-1:32*5]),.douta(way0_cache[5]));
+//    bank_ram Bank6_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*7-1:32*6]),.douta(way0_cache[6]));
+//    bank_ram Bank7_way0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*8-1:32*7]),.douta(way0_cache[7]));
     
-    wire [`RegBus]inst_cache_b0w1;
-    wire [`RegBus]inst_cache_b1w1;
-    wire [`RegBus]inst_cache_b2w1;
-    wire [`RegBus]inst_cache_b3w1;
-    wire [`RegBus]inst_cache_b4w1;
-    wire [`RegBus]inst_cache_b5w1;
-    wire [`RegBus]inst_cache_b6w1;
-    wire [`RegBus]inst_cache_b7w1;                              
-    bank_ram Bank0_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*1-1:32*0]),.douta(inst_cache_b0w1));
-    bank_ram Bank1_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*2-1:32*1]),.douta(inst_cache_b1w1));
-    bank_ram Bank2_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*3-1:32*2]),.douta(inst_cache_b2w1));
-    bank_ram Bank3_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*4-1:32*3]),.douta(inst_cache_b3w1));
-    bank_ram Bank4_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*5-1:32*4]),.douta(inst_cache_b4w1));
-    bank_ram Bank5_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*6-1:32*5]),.douta(inst_cache_b5w1));
-    bank_ram Bank6_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*7-1:32*6]),.douta(inst_cache_b6w1));
-    bank_ram Bank7_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*8-1:32*7]),.douta(inst_cache_b7w1));
+	wire [`InstBus]way1_cache[`BlockNum-1:0]; 
+    simple_dual_ram Bank0_way1 (.clka(clk),.ena(|wea_way1),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*1-1:32*0]),.clkb(clk),.enb(`Enable),.addrb(virtual_addr_i[`IndexBus]),.doutb(way1_cache[0]));
+    simple_dual_ram Bank1_way1 (.clka(clk),.ena(|wea_way1),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*2-1:32*1]),.clkb(clk),.enb(`Enable),.addrb(virtual_addr_i[`IndexBus]),.doutb(way1_cache[1]));
+    simple_dual_ram Bank2_way1 (.clka(clk),.ena(|wea_way1),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*3-1:32*2]),.clkb(clk),.enb(`Enable),.addrb(virtual_addr_i[`IndexBus]),.doutb(way1_cache[2]));
+    simple_dual_ram Bank3_way1 (.clka(clk),.ena(|wea_way1),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*4-1:32*3]),.clkb(clk),.enb(`Enable),.addrb(virtual_addr_i[`IndexBus]),.doutb(way1_cache[3]));
+    simple_dual_ram Bank4_way1 (.clka(clk),.ena(|wea_way1),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*5-1:32*4]),.clkb(clk),.enb(`Enable),.addrb(virtual_addr_i[`IndexBus]),.doutb(way1_cache[4]));
+    simple_dual_ram Bank5_way1 (.clka(clk),.ena(|wea_way1),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*6-1:32*5]),.clkb(clk),.enb(`Enable),.addrb(virtual_addr_i[`IndexBus]),.doutb(way1_cache[5]));
+    simple_dual_ram Bank6_way1 (.clka(clk),.ena(|wea_way1),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*7-1:32*6]),.clkb(clk),.enb(`Enable),.addrb(virtual_addr_i[`IndexBus]),.doutb(way1_cache[6]));
+    simple_dual_ram Bank7_way1 (.clka(clk),.ena(|wea_way1),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*8-1:32*7]),.clkb(clk),.enb(`Enable),.addrb(virtual_addr_i[`IndexBus]),.doutb(way1_cache[7]));                        
+//    bank_ram Bank0_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*1-1:32*0]),.douta(way1_cache[0]));
+//    bank_ram Bank1_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*2-1:32*1]),.douta(way1_cache[1]));
+//    bank_ram Bank2_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*3-1:32*2]),.douta(way1_cache[2]));
+//    bank_ram Bank3_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*4-1:32*3]),.douta(way1_cache[3]));
+//    bank_ram Bank4_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*5-1:32*4]),.douta(way1_cache[4]));
+//    bank_ram Bank5_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*6-1:32*5]),.douta(way1_cache[5]));
+//    bank_ram Bank6_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*7-1:32*6]),.douta(way1_cache[6]));
+//    bank_ram Bank7_way1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(virtual_addr_i[`IndexBus]), .dina(read_from_mem[32*8-1:32*7]),.douta(way1_cache[7]));
 
     //Tag+Valid
     wire [`TagVBus]tagv_cache_w0;
@@ -164,64 +166,11 @@ module ICache(
 //////////////////////////////////////////////////////////////////////////////////
     
     //STATE_SCAN_CACHE：选择ram中对应的bank
-    reg [`InstBus]inst1_way0;
-    reg [`InstBus]inst2_way0;
-    reg [`InstBus]inst1_way1;
-    reg [`InstBus]inst2_way1;
-    //way0
-    always@(*)begin
-        case(virtual_addr_i[4:2])
-            3'h0:inst1_way0 <= inst_cache_b0w0;
-            3'h1:inst1_way0 <= inst_cache_b1w0;
-            3'h2:inst1_way0 <= inst_cache_b2w0;
-            3'h3:inst1_way0 <= inst_cache_b3w0;
-            3'h4:inst1_way0 <= inst_cache_b4w0;
-            3'h5:inst1_way0 <= inst_cache_b5w0;
-            3'h6:inst1_way0 <= inst_cache_b6w0;
-            3'h7:inst1_way0 <= inst_cache_b7w0;
-            default: inst1_way0 <= `ZeroWord;
-        endcase
-    end
-    always@(*)begin
-        case(virtual_addr_i[4:2])
-            3'h0:inst2_way0 <= inst_cache_b1w0;
-            3'h1:inst2_way0 <= inst_cache_b2w0;
-            3'h2:inst2_way0 <= inst_cache_b3w0;
-            3'h3:inst2_way0 <= inst_cache_b4w0;
-            3'h4:inst2_way0 <= inst_cache_b5w0;
-            3'h5:inst2_way0 <= inst_cache_b6w0;
-            3'h6:inst2_way0 <= inst_cache_b7w0;
-            3'h7:inst2_way0 <= inst_cache_b0w0;
-            default: inst2_way0 <= `ZeroWord;
-        endcase
-    end
-    //way1
-    always@(*)begin
-        case(virtual_addr_i[4:2])
-            3'h0:inst1_way1 <= inst_cache_b0w1;
-            3'h1:inst1_way1 <= inst_cache_b1w1;
-            3'h2:inst1_way1 <= inst_cache_b2w1;
-            3'h3:inst1_way1 <= inst_cache_b3w1;
-            3'h4:inst1_way1 <= inst_cache_b4w1;
-            3'h5:inst1_way1 <= inst_cache_b5w1;
-            3'h6:inst1_way1 <= inst_cache_b6w1;
-            3'h7:inst1_way1 <= inst_cache_b7w1;
-            default: inst1_way1 <= `ZeroWord;
-        endcase
-    end
-    always@(*)begin
-        case(virtual_addr_i[4:2])
-            3'h0:inst2_way1 <= inst_cache_b1w1;
-            3'h1:inst2_way1 <= inst_cache_b2w1;
-            3'h2:inst2_way1 <= inst_cache_b3w1;
-            3'h3:inst2_way1 <= inst_cache_b4w1;
-            3'h4:inst2_way1 <= inst_cache_b5w1;
-            3'h5:inst2_way1 <= inst_cache_b6w1;
-            3'h6:inst2_way1 <= inst_cache_b7w1;
-            3'h7:inst2_way1 <= inst_cache_b0w1;
-            default: inst2_way1 <= `ZeroWord;
-        endcase
-    end
+    wire [`InstBus]inst1_way0 = way0_cache[virtual_addr_i[4:2]   ];
+    wire [`InstBus]inst2_way0 = way0_cache[virtual_addr_i[4:2]+3'h1 ];
+    wire [`InstBus]inst1_way1 = way1_cache[virtual_addr_i[4:2]   ];
+    wire [`InstBus]inst2_way1 = way1_cache[virtual_addr_i[4:2]+3'h1 ];
+    
     //Tag Hit
     wire hit_way0 = (tagv_cache_w0[19:0]==physical_addr[`TagBus] && tagv_cache_w0[20]==`Valid)? `HitSuccess : `HitFail;
     wire hit_way1 = (tagv_cache_w1[19:0]==physical_addr[`TagBus] && tagv_cache_w1[20]==`Valid)? `HitSuccess : `HitFail;
@@ -229,13 +178,13 @@ module ICache(
     
     
    //STATE_HIT_FAIL
-   assign mem_ren_o = (current_state==`STATE_HIT_FAIL )?`ReadEnable : `ReadDisable;
-   assign mem_araddr_o = physical_addr;
-   wire read_success = mem_rvalid_i;
+   assign mem_inst_ren_o = (current_state==`STATE_HIT_FAIL && !read_success)?`ReadEnable : `ReadDisable;
+   assign mem_inst_araddr_o = physical_addr;
+   wire read_success = mem_inst_rvalid_i;
    reg [`WayBus]read_from_mem;
    always@(posedge clk) begin 
         if(current_state==`STATE_HIT_FAIL )
-            read_from_mem<= mem_rdata_i;
+            read_from_mem<= mem_inst_rdata_i;
         else
             read_from_mem<= read_from_mem;
    end
@@ -248,6 +197,7 @@ module ICache(
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////输出控制//////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
+   
     assign cpu_inst1_o = (current_state==`STATE_SCAN_CACHE && hit_way0 == `HitSuccess)? inst1_way0:
                         (current_state==`STATE_SCAN_CACHE && hit_way1 == `HitSuccess)? inst1_way1:
                         (current_state==`STATE_WRITE_BACK &&virtual_addr_i[4:2] == 3'h0)? read_from_mem[32*1-1:32*0]:
@@ -276,8 +226,12 @@ module ICache(
                               (current_state==`STATE_WRITE_BACK)                        ? `Valid :
                               `Invalid ;
 							  
+			  
 	assign stall_o = (current_state == `STATE_SCAN_CACHE)? ~cpu_inst_valid_o: //not valid == stall_o
-					(current_state == `STATE_LOOK_UP )? cpu_req_i:`Invalid; 
+					(current_state == `STATE_LOOK_UP ) ? cpu_req_i:
+					(current_state == `STATE_HIT_FAIL ) ? `Valid:
+					(current_state == `STATE_WRITE_BACK ) ? `Invalid:
+					`Invalid; 
 	
-	assign single_shot = (virtual_addr_i[4:2] == 3'b111)? `Valid:`Invalid;//in the edge
+	assign single_issue_o = (virtual_addr_i[4:2] == 3'b111)? `Valid:`Invalid;//in the edge
 endmodule

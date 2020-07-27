@@ -9,7 +9,7 @@
 
 `include"defines.v"
 `include"defines_cache.v"
-module Cache(
+module CacheBeta1(
     input wire clk,
     input wire rst,
     
@@ -22,6 +22,7 @@ module Cache(
 	output wire [`InstBus] inst2_o,
 	output wire inst_stall_o,//高电平表示正在处理取指命令
 	output wire single_issue_i,//高电平表示ICache只能够支持单发
+	input wire flush,
     
 	//Data stall
 	output wire data_stall_o,//高电平表示正在处理访存命令
@@ -35,7 +36,7 @@ module Cache(
     input wire[`RegBus]data_wdata_i,
     input wire [`DataAddrBus]data_waddr_i,
     input wire [3:0] data_wsel_i,//选择需要写入的位数使能
-    //output wire data_bvalid_o,
+//    output wire data_bvalid_o,
 	
 	//AXI Communicate
 	output wire             axi_ce_o,
@@ -58,6 +59,14 @@ module Cache(
     );
 
 	
+//////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////Mapping Operation/////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
 //Notice:
 ///////1.DCache recieves only one port for addr, but cpu gives two,
 ///////  so we actually combine them here.
@@ -67,29 +76,17 @@ module Cache(
 	//Cache hit count
 	wire DCache_hit;
 	wire ICache_hit;
-	reg [127:0]total_dcache_hit;
-	reg [127:0]total_dcache_req;
 	reg [127:0]total_icache_hit;
 	reg [127:0]total_icache_req;
 	always@(posedge clk)begin
 		if(rst)
-			total_dcache_req <= 0;
+			total_icache_req <= 0;
 		else if(inst_valid_o)
 			total_icache_req <= total_icache_req + 1;
 		if(rst)
-			total_dcache_req <= 0;
+			total_icache_req <= 0;
 		else if(ICache_hit)
 			total_icache_req <= total_icache_req + 1;
-	end
-	always@(posedge clk)begin
-		if(rst)
-			total_dcache_req <= 0;
-		else if(data_rvalid_o)
-			total_dcache_req <= total_dcache_req + 1;
-		if(rst)
-			total_dcache_req <= 0;
-		else if(DCache_hit)
-			total_dcache_req <= total_dcache_req + 1;
 	end
 	
 	
@@ -108,14 +105,14 @@ module Cache(
     wire 				mem_data_wen_o;
     wire [`WayBus] 		mem_data_wdata_o;//一个块的大小
     wire [`DataAddrBus]	mem_data_awaddr_o;
-	ICache(
+	ICache ICache0(
 
 		clk,
-		rst,
+		rst|flush,
 		
 		//read inst request
 		inst_req_i,
-		inst_araddr_i,
+		inst_vaddr_i,
 		
 		//read inst result
 		ICache_hit,
@@ -159,7 +156,7 @@ module Cache(
     
     );
     
-	CacheAXI_Interface(
+	CacheAXI_Interface CacheAXI_Interface0(
 		clk,
 		rst,
 		//ICahce: Read Channel

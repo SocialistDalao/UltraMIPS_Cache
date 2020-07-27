@@ -12,7 +12,7 @@ module WriteBuffer(
 	//CPU read request and response
     input wire cpu_rreq_i,
     input wire [`DataAddrBus]cpu_araddr_i,
-	output reg read_hit_o,
+	output wire read_hit_o,
 	output reg [`WayBus]cpu_rdata_o,
 	
     //state
@@ -34,9 +34,9 @@ module WriteBuffer(
     //STATE_FULL `FIFOStateNumLog2'h3
     wire state_full;
     wire state_working;
-    assign state_full = (rst == `RstEnable)? `Invalid:
+    assign state_full = (rst)? `Invalid:
                         (FIFO_valid[tail] == `Valid)? `Valid: `Invalid;
-    assign state_working = (rst == `RstEnable)? `Invalid:
+    assign state_working = (rst)? `Invalid:
                         (FIFO_valid[head] == `Invalid)? `Invalid: `Valid;
     assign state_o = {state_full,state_working};
     
@@ -84,14 +84,7 @@ module WriteBuffer(
 	
 	//Read Hit
 	wire [`FIFONum-1:0]read_hit;
-//	assign read_hit_o = read_hit[7]| read_hit[6]| read_hit[5]| read_hit[4]| read_hit[3]| read_hit[2]| read_hit[1]| read_hit[0];
-    //Timing logic
-    always@(posedge clk)begin
-        if(rst)
-            read_hit_o <= `HitFail;
-        else
-            read_hit_o <= |read_hit;
-    end
+	assign read_hit_o = |read_hit;
 	for(genvar i = 0;i < `FIFONum; i = i+1)begin
 		assign read_hit[i] = ((cpu_araddr == FIFO_addr[i]) && FIFO_valid[i])? `HitSuccess: `HitFail;
 	end
@@ -142,7 +135,8 @@ module WriteBuffer(
     
     
     //总线处理
-    assign mem_wen_o = (state_o == `STATE_EMPTY)? `Invalid:`Valid;
+    assign mem_wen_o = (state_o == `STATE_EMPTY)? `Invalid:
+                        (mem_bvalid_i == `Valid)? `Invalid: `Valid;
     assign mem_awaddr_o = FIFO_addr[head];
     assign mem_wdata_o = FIFO_data[head];
 endmodule

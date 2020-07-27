@@ -60,7 +60,7 @@ module CacheAXI_Interface(
 	output wire             	axi_wlast_o,    //cache写最后一个数据
 	output wire [3:0]          axi_wlen_o    
     );
-	assign  axi_ce_o = (rst == `RstEnable)? `ChipDisable: `ChipEnable;
+	assign  axi_ce_o = rst? `ChipDisable: `ChipEnable;
 	assign  axi_sel_o = 4'b1111;//byte select
 	assign  axi_wlen_o = 4'h7;//byte select
 	assign  axi_rlen_o = 4'h7;//byte select
