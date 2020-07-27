@@ -31,8 +31,9 @@ module ICache_pipeline(
     output wire 				cpu_inst_valid_o,
     output wire [`InstBus] 		cpu_inst1_o,
     output wire [`InstBus] 		cpu_inst2_o,
+    output wire 				inst1_valid_o,
+    output wire 				inst2_valid_o,
 	output wire 				stall_o,
-	output wire 				single_issue_o,
     
     //read from mem
     input wire 					mem_inst_rvalid_i,
@@ -168,7 +169,7 @@ module ICache_pipeline(
 							(hit_fail == `Valid && read_success == `Success)? read_from_mem[virtual_addr_i[4:2]+3'h1]:
 							`ZeroWord;
 						
-    assign cpu_inst_valid_o = (hit_success == `HitSuccess)? `Valid :
+    assign inst1_valid_o = (hit_success == `HitSuccess)? `Valid :
                               (read_success == `Success)? `Valid :
                               `Invalid ;
 							  
@@ -176,7 +177,7 @@ module ICache_pipeline(
 	assign stall_o = (hit_fail == `Valid)? ~cpu_inst_valid_o: //not valid == stall_o
 					`Invalid; 
 	
-	assign single_issue_o = (physical_addr_2[4:2] == 3'b111)? `Valid:`Invalid;//in the edge
+	assign inst2_valid_o = (physical_addr_2[4:2] == 3'b111)? `Invalid: inst1_valid_o;//in the edge
 	
 	assign hit_o = hit_success;
 endmodule

@@ -30,6 +30,9 @@
 `define FIFOStateNumLog2 2
 `define FIFONum 8
 `define FIFONumLog2 3
+//Inst Buffer
+`define InstBufferSize 16
+`define InstBufferSizeLog2 4
 
 //Bus
 `define OffsetBus 4:0

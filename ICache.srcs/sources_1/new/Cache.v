@@ -125,8 +125,8 @@ module Cache(
 	//*CacheAXI interface channel*
 	reg 				interface_inst_req;
 	reg [`InstAddrBus]	interface_inst_araddr;
-	reg 				interface_inst_rvalid_i;
-	reg [`RegBus]		interface_inst_rdata_i;
+	wire 				interface_inst_rvalid_i;
+	wire [`DataBus]		interface_inst_rdata_i;
 	//*Cpu output operation*
 	reg 				ICache_stall;
 	reg [`InstBus]		ICache_inst1;
@@ -165,11 +165,12 @@ module Cache(
 	//*CacheAXI interface channel*
 	reg 				interface_data_rreq;
 	reg [`InstAddrBus]	interface_data_araddr;
-	reg 				interface_data_rvalid_i;
-	reg [`DataBus]		interface_data_rdata_i;
+	wire 				interface_data_rvalid_i;
+	wire [`DataBus]		interface_data_rdata_i;
 	//*Cpu output operation*
-	reg 				dcache_stall;
-	reg 				DCache_rdata_o;
+	wire 				dcache_stall;
+	reg 				data_uncached_rstall;
+	wire 				DCache_rdata_o;
 	
 	//**Data Write Uncached Operation**
 	reg 				DCache_wreq;
@@ -179,9 +180,7 @@ module Cache(
 	reg [`DataBus]		interface_data_wdata;
 	reg 				interface_data_bvalid_i;
 	//*Cpu output operation*
-	reg 				dcache_stall;
 	reg 				data_uncached_wstall;
-	reg 				data_uncached_rstall;
 	always@(*)begin
 		if(rst)begin
 			//read
@@ -290,20 +289,16 @@ module Cache(
 		//ICahce: Read Channel
 		interface_inst_req,
 		interface_inst_araddr,
+		inst_uncached,
 		interface_inst_rvalid_i,
 		interface_inst_rdata_i,
 		
 		//Data: Read Channel
-		mem_data_rvalid_i,
-		mem_data_rdata_i,
 		mem_data_ren_o,
 		mem_data_araddr_o,
-		
-		//Data Uncached: Read Channel
-		interface_data_rreq,
-		interface_data_araddr,
-		interface_data_rvalid_i,
-		interface_data_rdata_i,
+		data_uncached,
+		mem_data_rvalid_i,
+		mem_data_rdata_i,
 		
 		//Data: Write Channel
 		mem_data_wen_o,
@@ -311,10 +306,16 @@ module Cache(
 		mem_data_awaddr_o,
 		mem_data_bvalid_i,
 		
-		//Data Uncached: WriteChannel
+		//Data Uncached: Read Channel
+		interface_data_rreq,
+		interface_data_araddr,
+		interface_data_rvalid_i,
+		interface_data_rdata_i,
+		
+		//Data Uncached: Write Channel
 		interface_data_wreq,
-		interface_data_awaddr,
 		interface_data_wdata,
+		interface_data_awaddr,
 		interface_data_bvalid_i,
 		
 		//AXI Communicate
