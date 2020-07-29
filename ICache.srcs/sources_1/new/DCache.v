@@ -95,15 +95,16 @@ module DCache(
         end
     end
     //TLB
-    wire [`InstAddrBus]physical_addr=virtual_addr;
-    wire index = physical_addr[`IndexBus];
-    wire offset = physical_addr[`OffsetBus];
-    //TLB tlb0(
-    //.virtual_addr_i(virtual_addr),
-    //.physical_addr_o(physical_addr)
-    //);
+    wire [`InstAddrBus]physical_addr = virtual_addr;
+//    wire index = physical_addr[`IndexBus];
+//    wire offset = physical_addr[`OffsetBus];
+//    TLB tlb0(
+//    .virtual_addr_i(virtual_addr),
+//    .physical_addr_o(physical_addr)
+//    );
 	//WriteBuffer
 	wire [`WayBus]FIFO_rdata;
+	wire [`DataAddrBus]FIFO_waddr;
 	reg [`WayBus]FIFO_wdata;
 	wire FIFO_hit;
 	wire FIFO_wreq;
@@ -113,7 +114,7 @@ module DCache(
         .rst(rst),
         //CPU write request
         .cpu_wreq_i(FIFO_wreq),
-        .cpu_awaddr_i(physical_addr),
+        .cpu_awaddr_i(FIFO_waddr),
         .cpu_wdata_i(FIFO_wdata),//WaySize
         //CPU read request and response
         .cpu_rreq_i(cpu_rreq_i),
@@ -199,7 +200,7 @@ module DCache(
     always@(posedge clk)begin
         if(rst)
             dirty<=0;
-		else if(current_state == `STATE_FETCH_DATA && cpu_data_valid_o == `Valid && func == `WriteDisable)//Read not hit
+		else if(current_state == `STATE_FETCH_DATA && bus_read_success == `Valid && func == `WriteDisable)//Read not hit
             dirty[{virtual_addr[`IndexBus],LRU_pick}] <= `NotDirty;
 		else if(current_state == `STATE_FETCH_DATA && mem_rvalid_i == `Valid && func == `WriteEnable)//write not hit
             dirty[{virtual_addr[`IndexBus],LRU_pick}] <= `Dirty;
@@ -336,7 +337,9 @@ module DCache(
                      (current_state==`STATE_FETCH_DATA && hit_way1 == `HitSuccess  && func == `WriteEnable )? cpu_wsel_i : 4'h0;//write hit
                      
 	assign FIFO_wreq = (current_state == `STATE_FETCH_DATA && FIFO_hit == `HitSuccess && func == `WriteEnable)? `WriteEnable:
-	                   (bus_read_success == `Success && FIFO_state != `STATE_FULL && func==`WriteEnable && write_dirty == `Dirty)? `WriteEnable: `WriteDisable;
+	                   (bus_read_success == `Success && FIFO_state != `STATE_FULL && write_dirty == `Dirty)? `WriteEnable: `WriteDisable;
+   assign FIFO_waddr = (LRU_pick == 1'b1)?  {tagv_cache_w1[19:0],physical_addr[11:0]}:
+                        {tagv_cache_w0[19:0],physical_addr[11:0]};
    //AXI read requirements
    assign mem_ren_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitFail) ?  ~bus_read_success:`ReadDisable;
    assign mem_araddr_o = physical_addr;
@@ -348,13 +351,13 @@ module DCache(
 		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteEnable)begin//write hit fail
 			case(virtual_addr[4:2])
 				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*1-1:32*0] & ~wsel_expand)};
-				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*1-1:32*0] & ~wsel_expand),mem_rdata_i[32*2-1:32*1]};
-				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*3-1:32*2] & ~wsel_expand),mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
-				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*4-1:32*3] & ~wsel_expand),mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
-				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*5-1:32*4] & ~wsel_expand),mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
-				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*6-1:32*5] & ~wsel_expand),mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
-				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*7-1:32*6] & ~wsel_expand),mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
-				3'h0:read_from_mem <= {(cpu_wdata & wsel_expand)|(mem_rdata_i[32*8-1:32*7] & ~wsel_expand),mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
+				3'h1:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*1-1:32*0] & ~wsel_expand),mem_rdata_i[32*2-1:32*1]};
+				3'h2:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*3-1:32*2] & ~wsel_expand),mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
+				3'h3:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*4-1:32*3] & ~wsel_expand),mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
+				3'h4:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*5-1:32*4] & ~wsel_expand),mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
+				3'h5:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*6-1:32*5] & ~wsel_expand),mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
+				3'h6:read_from_mem <= {mem_rdata_i[32*8-1:32*7],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*7-1:32*6] & ~wsel_expand),mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
+				3'h7:read_from_mem <= {(cpu_wdata & wsel_expand)|(mem_rdata_i[32*8-1:32*7] & ~wsel_expand),mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
 				default: read_from_mem <= mem_rdata_i;
 			endcase
 		end
@@ -409,16 +412,16 @@ module DCache(
    //write to FIFO 
 	always@(*)begin
 	   FIFO_wdata <= `ZeroWay;
-	   if(current_state == `STATE_FETCH_DATA)begin
+	   if(current_state == `STATE_FETCH_DATA && FIFO_hit == `HitSuccess)begin
             case(virtual_addr[4:2])
                 3'h0:FIFO_wdata <= {FIFO_rdata[8*32-1:1*32],cpu_wdata};
                 3'h1:FIFO_wdata <= {FIFO_rdata[8*32-1:2*32],cpu_wdata,FIFO_rdata[1*32-1:0*32]};
-                3'h2:FIFO_wdata <= {FIFO_rdata[8*32-1:3*32],cpu_wdata,FIFO_rdata[2*32-1:1*32]};
-                3'h3:FIFO_wdata <= {FIFO_rdata[8*32-1:4*32],cpu_wdata,FIFO_rdata[3*32-1:2*32]};
-                3'h4:FIFO_wdata <= {FIFO_rdata[8*32-1:5*32],cpu_wdata,FIFO_rdata[4*32-1:3*32]};
-                3'h5:FIFO_wdata <= {FIFO_rdata[8*32-1:6*32],cpu_wdata,FIFO_rdata[5*32-1:4*32]};
-                3'h6:FIFO_wdata <= {FIFO_rdata[8*32-1:7*32],cpu_wdata,FIFO_rdata[6*32-1:5*32]};
-                3'h7:FIFO_wdata <= {cpu_wdata,FIFO_rdata[7*32-1:6*32]};
+                3'h2:FIFO_wdata <= {FIFO_rdata[8*32-1:3*32],cpu_wdata,FIFO_rdata[2*32-1:0*32]};
+                3'h3:FIFO_wdata <= {FIFO_rdata[8*32-1:4*32],cpu_wdata,FIFO_rdata[3*32-1:0*32]};
+                3'h4:FIFO_wdata <= {FIFO_rdata[8*32-1:5*32],cpu_wdata,FIFO_rdata[4*32-1:0*32]};
+                3'h5:FIFO_wdata <= {FIFO_rdata[8*32-1:6*32],cpu_wdata,FIFO_rdata[5*32-1:0*32]};
+                3'h6:FIFO_wdata <= {FIFO_rdata[8*32-1:7*32],cpu_wdata,FIFO_rdata[6*32-1:0*32]};
+                3'h7:FIFO_wdata <= {cpu_wdata,FIFO_rdata[7*32-1:0*32]};
                 default:;                                         
             endcase
 	   end
@@ -426,7 +429,7 @@ module DCache(
             if(LRU_pick == 1'b0)begin//0¡¤???I
                 FIFO_wdata <= {inst_cache_b7w0,inst_cache_b6w0,inst_cache_b5w0,inst_cache_b4w0,inst_cache_b3w0,inst_cache_b2w0,inst_cache_b1w0,inst_cache_b0w0};
             end
-            else if(LRU_pick == 1'b1)begin//1¡¤???I
+            else begin//1¡¤???I
                 FIFO_wdata <= {inst_cache_b7w1,inst_cache_b6w1,inst_cache_b5w1,inst_cache_b4w1,inst_cache_b3w1,inst_cache_b2w1,inst_cache_b1w1,inst_cache_b0w1};
             end
        end
@@ -456,4 +459,10 @@ module DCache(
                               (current_state==`STATE_FETCH_DATA && bus_read_success == `Success && func == `WriteDisable)? `Valid :
 //                              (current_state==`STATE_WRITE_DATA)                        ? `Valid :
                               `Invalid ;
+                              
+      //simulation signals
+      wire [6:0]index = virtual_addr_i[11:5];
+      wire [3:0]offset = virtual_addr_i[4:2];
+      wire [19:0]TagWay0 = tagv_cache_w0[19:0];
+      wire [19:0]TagWay1 = tagv_cache_w1[19:0];
 endmodule

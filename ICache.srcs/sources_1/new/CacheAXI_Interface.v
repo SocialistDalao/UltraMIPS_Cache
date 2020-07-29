@@ -213,12 +213,15 @@ module CacheAXI_Interface(
 	end
 	
 	//AXI
-	assign  axi_wlen_o   = (read_state == `STATE_WRITE_DUNCACHED )?4'h0:4'h7;//byte select
+	assign  axi_wlen_o   = (write_state == `STATE_WRITE_DUNCACHED ||(write_state == `STATE_WRITE_FREE && ducache_wen_i == 1'b1))?4'h0:4'h7;//byte select
+	
 	assign  axi_wen_o    = (write_state == `STATE_WRITE_FREE) ? `WriteDisable : `WriteEnable;
 	assign  axi_wvalid_o = (write_state == `STATE_WRITE_FREE)? `Invalid: `Valid;
     
-    assign  axi_rlen_o  = (read_state == `STATE_READ_IUNCACHED 
-                            || read_state == `STATE_READ_DUNCACHED )?4'h0:4'h7;//byte select
+    assign  axi_rlen_o  = ((read_state == `STATE_READ_IUNCACHED || read_state == `STATE_READ_DUNCACHED ) || 
+                           ((read_state == `STATE_READ_FREE)&&(ducache_ren_i)) || 
+                           ((read_state == `STATE_READ_FREE)&&(inst_ren_i)&&(inst_uncached)))?4'h0:4'h7;//byte select
+                           
 	assign  axi_waddr_o = (write_state == `STATE_WRITE_DUNCACHED)?
 	                       ducache_awaddr_i:{data_awaddr_i[31:5],write_count,2'b00};
 	assign  axi_wlast_o = (write_state == `STATE_WRITE_BUSY && write_count == 3'h7)? 

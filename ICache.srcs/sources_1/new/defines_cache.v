@@ -30,9 +30,6 @@
 `define FIFOStateNumLog2 2
 `define FIFONum 8
 `define FIFONumLog2 3
-//Inst Buffer
-`define InstBufferSize 16
-`define InstBufferSizeLog2 4
 
 //Bus
 `define OffsetBus 4:0
@@ -111,7 +108,18 @@
 `define AXBURST  1:0
 
 //×´Ì¬»ú
+/*
 `define AXI_IDLE 4'b00
 `define ARVALID  4'b01
 `define AWVALID  4'b10
-`define BREADY   4'b11
+`define BREADY   4'b11*/
+
+//×´Ì¬»ú
+`define AXI_IDLE 3'b000
+`define ARREADY  3'b001   //wait for arready
+`define RVALID   3'b010   //wait for rvalid
+`define RLAST    3'b011   //wait for rlast
+`define AWREADY  3'b100   //wait for awready
+`define WREADY   3'b101   //wair for wready    
+`define BVALID   3'b110   //wait for bvalid
+

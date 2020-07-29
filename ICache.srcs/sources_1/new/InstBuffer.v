@@ -6,22 +6,26 @@ module InstBuffer(
     input rst,
 	input flush,
     //Issue
-    input wire 				single_issue_i,//whether issue stage has issued one inst
-    input wire 				issue_i,// Whether issue stage has issued inst
-    output wire [`InstBus]	issue_inst1_o,
-    output wire [`InstBus]	issue_inst2_o,
-    output wire 			issue_inst1_valid_o,
-    output wire 			issue_inst2_valid_o,
-	//Fetch inst
-    input wire [`InstBus]	ICache_inst1_i,
-    input wire [`InstBus]	ICache_inst2_i,
-    input wire 				ICache_inst1_valid_o,
-    input wire 				ICache_inst2_valid_o,
-	output wire 			buffer_full_i,
+    input wire 					single_issue_i,//whether issue stage has issued one inst
+    input wire 					issue_i,// Whether issue stage has issued inst
+    output wire [`InstBus]		issue_inst1_o,
+    output wire [`InstBus]		issue_inst2_o,
+    output wire [`InstBus]		issue_inst1_addr_o,
+    output wire [`InstBus]		issue_inst2_addr_o,
+    output wire 				issue_ok_o,//when there are 3 or more inst in FIFO, we can issue
+	//Fetch inst	
+    input wire [`InstBus]		ICache_inst1_i,
+    input wire [`InstBus]		ICache_inst2_i,
+	input wire [`InstAddrBus] 	inst1_addr_i,
+	input wire [`InstAddrBus] 	inst2_addr_i,
+    input wire 					ICache_inst1_valid_o,
+    input wire 					ICache_inst2_valid_o,
+	output wire 				buffer_full_i,
 	
     );
 	//队列本体
     reg [`InstBus]FIFO_data[`InstBufferSize-1:0];
+    reg [`InstAddrBus]FIFO_addr[`InstBufferSize-1:0];
 	
     //头尾指针维护
     reg [`InstBufferSizeLog2-1:0]tail;//表征当前正在写入的数据位置
@@ -61,6 +65,8 @@ module InstBuffer(
     always@(posedge clk)begin
 		FIFO_data[tail] <= ICache_inst1_i;
 		FIFO_data[tail+`InstBufferSizeLog2'h1] <= ICache_inst2_i;
+		FIFO_addr[tail] <= ICache_inst1_addr_i;
+		FIFO_addr[tail+`InstBufferSizeLog2'h1] <= ICache_inst2_addr_i;
     end
 	   
 //////////////////////////////////////////////////////////////////////////////////
@@ -68,8 +74,9 @@ module InstBuffer(
 //////////////////////////////////////////////////////////////////////////////////
 	assign issue_inst1_o = FIFO_data[head];
 	assign issue_inst2_o = FIFO_data[head+`InstBufferSizeLog2'h1];
-	assign issue_inst1_valid_o = FIFO_valid[head];
-	assign issue_inst1_valid_o = FIFO_valid[head+`InstBufferSizeLog2'h1];
+	assign issue_inst1_addr_o = FIFO_addr[head];
+	assign issue_inst2_addr_o = FIFO_addr[head+`InstBufferSizeLog2'h1];
+	assign issue_ok_o = FIFO_valid[head+`InstBufferSizeLog2'h2];
     //full
 	assign buffer_full_i = FIFO_valid[tail+`InstBufferSizeLog2'h1];
 endmodule

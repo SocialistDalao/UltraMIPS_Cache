@@ -9,52 +9,52 @@
 
 `include"defines.v"
 `include"defines_cache.v"
-module Cache(
+module CacheBeta1(
     input wire clk,
     input wire rst,
     
 	//Inst
-	input wire 					inst_req_i,//高电平表示cpu发起取指令
+	input wire 					inst_req_i,//锟竭碉拷平锟斤拷示cpu锟斤拷锟斤拷取指锟斤拷
 	input wire [`RegBus]		inst_vaddr_i,
-	output wire 				inst_hit_o,//可选，表示ICache命中
-	output wire 				inst_valid_o,//高电平表示当前输出inst有效
+	output wire 				inst_hit_o,//锟斤拷选锟斤拷锟斤拷示ICache锟斤拷锟斤拷
+	output wire 				inst_valid_o,//锟竭碉拷平锟斤拷示锟斤拷前锟斤拷锟絠nst锟斤拷效
 	output reg [`InstBus] 		inst1_o,
 	output wire [`InstBus] 		inst2_o,
-	output reg 				    inst_stall_o,//高电平表示正在处理取指命令
-	output reg 				    single_issue_o,//高电平表示ICache只能够支持单发
+	output reg 				    inst_stall_o,//锟竭碉拷平锟斤拷示锟斤拷锟节达拷锟斤拷取指锟斤拷锟斤拷
+	output reg 				    single_issue_o,//锟竭碉拷平锟斤拷示ICache只锟杰癸拷支锟街碉拷锟斤拷
 	input wire 					flush,
     
 	//Data stall
-	output wire 				data_stall_o,//高电平表示正在处理访存命令
+	output wire 				data_stall_o,//锟竭碉拷平锟斤拷示锟斤拷锟节达拷锟斤拷锟矫达拷锟斤拷锟斤拷
 	//Data : Read Channel
-    input wire 					data_rreq_i,//高电平表示cpu发起取数据
+    input wire 					data_rreq_i,//锟竭碉拷平锟斤拷示cpu锟斤拷锟斤拷取锟斤拷锟斤拷
     input wire[`DataAddrBus]	data_raddr_i,
-    output wire 				data_rvalid_o,//高电平表示当前输出data有效
+    output wire 				data_rvalid_o,//锟竭碉拷平锟斤拷示锟斤拷前锟斤拷锟絛ata锟斤拷效
     output reg [`RegBus]		data_rdata_o,
 	//Data: Write Channel
-    input wire 					data_wreq_i,//高电平表示cpu发起写数据
+    input wire 					data_wreq_i,//锟竭碉拷平锟斤拷示cpu锟斤拷锟斤拷写锟斤拷锟斤拷
     input wire[`RegBus]			data_wdata_i,
     input wire [`DataAddrBus]	data_waddr_i,
-    input wire [3:0] 			data_wsel_i,//选择需要写入的位数使能
+    input wire [3:0] 			data_wsel_i,//选锟斤拷锟斤拷要写锟斤拷锟轿伙拷锟绞癸拷锟?
 //    output wire data_bvalid_o,
 	
 	//AXI Communicate
 	output wire             axi_ce_o,
-	output wire             axi_sel_o,
+	output wire [3:0]             axi_sel_o,
 	//AXI read
-	input wire[`RegBus]    	axi_rdata_i,        //返回到cache的读取数据
-	input wire             	axi_rvalid_i,  //返回数据可获取
+	input wire[`RegBus]    	axi_rdata_i,        //锟斤拷锟截碉拷cache锟侥讹拷取锟斤拷锟斤拷
+	input wire             	axi_rvalid_i,  //锟斤拷锟斤拷锟斤拷锟捷可伙拷取
 	output wire             axi_ren_o,
-	output wire             axi_rready_o,   //cache端准备好读
+	output wire             axi_rready_o,   //cache锟斤拷准锟斤拷锟矫讹拷
 	output wire[`RegBus]    axi_raddr_o,
 	output wire [3:0]       axi_rlen_o,		//read burst length
 	//AXI write
-	input wire             	axi_bvalid_i,   //写响应,每个beat发一次，成功则可以传下一数据
+	input wire             	axi_bvalid_i,   //写锟斤拷应,每锟斤拷beat锟斤拷一锟轿ｏ拷锟缴癸拷锟斤拷锟斤拷源锟斤拷锟揭伙拷锟斤拷锟?
 	output wire             axi_wen_o,
 	output wire[`RegBus]    axi_waddr_o,
-	output wire[`RegBus]    axi_wdata_o,    //cache最好保证在每个时钟沿更新要写的内容
-	output wire             axi_wvalid_o,   //cache端准备好写的数据，最好是持续
-	output wire             axi_wlast_o,    //cache写最后一个数据
+	output wire[`RegBus]    axi_wdata_o,    //cache锟斤拷帽锟街わ拷锟矫匡拷锟绞憋拷锟斤拷馗锟斤拷锟揭达拷锟斤拷锟斤拷锟?
+	output wire             axi_wvalid_o,   //cache锟斤拷准锟斤拷锟斤拷写锟斤拷锟斤拷锟捷ｏ拷锟斤拷锟斤拷浅锟斤拷锟?
+	output wire             axi_wlast_o,    //cache写锟斤拷锟揭伙拷锟斤拷锟斤拷锟?
 	output wire [3:0]       axi_wlen_o		//write burst length
     );
 
@@ -89,7 +89,7 @@ module Cache(
 	
 	//inst read
 	wire 				mem_inst_rvalid_i;
-	wire [`WayBus]		mem_inst_rdata_i;//一个块的大小
+	wire [`WayBus]		mem_inst_rdata_i;//一锟斤拷锟斤拷拇锟叫?
 	wire 				mem_inst_ren_o;
 	wire [`InstAddrBus]	mem_inst_araddr_o;
     //data read
@@ -100,23 +100,23 @@ module Cache(
 	//data write
     wire 				mem_data_bvalid_i;
     wire 				mem_data_wen_o;
-    wire [`WayBus] 		mem_data_wdata_o;//一个块的大小
+    wire [`WayBus] 		mem_data_wdata_o;//一锟斤拷锟斤拷拇锟叫?
     wire [`DataAddrBus]	mem_data_awaddr_o;
 	
 	//TLB
-	wire inst_uncached;
+	wire inst_uncached = `Invalid;
 	wire [`InstAddrBus]inst_paddr_i;
 	TLB tlb_inst(
     .virtual_addr_i(inst_vaddr_i),
-    .physical_addr_o(inst_paddr_i),
-    .uncache(inst_uncached)
+    .physical_addr_o(inst_paddr_i)
+//    .uncached(inst_uncached)
     );
 	wire data_uncached;
 	wire [`InstAddrBus]data_paddr_i;
 	TLB tlb_data(
     .virtual_addr_i(virtual_addr_i),
     .physical_addr_o(data_paddr_i),
-    .uncache(data_uncached)
+    .uncached(data_uncached)
     );
 	
 	//**Inst Uncached Operation**
@@ -126,11 +126,11 @@ module Cache(
 	reg 				interface_inst_req;
 	reg [`InstAddrBus]	interface_inst_araddr;
 	wire 				interface_inst_rvalid_i;
-	wire [`DataBus]		interface_inst_rdata_i;
+	wire [`WayBus]		interface_inst_rdata_i;
 	//*Cpu output operation*
-	reg 				ICache_stall;
-	reg [`InstBus]		ICache_inst1;
-	reg 				ICache_single_issue;
+	wire 				ICache_stall;
+	wire [`InstBus]		ICache_inst1;
+	wire 				ICache_single_issue;
 	always@(*)begin
 		if(rst|flush)begin
 			ICache_req 				<= `Invalid;
@@ -142,10 +142,10 @@ module Cache(
 		end
 		else if(inst_uncached)begin
 			ICache_req 				<= 	`Invalid;
-			interface_inst_req 		<= 	inst_req_i;
+			interface_inst_req 		<= 	inst_req_i & ~interface_inst_rvalid_i;
 			interface_inst_araddr 	<= 	inst_paddr_i;
-			inst_stall_o 			<= ~interface_inst_rvalid_i;
-			inst1_o 				<= 	interface_inst_rdata_i;
+			inst_stall_o 			<= ~interface_inst_rvalid_i & inst_req_i;
+			inst1_o 				<= 	interface_inst_rdata_i[`InstBus];
 			single_issue_o			<= `Valid;
 		end
 		else begin
@@ -170,7 +170,7 @@ module Cache(
 	//*Cpu output operation*
 	wire 				dcache_stall;
 	reg 				data_uncached_rstall;
-	wire 				DCache_rdata_o;
+	wire[`DataBus] 		DCache_rdata_o;
 	
 	//**Data Write Uncached Operation**
 	reg 				DCache_wreq;
@@ -178,7 +178,7 @@ module Cache(
 	reg 				interface_data_wreq;
 	reg [`DataAddrBus]	interface_data_awaddr;
 	reg [`DataBus]		interface_data_wdata;
-	reg 				interface_data_bvalid_i;
+	wire 				interface_data_bvalid_i;
 	//*Cpu output operation*
 	reg 				data_uncached_wstall;
 	always@(*)begin
@@ -199,16 +199,16 @@ module Cache(
 		else if(data_uncached)begin
 			//read
 			DCache_rreq 			<= `Invalid;
-			interface_data_rreq 	<= 	data_rreq_i;
+			interface_data_rreq 	<= 	data_rreq_i & ~interface_data_rvalid_i;
 			interface_data_araddr 	<= 	data_paddr_i;
 			data_rdata_o			<= 	interface_data_rdata_i;
-			data_uncached_rstall	<= ~interface_data_rvalid_i;
+			data_uncached_rstall	<= ~interface_data_rvalid_i & data_rreq_i;
 			//write
 			DCache_wreq				<= `Invalid;
-			interface_data_wreq		<=  data_wreq_i;
+			interface_data_wreq		<=  data_wreq_i & ~interface_data_bvalid_i;
 			interface_data_awaddr   <=  data_paddr_i;
 			interface_data_wdata    <=  data_wdata_i;
-			data_uncached_wstall    <= ~interface_data_bvalid_i;
+			data_uncached_wstall    <= ~interface_data_bvalid_i & data_wreq_i;
 		end
 		else begin
 			//read
@@ -219,7 +219,7 @@ module Cache(
 			data_rdata_o			<=  DCache_rdata_o;
 			//write
 			DCache_wreq				<=  data_wreq_i;
-			interface_data_wreq		<=  mem_inst_ren_o;
+			interface_data_wreq		<= `Invalid;
 			interface_data_awaddr   <=  data_waddr_i;
 			interface_data_wdata    <=  data_wdata_i;
 			data_uncached_wstall    <= `Invalid;
@@ -322,19 +322,19 @@ module Cache(
 		axi_ce_o,
 		axi_sel_o,
 		//AXI read
-		axi_rdata_i,        //返回到cache的读取数据
-		axi_rvalid_i,  //返回数据可获取
+		axi_rdata_i,        //锟斤拷锟截碉拷cache锟侥讹拷取锟斤拷锟斤拷
+		axi_rvalid_i,  //锟斤拷锟斤拷锟斤拷锟捷可伙拷取
 		axi_ren_o,
-		axi_rready_o,   //cache端准备好读
+		axi_rready_o,   //cache锟斤拷准锟斤拷锟矫讹拷
 		axi_raddr_o,
 		axi_rlen_o,		//read burst length
 		//AXI write
-		axi_bvalid_i,   //写响应,每个beat发一次，成功则可以传下一数据
+		axi_bvalid_i,   //写锟斤拷应,每锟斤拷beat锟斤拷一锟轿ｏ拷锟缴癸拷锟斤拷锟斤拷源锟斤拷锟揭伙拷锟斤拷锟?
 		axi_wen_o,
 		axi_waddr_o,
-		axi_wdata_o,    //cache最好保证在每个时钟沿更新要写的内容
-		axi_wvalid_o,   //cache端准备好写的数据，最好是持续
-		axi_wlast_o,    //cache写最后一个数据
+		axi_wdata_o,    //cache锟斤拷帽锟街わ拷锟矫匡拷锟绞憋拷锟斤拷馗锟斤拷锟揭达拷锟斤拷锟斤拷锟?
+		axi_wvalid_o,   //cache锟斤拷准锟斤拷锟斤拷写锟斤拷锟斤拷锟捷ｏ拷锟斤拷锟斤拷浅锟斤拷锟?
+		axi_wlast_o,    //cache写锟斤拷锟揭伙拷锟斤拷锟斤拷锟?
 		axi_wlen_o		//read burst length
 	);
 
