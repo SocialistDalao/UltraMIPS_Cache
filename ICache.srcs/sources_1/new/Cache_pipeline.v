@@ -14,10 +14,10 @@ module Cache_pipeline(
     input wire rst,
     
 	//Inst
-	input wire 					inst_req_i,//�ߵ�ƽ��ʾcpu����ȡָ��
+	input wire 					inst_req_i,//???????cpu????????
 	input wire [`RegBus]		inst_vaddr_i,
-	output wire 				inst_hit_o,//��ѡ����ʾICache����
-	output wire 				inst_valid_o,//�ߵ�ƽ��ʾ��ǰ���inst��Ч
+	output wire 				inst_hit_o,//????????ICache????
+	output wire 				inst_valid_o,//?????????????inst??��
 	output reg [`InstBus] 		inst1_o,
 	output wire [`InstBus] 		inst2_o,
 	output wire [`InstAddrBus] 	inst1_addr_o,
@@ -25,41 +25,41 @@ module Cache_pipeline(
     output reg 					inst1_valid_o,
     output reg 					inst2_valid_o,
 	output wire					pc_stall_o,
-	//output reg 				    inst_stall_o,//�ߵ�ƽ��ʾ���ڴ���ȡָ����
-	//output reg 				    single_issue_o,//�ߵ�ƽ��ʾICacheֻ�ܹ�֧�ֵ���
+	//output reg 				    inst_stall_o,//????????????????????
+	//output reg 				    single_issue_o,//???????ICache??????????
 	input wire 					flush,
     
 	//Data stall
-	output wire 				data_stall_o,//�ߵ�ƽ��ʾ���ڴ����ô�����
+	output wire 				data_stall_o,//?????????????????????
 	//Data : Read Channel
-    input wire 					data_rreq_i,//�ߵ�ƽ��ʾcpu����ȡ����
+    input wire 					data_rreq_i,//???????cpu?????????
     input wire[`DataAddrBus]	data_raddr_i,
-    output wire 				data_rvalid_o,//�ߵ�ƽ��ʾ��ǰ���data��Ч
+    output wire 				data_rvalid_o,//?????????????data??��
     output reg [`RegBus]		data_rdata_o,
 	//Data: Write Channel
-    input wire 					data_wreq_i,//�ߵ�ƽ��ʾcpu����д����
+    input wire 					data_wreq_i,//???????cpu????��????
     input wire[`RegBus]			data_wdata_i,
     input wire [`DataAddrBus]	data_waddr_i,
-    input wire [3:0] 			data_wsel_i,//ѡ����Ҫд���λ��ʹ��?
+    input wire [3:0] 			data_wsel_i,//??????��???��?????
 //    output wire data_bvalid_o,
 	
 	//AXI Communicate
 	output wire             axi_ce_o,
 	output wire             axi_sel_o,
 	//AXI read
-	input wire[`RegBus]    	axi_rdata_i,        //���ص�cache�Ķ�ȡ����
-	input wire             	axi_rvalid_i,  //�������ݿɻ�ȡ
+	input wire[`RegBus]    	axi_rdata_i,        //?????cache????????
+	input wire             	axi_rvalid_i,  //???????????
 	output wire             axi_ren_o,
-	output wire             axi_rready_o,   //cache��׼���ö�
+	output wire             axi_rready_o,   //cache????????
 	output wire[`RegBus]    axi_raddr_o,
 	output wire [3:0]       axi_rlen_o,		//read burst length
 	//AXI write
-	input wire             	axi_bvalid_i,   //д��Ӧ,ÿ��beat��һ�Σ��ɹ�����Դ���һ����?
+	input wire             	axi_bvalid_i,   //��???,???beat????��?????????????????
 	output wire             axi_wen_o,
 	output wire[`RegBus]    axi_waddr_o,
-	output wire[`RegBus]    axi_wdata_o,    //cache��ñ�֤��ÿ��ʱ���ظ����?д������??
-	output wire             axi_wvalid_o,   //cache��׼����д�����ݣ�����ǳ���?
-	output wire             axi_wlast_o,    //cacheд���һ������?
+	output wire[`RegBus]    axi_wdata_o,    //cache???????????????????��??????
+	output wire             axi_wvalid_o,   //cache???????��???????????????
+	output wire             axi_wlast_o,    //cache��??????????
 	output wire [3:0]       axi_wlen_o		//write burst length
     );
 
@@ -91,10 +91,12 @@ module Cache_pipeline(
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////Mapping Operation/////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
+	//In this section, we deal with cached and uncached operation
+	//and give related control signals to Cache and AXI.
 	
 	//inst read
 	wire 				mem_inst_rvalid_i;
-	wire [`WayBus]		mem_inst_rdata_i;//һ����Ĵ��?
+	wire [`WayBus]		mem_inst_rdata_i;//???????��
 	wire 				mem_inst_ren_o;
 	wire [`InstAddrBus]	mem_inst_araddr_o;
     //data read
@@ -105,7 +107,7 @@ module Cache_pipeline(
 	//data write
     wire 				mem_data_bvalid_i;
     wire 				mem_data_wen_o;
-    wire [`WayBus] 		mem_data_wdata_o;//һ����Ĵ��?
+    wire [`WayBus] 		mem_data_wdata_o;//???????��
     wire [`DataAddrBus]	mem_data_awaddr_o;
 	
 	//TLB
@@ -133,6 +135,7 @@ module Cache_pipeline(
 	wire 				interface_inst_rvalid_i;
 	wire [`WayBus]		interface_inst_rdata_i;
 	//*Cpu output operation*
+	
 	//wire 				ICache_stall;
 	wire [`InstBus]		ICache_inst1;
 	wire 				ICache_inst1_valid_o;
@@ -170,69 +173,117 @@ module Cache_pipeline(
 	
 	
 	
-	//**Data Read Uncached Operation**
+	//**Data READ Uncached Operation**
+	//*Uncached: CacheAXI_Interface*
+	reg 				interface_uncached_data_rreq;
+	reg [`InstAddrBus]	interface_uncached_data_araddr;
+	wire 				interface_uncached_data_rvalid_i;
+	wire [`DataBus]		interface_uncached_data_rdata_i;
+	//*Control operation*
 	reg 				DCache_rreq;
-	//*CacheAXI interface channel*
-	reg 				interface_data_rreq;
-	reg [`InstAddrBus]	interface_data_araddr;
-	wire 				interface_data_rvalid_i;
-	wire [`DataBus]		interface_data_rdata_i;
-	//*Cpu output operation*
 	wire 				dcache_stall;
+	wire [`StateBus]	dcache_state;
 	reg 				data_uncached_rstall;
 	wire[`DataBus] 		DCache_rdata_o;
 	
-	//**Data Write Uncached Operation**
+	//**Data WRITE Uncached Operation**
+	//*Uncached: CacheAXI_Interface*
+	reg 				interface_uncached_data_wreq;
+	reg [`DataAddrBus]	interface_uncached_data_awaddr;
+	reg [`DataBus]		interface_uncached_data_wdata;
+	wire 				interface_uncached_data_bvalid_i;
+	//*Control operation*
 	reg 				DCache_wreq;
-	//*CacheAXI interface channel*
-	reg 				interface_data_wreq;
-	reg [`DataAddrBus]	interface_data_awaddr;
-	reg [`DataBus]		interface_data_wdata;
-	wire 				interface_data_bvalid_i;
-	//*Cpu output operation*
 	reg 				data_uncached_wstall;
+	reg 				uncached_state;
+	reg 				uncached_next_state;
+	
+	//Read Channel
+	always@(posedge clk)begin
+		if(rst)
+			uncached_state <= `DATA_CACHED;
+		else 
+			uncached_state <= uncached_next_state;
+	end
+	always@(*)begin
+		uncached_next_state <= uncached_state;
+		case(uncached_state)
+			`DATA_CACHED:begin//When dcache is not working and current request is uncached
+				if(data_rreq_i & data_uncached & (dcache_state == `STATE_LOOK_UP))
+					uncached_next_state <= `DATA_UNCACHED;
+			end
+			`DATA_UNCACHED:begin//When uncached operation is finished and next one is not uncached operation
+				if(interface_uncached_data_bvalid_i & !(data_rreq_i & data_uncached))
+					uncached_next_state <= `DATA_CACHED;
+			end
+			default:;
+		endcase
+	end
 	always@(*)begin
 		if(rst)begin
-			//read
-			DCache_rreq 			<= `Invalid;
-			interface_data_rreq 	<= `Invalid;
-			interface_data_araddr 	<= `ZeroWord;
-			data_uncached_rstall	<= `Invalid;
-			data_rdata_o			<= `ZeroWord;
-			//write
-			DCache_wreq				<= `Invalid;
-			interface_data_wreq		<= `Invalid;
-			interface_data_awaddr   <= `ZeroWord;
-			interface_data_wdata    <= `ZeroWord;
-			data_uncached_wstall    <= `ZeroWord;
+				DCache_rreq 					<= `Invalid;
+				interface_uncached_data_rreq 	<= `Invalid;
+				interface_uncached_data_araddr 	<= `ZeroWord;
+				data_uncached_rstall			<= `Invalid;
+				data_rdata_o					<= `ZeroWord;
 		end
-		else if(data_uncached)begin
-			//read
-			DCache_rreq 			<= `Invalid;
-			interface_data_rreq 	<= 	data_rreq_i & ~interface_data_rvalid_i;
-			interface_data_araddr 	<= 	data_paddr_i;
-			data_rdata_o			<= 	interface_data_rdata_i;
-			data_uncached_rstall	<= ~interface_data_rvalid_i & data_rreq_i;
-			//write
-			DCache_wreq				<= `Invalid;
-			interface_data_wreq		<=  data_wreq_i & ~interface_data_bvalid_i;
-			interface_data_awaddr   <=  data_paddr_i;
-			interface_data_wdata    <=  data_wdata_i;
-			data_uncached_wstall    <= ~interface_data_bvalid_i & data_wreq_i;
+		else if(uncached_state == `DATA_CACHED)begin
+			if(uncached_next_state == `DATA_UNCACHED)begin
+				DCache_rreq 					<= `Invalid;
+				interface_uncached_data_rreq 	<= `Valid;
+				interface_uncached_data_araddr 	<= 	data_paddr_i;
+				data_rdata_o					<= 	interface_uncached_data_rdata_i;
+				data_uncached_rstall			<= `Invalid;
+			end
+			else begin
+				DCache_rreq 					<=  data_rreq_i;
+				interface_uncached_data_rreq 	<= `Invalid;
+				interface_uncached_data_araddr 	<=  data_paddr_i;
+				data_uncached_rstall			<= `Invalid;
+				data_rdata_o					<=  DCache_rdata_o;
+			end
+		end
+		else if(uncached_state == `DATA_UNCACHED)begin
+				DCache_rreq 					<= `Invalid;
+				interface_uncached_data_rreq 	<= 	~interface_uncached_data_rvalid_i;
+				interface_uncached_data_araddr 	<= 	data_paddr_i;
+				data_uncached_rstall			<= ~interface_uncached_data_rvalid_i;
+				data_rdata_o					<= 	interface_uncached_data_rdata_i;
 		end
 		else begin
-			//read
-			DCache_rreq 			<=  data_rreq_i;
-			interface_data_rreq 	<= `Invalid;
-			interface_data_araddr 	<=  data_paddr_i;
-			data_uncached_rstall	<= `Invalid;
-			data_rdata_o			<=  DCache_rdata_o;
+				DCache_rreq 					<= `Invalid;
+				interface_uncached_data_rreq 	<= `Invalid;
+				interface_uncached_data_araddr 	<= `ZeroWord;
+				data_uncached_rstall			<= `Invalid;
+				data_rdata_o					<= `ZeroWord;
+		end
+	end
+	
+	//Write Channel
+	always@(*)begin
+		if(rst)begin
 			//write
-			DCache_wreq				<=  data_wreq_i;
-			interface_data_wreq		<= `Invalid;
-			interface_data_awaddr   <=  data_waddr_i;
-			interface_data_wdata    <=  data_wdata_i;
-			data_uncached_wstall    <= `Invalid;
+			DCache_wreq						<= `Invalid;
+			interface_uncached_data_wreq	<= `Invalid;
+			interface_uncached_data_awaddr  <= `ZeroWord;
+			interface_uncached_data_wdata   <= `ZeroWord;
+			data_uncached_wstall    		<= `ZeroWord;
+		end
+		else if(data_uncached)begin
+			//write
+			DCache_wreq						<= `Invalid;
+			interface_uncached_data_wreq	<=  data_wreq_i & ~interface_uncached_data_bvalid_i;
+			interface_uncached_data_awaddr  <=  data_paddr_i;
+			interface_uncached_data_wdata   <=  data_wdata_i;
+			data_uncached_wstall    		<= ~interface_uncached_data_bvalid_i & data_wreq_i;
+		end
+		else begin
+			//write
+			DCache_wreq						<=  data_wreq_i;
+			interface_uncached_data_wreq	<= `Invalid;
+			interface_uncached_data_awaddr  <=  data_waddr_i;
+			interface_uncached_data_wdata   <=  data_wdata_i;
+			data_uncached_wstall    		<= `Invalid;
 		end
 	end
 	assign data_stall_o = data_uncached_rstall | data_uncached_wstall | dcache_stall;
@@ -240,6 +291,7 @@ module Cache_pipeline(
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////ICache Flush Control///////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
+
 	wire is_mem_request;//VALID: ICache request for loading inst from mem
 	reg ICache_flush;
 	assign pc_stall_o = ICache_flush | ICache_stall;//When ICache stops, pc should not move.
@@ -303,6 +355,7 @@ module Cache_pipeline(
 		DCache_rdata_o,
 		
 		dcache_stall,
+		dcache_state,
 		
 		mem_data_rvalid_i,
 		mem_data_rdata_i,
@@ -341,34 +394,34 @@ module Cache_pipeline(
 		mem_data_bvalid_i,
 		
 		//Data Uncached: Read Channel
-		interface_data_rreq,
-		interface_data_araddr,
-		interface_data_rvalid_i,
-		interface_data_rdata_i,
+		interface_uncached_data_rreq,
+		interface_uncached_data_araddr,
+		interface_uncached_data_rvalid_i,
+		interface_uncached_data_rdata_i,
 		
 		//Data Uncached: Write Channel
-		interface_data_wreq,
-		interface_data_wdata,
-		interface_data_awaddr,
-		interface_data_bvalid_i,
+		interface_uncached_data_wreq,
+		interface_uncached_data_wdata,
+		interface_uncached_data_awaddr,
+		interface_uncached_data_bvalid_i,
 		
 		//AXI Communicate
 		axi_ce_o,
 		axi_sel_o,
 		//AXI read
-		axi_rdata_i,        //���ص�cache�Ķ�ȡ����
-		axi_rvalid_i,  //�������ݿɻ�ȡ
+		axi_rdata_i,        //?????cache????????
+		axi_rvalid_i,  //???????????
 		axi_ren_o,
-		axi_rready_o,   //cache��׼���ö�
+		axi_rready_o,   //cache????????
 		axi_raddr_o,
 		axi_rlen_o,		//read burst length
 		//AXI write
-		axi_bvalid_i,   //д��Ӧ,ÿ��beat��һ�Σ��ɹ�����Դ���һ����?
+		axi_bvalid_i,   //��???,???beat????��?????????????????
 		axi_wen_o,
 		axi_waddr_o,
-		axi_wdata_o,    //cache��ñ�֤��ÿ��ʱ���ظ����?д������??
-		axi_wvalid_o,   //cache��׼����д�����ݣ�����ǳ���?
-		axi_wlast_o,    //cacheд���һ������?
+		axi_wdata_o,    //cache???????????????????��??????
+		axi_wvalid_o,   //cache???????��???????????????
+		axi_wlast_o,    //cache��??????????
 		axi_wlen_o		//read burst length
 	);
 

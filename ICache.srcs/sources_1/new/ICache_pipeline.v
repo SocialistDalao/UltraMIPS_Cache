@@ -81,8 +81,6 @@ module ICache_pipeline(
 			cpu_req_2 <= cpu_req_i;
 			cpu_inst1_addr_o <= virtual_addr_i;
 			cpu_inst2_addr_o <= virtual_addr_i + 32'h4;
-			inst1_from_mem_2 <= read_from_mem[virtual_addr_i[4:2]];
-			inst2_from_mem_2 <= read_from_mem[virtual_addr_i[4:2]+3'h1];
 		end
 	end
     //TLB
@@ -182,7 +180,7 @@ module ICache_pipeline(
     
    //Mem communication
    wire read_success = mem_inst_rvalid_i;
-   assign mem_inst_ren_o = ~read_success | hit_fail;//read axi when not hit(when read success, stop)
+   assign mem_inst_ren_o = ~read_success & hit_fail;//read axi when not hit(when read success, stop)
    assign mem_inst_araddr_o = physical_addr_2;
    //mem read data
    wire [`InstBus]read_from_mem[`BlockNum-1:0];
