@@ -33,11 +33,11 @@ module DCache_pipeline(
     input wire [3:0]cpu_wsel_i,
     output wire hit_o,
     output wire cpu_data_valid_o,
-    output wire [`DataBus] cpu_data_o,
+    output wire [`DataBus] cpu_data_final_o,
 	
 	//cache state
 	output reg cpu_stall_o,
-	output reg [`StateBus] DCache_state_o,
+	output wire [`StateBus] DCache_state_o,
     
     //mem read
     input wire mem_rvalid_i,
@@ -47,7 +47,7 @@ module DCache_pipeline(
 	//mem write
     input wire mem_bvalid_i,
     output wire mem_wen_o,
-    output wire[`WayBus] mem_wdata_o,//一个块的大小
+    output wire[`WayBus] mem_wdata_o,//?????é???ó??
     output wire [`DataAddrBus]mem_awaddr_o
     
     //test
@@ -71,11 +71,12 @@ module DCache_pipeline(
 	end
 	
     wire [31:0]wsel_expand;
-    assign wsel_expand={{8{cpu_wsel_i[3]}} , {8{cpu_wsel_i[2]}} , {8{cpu_wsel_i[1]}} , {8{cpu_wsel_i[0]}}};
+    assign wsel_expand={{8{cpu_wsel_2[3]}} , {8{cpu_wsel_2[2]}} , {8{cpu_wsel_2[1]}} , {8{cpu_wsel_2[0]}}};
     //keep the data of STATE_LOOK_UP
     reg [`InstAddrBus]virtual_addr;
     reg [`RegBus]cpu_wdata;
-    reg func;//?????д?????????
+    reg func;//?????§??????????
+    reg [3:0]cpu_wsel_2;
     
 	
     always@(posedge clk)begin
@@ -83,16 +84,19 @@ module DCache_pipeline(
             virtual_addr<= `ZeroWord;
             cpu_wdata<= `ZeroWord;
             func <= `Invalid;
+            cpu_wsel_2 <= 4'h0;
         end
         else if(current_state == `STATE_LOOK_UP)begin
             virtual_addr <= virtual_addr_i;
             cpu_wdata <= cpu_wdata_i;
             func <= cpu_wreq_i;
+            cpu_wsel_2 <= cpu_wsel_i;
         end
         else begin
             virtual_addr <= virtual_addr;
             cpu_wdata <= cpu_wdata;
             func <= func;
+            cpu_wsel_2 <= cpu_wsel_2;
         end
     end
     //TLB
@@ -212,9 +216,9 @@ module DCache_pipeline(
     end
 	
 	//Stall
-	always@(*)begin
+	always@(*)begin 
 		if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteDisable)//read not hit
-			cpu_stall_o <= ~bus_read_success;//not successful
+			cpu_stall_o <= ~bus_read_success | (cpu_rreq_i | cpu_wreq_i);//not successful( if request when successful, still stall)
 		else if(current_state != `STATE_LOOK_UP && (cpu_rreq_i | cpu_wreq_i))//req when Cache is busy
 			cpu_stall_o <= `Valid;
 		//else if (bus_read_success == `Success && FIFO_state == `STATE_FULL && write_dirty == `Valid)//Write buffer FIFO full
@@ -330,10 +334,10 @@ module DCache_pipeline(
    //Tag not hit
    //write to ram
     assign wea_way0 =(bus_read_success==`Valid && bus_read_success == `Success && LRU_pick == 1'b0)? 4'b1111 : // Not Hit
-                     (current_state==`STATE_FETCH_DATA && hit_way0 == `HitSuccess && func == `WriteEnable )? cpu_wsel_i: 4'h0;//Write Hit
+                     (current_state==`STATE_FETCH_DATA && hit_way0 == `HitSuccess && func == `WriteEnable )? cpu_wsel_2: 4'h0;//Write Hit
     
     assign wea_way1 = (bus_read_success==`Valid && bus_read_success == `Success && LRU_pick == 1'b1)? 4'b1111 ://not hit
-                     (current_state==`STATE_FETCH_DATA && hit_way1 == `HitSuccess  && func == `WriteEnable )? cpu_wsel_i : 4'h0;//write hit
+                     (current_state==`STATE_FETCH_DATA && hit_way1 == `HitSuccess  && func == `WriteEnable )? cpu_wsel_2 : 4'h0;//write hit
                      
                  
 	assign FIFO_wreq = (current_state == `STATE_FETCH_DATA && FIFO_hit == `HitSuccess && func == `WriteEnable)? `WriteEnable:
@@ -351,7 +355,7 @@ module DCache_pipeline(
 		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteEnable)begin//write hit fail
 			case(virtual_addr[4:2])
 				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*1-1:32*0] & ~wsel_expand)};
-				3'h1:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*1-1:32*0] & ~wsel_expand),mem_rdata_i[32*2-1:32*1]};
+				3'h1:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*2-1:32*1] & ~wsel_expand),mem_rdata_i[32*2-1:32*1]};
 				3'h2:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*3-1:32*2] & ~wsel_expand),mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
 				3'h3:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*4-1:32*3] & ~wsel_expand),mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
 				3'h4:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*5-1:32*4] & ~wsel_expand),mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],mem_rdata_i[32*1-1:32*0]};
@@ -426,10 +430,10 @@ module DCache_pipeline(
             endcase
 	   end
 	   else if(bus_read_success == `Success)begin
-            if(LRU_pick == 1'b0)begin//0·???滻
+            if(LRU_pick == 1'b0)begin//0?¤????I
                 FIFO_wdata <= {inst_cache_b7w0,inst_cache_b6w0,inst_cache_b5w0,inst_cache_b4w0,inst_cache_b3w0,inst_cache_b2w0,inst_cache_b1w0,inst_cache_b0w0};
             end
-            else begin//1·???滻
+            else begin//1?¤????I
                 FIFO_wdata <= {inst_cache_b7w1,inst_cache_b6w1,inst_cache_b5w1,inst_cache_b4w1,inst_cache_b3w1,inst_cache_b2w1,inst_cache_b1w1,inst_cache_b0w1};
             end
        end
@@ -441,7 +445,7 @@ module DCache_pipeline(
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////Output//////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
-    assign cpu_data_o = (current_state==`STATE_FETCH_DATA && hit_way0 == `HitSuccess)? data_way0:
+    wire [`DataBus] cpu_data_o = (current_state==`STATE_FETCH_DATA && hit_way0 == `HitSuccess)? data_way0:
                         (current_state==`STATE_FETCH_DATA && hit_way1 == `HitSuccess)? data_way1:
                         (current_state==`STATE_FETCH_DATA && FIFO_hit == `HitSuccess)? data_FIFO:
 						//not hit
@@ -458,7 +462,16 @@ module DCache_pipeline(
     assign cpu_data_valid_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitSuccess && func == `WriteDisable)? `Valid :
                               (current_state==`STATE_FETCH_DATA && bus_read_success == `Success && func == `WriteDisable)? `Valid :
 //                              (current_state==`STATE_WRITE_DATA)                        ? `Valid :
-                              `Invalid ;]
+                              `Invalid ;
 							  
 	assign DCache_state_o = current_state;
+	
+	//continuous read collison
+	reg [`DataBus] cpu_data_o_2;
+	always@(posedge clk)begin
+		cpu_data_o_2 <= cpu_data_o;
+	end
+	
+	assign cpu_data_final_o = (current_state == `STATE_LOOK_UP)?	cpu_data_o_2: cpu_data_o;
+	
 endmodule
