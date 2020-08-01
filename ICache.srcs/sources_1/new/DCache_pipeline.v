@@ -217,10 +217,12 @@ module DCache_pipeline(
 	
 	//Stall
 	always@(*)begin 
-		if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteDisable)//read not hit
-			cpu_stall_o <= ~bus_read_success | (cpu_rreq_i | cpu_wreq_i);//not successful( if request when successful, still stall)
-		else if(current_state != `STATE_LOOK_UP && (cpu_rreq_i | cpu_wreq_i))//req when Cache is busy
+	
+		if(current_state != `STATE_LOOK_UP && (cpu_rreq_i | cpu_wreq_i))//req when Cache is busy
 			cpu_stall_o <= `Valid;
+		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteDisable)//read not hit
+			cpu_stall_o <= ~bus_read_success;//not successful( if request when successful, still stall)
+		
 		//else if (bus_read_success == `Success && FIFO_state == `STATE_FULL && write_dirty == `Valid)//Write buffer FIFO full
 		//	cpu_stall_o <= `Valid;
 		else
@@ -349,10 +351,11 @@ module DCache_pipeline(
    assign mem_araddr_o = physical_addr;
    //ram write data
    always@(*) begin 
+        read_from_mem<={`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord};
 		if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteDisable)begin//read hit fail
 			read_from_mem <= mem_rdata_i;
 		end
-		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteEnable)begin//write hit fail
+		if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail && func == `WriteEnable)begin//write hit fail
 			case(virtual_addr[4:2])
 				3'h0:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],mem_rdata_i[32*2-1:32*1],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*1-1:32*0] & ~wsel_expand)};
 				3'h1:read_from_mem <= {mem_rdata_i[32*8-1:32*7],mem_rdata_i[32*7-1:32*6],mem_rdata_i[32*6-1:32*5],mem_rdata_i[32*5-1:32*4],mem_rdata_i[32*4-1:32*3],mem_rdata_i[32*3-1:32*2],(cpu_wdata & wsel_expand)|(mem_rdata_i[32*2-1:32*1] & ~wsel_expand),mem_rdata_i[32*2-1:32*1]};
@@ -365,7 +368,7 @@ module DCache_pipeline(
 				default: read_from_mem <= mem_rdata_i;
 			endcase
 		end
-		else if(current_state == `STATE_FETCH_DATA && hit_o == `HitSuccess)begin//hit success
+		if(current_state == `STATE_FETCH_DATA && hit_o == `HitSuccess)begin//hit success
             if(hit_way0 == `HitSuccess)begin
                 case(virtual_addr[4:2])
                     3'h0:read_from_mem <= {inst_cache_b7w0,inst_cache_b6w0,inst_cache_b5w0,inst_cache_b4w0,inst_cache_b3w0,inst_cache_b2w0,inst_cache_b1w0,cpu_wdata};
@@ -378,8 +381,8 @@ module DCache_pipeline(
                     3'h7:read_from_mem <= {cpu_wdata,inst_cache_b6w0,inst_cache_b5w0,inst_cache_b4w0,inst_cache_b3w0,inst_cache_b2w0,inst_cache_b1w0,inst_cache_b0w0};
                     default:read_from_mem<={inst_cache_b7w0,inst_cache_b6w0,inst_cache_b5w0,inst_cache_b4w0,inst_cache_b3w0,inst_cache_b2w0,inst_cache_b1w0,inst_cache_b0w0};
                 endcase
-            end//if
-            else if(hit_way1 == `HitSuccess)begin
+            end
+            if(hit_way1 == `HitSuccess)begin
                 case(virtual_addr[4:2])
                     3'h0:read_from_mem <= {inst_cache_b7w1,inst_cache_b6w1,inst_cache_b5w1,inst_cache_b4w1,inst_cache_b3w1,inst_cache_b2w1,inst_cache_b1w1,cpu_wdata};
                     3'h1:read_from_mem <= {inst_cache_b7w1,inst_cache_b6w1,inst_cache_b5w1,inst_cache_b4w1,inst_cache_b3w1,inst_cache_b2w1,cpu_wdata,inst_cache_b0w1};
@@ -391,8 +394,8 @@ module DCache_pipeline(
                     3'h7:read_from_mem <= {cpu_wdata,inst_cache_b6w1,inst_cache_b5w1,inst_cache_b4w1,inst_cache_b3w1,inst_cache_b2w1,inst_cache_b1w1,inst_cache_b0w1};
                     default:read_from_mem<={inst_cache_b7w1,inst_cache_b6w1,inst_cache_b5w1,inst_cache_b4w1,inst_cache_b3w1,inst_cache_b2w1,inst_cache_b1w1,inst_cache_b0w1};
                 endcase
-            end//elseif
-            else if(FIFO_hit == `HitSuccess)begin
+            end
+            if(FIFO_hit == `HitSuccess)begin
                 case(virtual_addr[4:2])
                     3'h0:read_from_mem <= {inst_cache_b7w1,inst_cache_b6w1,inst_cache_b5w1,inst_cache_b4w1,inst_cache_b3w1,inst_cache_b2w1,inst_cache_b1w1,cpu_wdata};
                     3'h1:read_from_mem <= {inst_cache_b7w1,inst_cache_b6w1,inst_cache_b5w1,inst_cache_b4w1,inst_cache_b3w1,inst_cache_b2w1,cpu_wdata,inst_cache_b0w1};
@@ -404,12 +407,8 @@ module DCache_pipeline(
                     3'h7:read_from_mem <= {cpu_wdata,inst_cache_b6w1,inst_cache_b5w1,inst_cache_b4w1,inst_cache_b3w1,inst_cache_b2w1,inst_cache_b1w1,inst_cache_b0w1};
                     default:read_from_mem<={inst_cache_b7w1,inst_cache_b6w1,inst_cache_b5w1,inst_cache_b4w1,inst_cache_b3w1,inst_cache_b2w1,inst_cache_b1w1,inst_cache_b0w1};
                 endcase
-            end//elseif
-            else
-                read_from_mem<={`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord};
-        end//elseif
-        else
-                read_from_mem<={`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord,`ZeroWord};
+            end//if if
+        end//if
    end
   
    //STATE_WRITE_DATA
@@ -429,7 +428,7 @@ module DCache_pipeline(
                 default:;                                         
             endcase
 	   end
-	   else if(bus_read_success == `Success)begin
+	   if(bus_read_success == `Success)begin
             if(LRU_pick == 1'b0)begin//0?ก่????I
                 FIFO_wdata <= {inst_cache_b7w0,inst_cache_b6w0,inst_cache_b5w0,inst_cache_b4w0,inst_cache_b3w0,inst_cache_b2w0,inst_cache_b1w0,inst_cache_b0w0};
             end
@@ -445,20 +444,30 @@ module DCache_pipeline(
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////Output//////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
-    wire [`DataBus] cpu_data_o = (current_state==`STATE_FETCH_DATA && hit_way0 == `HitSuccess)? data_way0:
-                        (current_state==`STATE_FETCH_DATA && hit_way1 == `HitSuccess)? data_way1:
-                        (current_state==`STATE_FETCH_DATA && FIFO_hit == `HitSuccess)? data_FIFO:
-						//not hit
-                        (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h0)? read_from_mem[32*1-1:32*0]:
-                        (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h1)? read_from_mem[32*2-1:32*1]:
-                        (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h2)? read_from_mem[32*3-1:32*2]:
-                        (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h3)? read_from_mem[32*4-1:32*3]:
-                        (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h4)? read_from_mem[32*5-1:32*4]:
-                        (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h5)? read_from_mem[32*6-1:32*5]:
-                        (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h6)? read_from_mem[32*7-1:32*6]:
-                        (current_state==`STATE_FETCH_DATA && bus_read_success ==`Success && virtual_addr[4:2] == 3'h7)? read_from_mem[32*8-1:32*7]:
-                        `ZeroWord;
-                        
+reg [`DataBus] cpu_data_o;
+    always@(*)begin
+        cpu_data_o <= `ZeroWord;
+        if(current_state==`STATE_FETCH_DATA && hit_way0 == `HitSuccess)
+            cpu_data_o <= data_way0;
+        if(current_state==`STATE_FETCH_DATA && hit_way1 == `HitSuccess)
+            cpu_data_o <= data_way1;
+        if(current_state==`STATE_FETCH_DATA && FIFO_hit == `HitSuccess)
+            cpu_data_o <= data_FIFO;
+        if(current_state==`STATE_FETCH_DATA && bus_read_success ==`Success)begin
+        case(virtual_addr[4:2])
+            3'h0:cpu_data_o <= read_from_mem[32*1-1:32*0];
+            3'h1:cpu_data_o <= read_from_mem[32*2-1:32*1];
+            3'h2:cpu_data_o <= read_from_mem[32*3-1:32*2];
+            3'h3:cpu_data_o <= read_from_mem[32*4-1:32*3];
+            3'h4:cpu_data_o <= read_from_mem[32*5-1:32*4];
+            3'h5:cpu_data_o <= read_from_mem[32*6-1:32*5];
+            3'h6:cpu_data_o <= read_from_mem[32*7-1:32*6];
+            3'h7:cpu_data_o <= read_from_mem[32*8-1:32*7];
+            default:;
+        endcase
+        end
+    end
+
     assign cpu_data_valid_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitSuccess && func == `WriteDisable)? `Valid :
                               (current_state==`STATE_FETCH_DATA && bus_read_success == `Success && func == `WriteDisable)? `Valid :
 //                              (current_state==`STATE_WRITE_DATA)                        ? `Valid :

@@ -1,4 +1,3 @@
-`timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -24,12 +23,15 @@
 module CacheAXI_Interface(
     input clk,
     input rst,
+    //input flush,
+    input wire[3:0]            cache_sel_i,
 	//ICahce: Read Channel
     input wire 					inst_ren_i,
     input wire [`InstAddrBus] 	inst_araddr_i,
 	input wire                  inst_uncached,
 	output reg 					inst_rvalid_o,
 	output reg [`WayBus]		inst_rdata_o,//DCache: Read Channel
+	output wire                is_process_cached_inst_o,
 	
 	//DCache: Read Channel
     input wire 					data_ren_i,
@@ -52,7 +54,7 @@ module CacheAXI_Interface(
     
 	//D-uncache: Write Channel
 	input wire 					ducache_wen_i,
-	input wire [`WayBus]		ducache_wdata_i,  //一个字的大小
+	input wire [`RegBus]		ducache_wdata_i,  //一个字的大小
     input wire [`DataAddrBus]	ducache_awaddr_i,  //!!!/////
     output reg 					ducache_bvalid_o,  //!!!/////
 
@@ -76,16 +78,17 @@ module CacheAXI_Interface(
 	output wire [3:0]           axi_wlen_o    
     );
 	assign  axi_ce_o = rst? `ChipDisable: `ChipEnable;
-	assign  axi_sel_o = 4'b1111;//byte select
+	//assign  axi_sel_o = 4'b1111;//byte select
 
 	//READ(DCache first,uncache first)
 	//state
 	reg[`READ_STATE_WIDTH]read_state;
 	reg[2:0]read_count;
+	assign is_process_cached_inst_o = (read_state ==`STATE_READ_ICACHE);
 	always@(posedge clk)begin
 		if(rst) 
 			read_state <= `STATE_READ_FREE;
-		else if( read_state == `STATE_READ_FREE && ducache_ren_i == `ReadEnable && data_uncached == `Uncached)
+		else if( read_state == `STATE_READ_FREE && ducache_ren_i == `ReadEnable )
 			read_state <= `STATE_READ_DUNCACHED;  //data uncached
 		else if( read_state == `STATE_READ_DUNCACHED && rdata_valid_i == `Valid)
 			read_state <= `STATE_READ_FREE;       //data uncached finish
@@ -149,7 +152,9 @@ module CacheAXI_Interface(
 //	assign data_rvalid_o = ( read_state == `STATE_READ_DCACHE && rdata_valid_i == `Valid && read_count == 3'h7 )?
 //							`Valid: `Invalid;//can add key word optimization later
 	always@(posedge clk)begin
-	   if(rdata_valid_i)begin
+	   if(rst)begin
+	       inst_rdata_o <= 256'h0;
+	   end else if(rdata_valid_i)begin
             case(read_count)
                 3'h0:	inst_rdata_o[32*1-1:32*0] <= rdata_i;
                 3'h1:	inst_rdata_o[32*2-1:32*1] <= rdata_i;
@@ -192,7 +197,7 @@ module CacheAXI_Interface(
 	always@(posedge clk)begin
 		if(rst) 
 			write_state <= `STATE_WRITE_FREE;
-		else if( write_state == `STATE_WRITE_FREE && ducache_wen_i == `WriteEnable && data_uncached == `Uncached)//write uncache
+		else if( write_state == `STATE_WRITE_FREE && ducache_wen_i == `WriteEnable)//write uncache
             write_state <= `STATE_WRITE_DUNCACHED;
         else if( write_state == `STATE_WRITE_DUNCACHED && wdata_resp_i == `Valid )//last write successful
             write_state <= `STATE_WRITE_FREE;
@@ -227,6 +232,11 @@ module CacheAXI_Interface(
 	assign  axi_wlast_o = (write_state == `STATE_WRITE_BUSY && write_count == 3'h7)? 
                            `Valid:(write_state == `STATE_WRITE_DUNCACHED)?`Valid:`Invalid;//write last word
 	
+    assign  axi_ce_o = rst? `ChipDisable: `ChipEnable;
+    
+	assign  axi_sel_o = (ducache_ren_i)||((write_state == `STATE_WRITE_FREE) && ducache_wen_i && (!data_wen_i)) 
+	                     || (write_state == `STATE_WRITE_DUNCACHED)?cache_sel_i:4'b1111;
+	                     
 	//DCache
 	always@(posedge clk)begin
 	   if( write_state == `STATE_WRITE_BUSY && wdata_resp_i == `Valid && write_count == 3'h7 )

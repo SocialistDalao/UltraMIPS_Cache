@@ -22,7 +22,7 @@ module ICache_pipeline(
 	//Control Signal
     input wire 					clk,
     input wire 					rst,
-	output wire 				is_mem_request,//ICache Flush Control Related Signal
+//	output wire 				is_mem_request,//ICache Flush Control Related Signal
     
     //read inst request
     input wire 					cpu_req_i,
@@ -205,8 +205,8 @@ module ICache_pipeline(
 							(hit_fail == `Valid && read_success == `Success)? read_from_mem[physical_addr_2[4:2]+3'h1]:
 							`ZeroWord;
 						
-    assign inst1_valid_o = (hit_success == `HitSuccess)? cpu_req_2 :
-                              (read_success == `Success)? cpu_req_2 :
+    assign inst1_valid_o = (hit_success == `HitSuccess)? cpu_req_2 &!rst :
+                              (read_success == `Success)? cpu_req_2 &!rst :
                               `Invalid ;
 							  
 	assign inst2_valid_o = (physical_addr_2[4:2] == 3'b111)? `Invalid: inst1_valid_o;//in the edge
@@ -216,5 +216,5 @@ module ICache_pipeline(
 	
 	
 	assign hit_o = hit_success;
-	assign is_mem_request = hit_fail;
+//	assign is_mem_request = hit_fail;
 endmodule

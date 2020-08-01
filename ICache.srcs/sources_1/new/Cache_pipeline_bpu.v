@@ -13,6 +13,19 @@ module Cache_pipeline(
     input wire clk,
     input wire rst,
     
+	//bpu
+	wire 				is_pc_branch_i;
+	wire 				is_pcPlus4_branch_i;
+	wire [`InstAddrBus]	pc_branch_dest_i;
+	wire [`InstAddrBus]	pcPlus4_branch_dest_i;
+    input wire [`SIZE_OF_CORR_PACK] corr_pack0_i;
+    input wire [`SIZE_OF_CORR_PACK] corr_pack1_i;
+    output wire [`SIZE_OF_CORR_PACK] corr_pack0_o;
+    output wire [`SIZE_OF_CORR_PACK] corr_pack1_o;
+	
+	//pc control
+	wire [`InstAddrBus] npc_o;
+	
 	//Inst
 	input wire 					inst_req_i,//�ߵ�ƽ��ʾcpu����ȡָ��
 	input wire [`RegBus]		inst_vaddr_i,
@@ -45,7 +58,7 @@ module Cache_pipeline(
 	
 	//AXI Communicate
 	output wire             axi_ce_o,
-	output wire             axi_sel_o,
+	output wire [3:0]        axi_sel_o,
 	//AXI read
 	input wire[`RegBus]    	axi_rdata_i,        //���ص�cache�Ķ�ȡ����
 	input wire             	axi_rvalid_i,  //�������ݿɻ�ȡ
@@ -166,8 +179,8 @@ module Cache_pipeline(
 			interface_inst_araddr 	<= 	mem_inst_araddr_o;
 			//inst_stall_o 			<= 	ICache_stall;
 			inst1_o 				<= 	ICache_inst1;
-			inst1_valid_o			<= 	ICache_inst1_valid_o;
-			inst2_valid_o			<= 	ICache_inst2_valid_o;
+			inst1_valid_o			<= 	ICache_inst1_valid_o & inst1_valid_en_2;
+			inst2_valid_o			<= 	ICache_inst2_valid_o & inst2_valid_en_2;
 		end
 	end
 	
@@ -199,6 +212,17 @@ module Cache_pipeline(
 	reg 				uncached_next_state;
 	
 	//Read Channel
+	//data keeper
+	reg [`DataAddrBus] data_paddr_2;
+	always@(posedge clk)begin
+        // keep reading uncached addr to communicate with AXI
+        if(uncached_state == `DATA_CACHED)
+            data_paddr_2 <= data_paddr_i;
+        //next operation: update addr( ready to operate another uncached signal)
+        else if(interface_uncached_data_rvalid_i)begin
+            data_paddr_2 <= data_paddr_i;
+        end
+	end
 	always@(posedge clk)begin
 		if(rst)
 			uncached_state <= `DATA_CACHED;
@@ -206,19 +230,20 @@ module Cache_pipeline(
 			uncached_state <= uncached_next_state;
 	end
 	always@(*)begin
-		uncached_next_state <= uncached_state;
+         uncached_next_state <= uncached_state;
 		case(uncached_state)
 			`DATA_CACHED:begin//When dcache is not working and current request is uncached
 				if(data_rreq_i & data_uncached & (dcache_state == `STATE_LOOK_UP))
 					uncached_next_state <= `DATA_UNCACHED;
 			end
 			`DATA_UNCACHED:begin//When uncached operation is finished and next one is not uncached operation
-				if(interface_uncached_data_bvalid_i & !(data_rreq_i & data_uncached))
+				if(interface_uncached_data_rvalid_i & !(data_rreq_i & data_uncached))
 					uncached_next_state <= `DATA_CACHED;
 			end
 			default:;
 		endcase
 	end
+
 	always@(*)begin
 		if(rst)begin
 				DCache_rreq 					<= `Invalid;
@@ -246,7 +271,7 @@ module Cache_pipeline(
 		else if(uncached_state == `DATA_UNCACHED)begin
 				DCache_rreq 					<= `Invalid;
 				interface_uncached_data_rreq 	<= 	~interface_uncached_data_rvalid_i;
-				interface_uncached_data_araddr 	<= 	data_paddr_i;
+				interface_uncached_data_araddr 	<= 	data_paddr_2;
 				data_uncached_rstall			<= ~interface_uncached_data_rvalid_i;
 				data_rdata_o					<= 	interface_uncached_data_rdata_i;
 		end
@@ -292,13 +317,13 @@ module Cache_pipeline(
 ///////////////////////////ICache Flush Control///////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 
-	wire is_mem_request;//VALID: ICache request for loading inst from mem
+	wire is_process_cached_inst;//VALID: ICache request for loading inst from mem
 	reg ICache_flush;
 	assign pc_stall_o = ICache_flush | ICache_stall;//When ICache stops, pc should not move.
 	always@(posedge clk)begin
 		if(rst)
 			ICache_flush <= `Invalid;
-		else if(is_mem_request & flush & !mem_inst_rvalid_i)begin//read mem but not end
+		else if(is_process_cached_inst & flush & !mem_inst_rvalid_i)begin//read mem but not end
 			ICache_flush <= `Valid;
 		end
 		else if(mem_inst_rvalid_i == `Valid)begin
@@ -306,24 +331,24 @@ module Cache_pipeline(
 		end
 	end
 
+
 	
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////ICache Dynamic BPU Control/////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 
 	//I/O
-	wire [`InstAddrBus] pc_i;
-	wire 				is_pc_branch_i;
-	wire 				is_pcPlus4_branch_i;
-	wire [`InstAddrBus]	pc_branch_dest_i;
-	wire [`InstAddrBus] npc_o;
+	wire [`InstAddrBus] pc_i = inst_vaddr_i;
 	
 	//Fetch inst control signals
 	reg 				inst1_valid_en_1;
 	reg 				inst1_valid_en_2;
 	reg 				inst2_valid_en_1;
 	reg 				inst2_valid_en_2;
-	
+    reg [`SIZE_OF_CORR_PACK] corr_pack0_2;
+    reg [`SIZE_OF_CORR_PACK] corr_pack1_2;
+	assign corr_pack0_o = corr_pack0_2;
+	assign corr_pack1_o = corr_pack1_2;
 	
 	//Signal in control
 	wire sign_pc_edge = (pc_i[4:2] == 3'b111);
@@ -338,10 +363,14 @@ module Cache_pipeline(
 		if(ICache_inst1_valid_o == `Invalid)begin
 			inst1_valid_en_2 <= inst1_valid_en_2;
 			inst2_valid_en_2 <= inst2_valid_en_2;
+			corr_pack0_2 	 <= corr_pack0_2;
+			corr_pack1_2 	 <= corr_pack1_2;
 		end
 		else begin
 			inst1_valid_en_2 <= inst1_valid_en_1;
 			inst2_valid_en_2 <= inst2_valid_en_1;
+			corr_pack0_2 	 <= corr_pack0_1;
+			corr_pack1_2 	 <= corr_pack1_1;
 		end
 		
 		if(rst)begin
@@ -449,8 +478,8 @@ module Cache_pipeline(
 	ICache_pipeline ICache0(
 
 		clk,
-		rst|ICache_flush,
-		is_mem_request,
+		rst|ICache_flush|flush,
+//		is_mem_request,
 		
 		//read inst request
 		ICache_req,
@@ -505,15 +534,20 @@ module Cache_pipeline(
     );
     assign mem_inst_rvalid_i = interface_inst_rvalid_i;
     assign mem_inst_rdata_i = interface_inst_rdata_i;
+
+    //wire [3:0] sel_from_stbuff;
+    
 	CacheAXI_Interface CacheAXI_Interface0(
 		clk,
 		rst,
+		data_wsel_i,
 		//ICahce: Read Channel
 		interface_inst_req,
 		interface_inst_araddr,
 		inst_uncached,
 		interface_inst_rvalid_i,
 		interface_inst_rdata_i,
+		is_process_cached_inst,
 		
 		//Data: Read Channel
 		mem_data_ren_o,

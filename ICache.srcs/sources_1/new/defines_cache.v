@@ -30,6 +30,9 @@
 `define FIFOStateNumLog2 2
 `define FIFONum 8
 `define FIFONumLog2 3
+//Inst Buffer
+`define InstBufferSize 32
+`define InstBufferSizeLog2 5
 
 //Bus
 `define OffsetBus 4:0
@@ -56,10 +59,17 @@
 //Pipeline
 `define STATE_WORK 1'h0
 `define STATE_STALL 1'h1
+//BPU dynamic fetch inst state
+`define GetNormalInst       2'b00
+`define OnlyGetTwoInst      2'b01
+`define OnlyGetThreeInst  	2'b10
 //DCache
 `define STATE_LOOK_UP `StateNumLog2'h0
 `define STATE_FETCH_DATA `StateNumLog2'h1
 `define STATE_WRITE_DATA `StateNumLog2'h2
+//Data Uncached State
+`define DATA_CACHED 1'h0
+`define DATA_UNCACHED 1'h1
 //Write Buffer
 `define STATE_EMPTY `FIFOStateNumLog2'h0
 `define STATE_WORKING `FIFOStateNumLog2'h1
