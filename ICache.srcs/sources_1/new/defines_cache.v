@@ -61,8 +61,8 @@
 `define STATE_STALL 1'h1
 //BPU dynamic fetch inst state
 `define GetNormalInst       2'b00
-`define OnlyGetTwoInst      2'b01
-`define OnlyGetThreeInst  	2'b10
+`define OnlyGetOneInst      2'b01
+`define OnlyGetTwoInst  	2'b10 
 //DCache
 `define STATE_LOOK_UP `StateNumLog2'h0
 `define STATE_FETCH_DATA `StateNumLog2'h1

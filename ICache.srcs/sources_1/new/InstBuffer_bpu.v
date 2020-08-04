@@ -24,7 +24,7 @@ module InstBuffer(
 	input wire [`SIZE_OF_CORR_PACK]bpu_corr2_i,
     input wire 					ICache_inst1_valid_o,
     input wire 					ICache_inst2_valid_o,
-	output wire 				buffer_full_i,
+	output wire 				buffer_full_o
 	
     );
 	//队列本体
@@ -74,8 +74,8 @@ module InstBuffer(
 		FIFO_data[tail+`InstBufferSizeLog2'h1] <= ICache_inst2_i;
 		FIFO_addr[tail] <= ICache_inst1_addr_i;
 		FIFO_addr[tail+`InstBufferSizeLog2'h1] <= ICache_inst2_addr_i;
-		FIFO_bpu_corr[tail] <= ICache_inst1_addr_i;
-		FIFO_bpu_corr[tail+`InstBufferSizeLog2'h1] <= ICache_inst2_addr_i;
+		FIFO_bpu_corr[tail] <= bpu_corr1_i;
+		FIFO_bpu_corr[tail+`InstBufferSizeLog2'h1] <= bpu_corr2_i;
     end
 	   
 //////////////////////////////////////////////////////////////////////////////////
@@ -85,6 +85,8 @@ module InstBuffer(
 	assign issue_inst2_o = FIFO_data[head+`InstBufferSizeLog2'h1];
 	assign issue_inst1_addr_o = FIFO_addr[head];
 	assign issue_inst2_addr_o = FIFO_addr[head+`InstBufferSizeLog2'h1];
+    assign issue_bpu_corr1_o = FIFO_bpu_corr[head];
+    assign issue_bpu_corr2_o = FIFO_bpu_corr[head+`InstBufferSizeLog2'h1];
 	assign issue_ok_o = FIFO_valid[head+`InstBufferSizeLog2'h2];
     //full
 	assign buffer_full_o = FIFO_valid[tail+`InstBufferSizeLog2'h5];

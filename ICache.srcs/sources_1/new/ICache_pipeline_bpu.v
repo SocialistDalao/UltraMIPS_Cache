@@ -19,8 +19,12 @@
 
 module ICache_pipeline(
 
+	//Control Signal
     input wire 					clk,
     input wire 					rst,
+    output wire 			    is_working_o,
+    output wire 			    is_pipeline2_empty_o,
+//	output wire 				is_mem_request,//ICache Flush Control Related Signal
     
     //read inst request
     input wire 					cpu_req_i,
@@ -34,15 +38,20 @@ module ICache_pipeline(
     output wire [`InstBus] 		cpu_inst2_o,
     output reg [`InstAddrBus] 	cpu_inst1_addr_o,
     output reg [`InstAddrBus] 	cpu_inst2_addr_o,
-    output wire 				inst1_valid_o,
-    output wire 				inst2_valid_o,
+    output reg 			   	inst1_valid_o,
+    output reg 				inst2_valid_o,
 	output wire 				stall_o,
     
     //read from mem
     input wire 					mem_inst_rvalid_i,
     input wire [`WayBus]		mem_inst_rdata_i,//一个块的大小
     output wire 				mem_inst_ren_o,
-    output wire[`InstAddrBus]	mem_inst_araddr_o
+    output wire[`InstAddrBus]	mem_inst_araddr_o,
+    
+    input wire [`SIZE_OF_CORR_PACK] corr_pack0_i      ,//
+    input wire [`SIZE_OF_CORR_PACK] corr_pack1_i      ,
+    output reg [`SIZE_OF_CORR_PACK] corr_pack0_o      ,//
+    output reg [`SIZE_OF_CORR_PACK] corr_pack1_o
     
     );
 	//remaining signal: In this vision, these signals are not useful, but we keep them here
@@ -59,8 +68,6 @@ module ICache_pipeline(
     //wire [`RegBus]physical_addr_1 = virtual_addr_i;
     reg [`RegBus]physical_addr_2;
     reg cpu_req_2;
-    reg [`InstBus]inst1_from_mem_2;
-    reg [`InstBus]inst2_from_mem_2;
 	always@(posedge clk)begin
 		if(rst)begin
 			physical_addr_2 <= `ZeroWord;
@@ -73,14 +80,16 @@ module ICache_pipeline(
 			cpu_req_2 <= cpu_req_2;
 			cpu_inst1_addr_o <= cpu_inst1_addr_o;
 			cpu_inst2_addr_o <= cpu_inst2_addr_o;
+			corr_pack0_o <= corr_pack0_o;
+			corr_pack1_o <= corr_pack1_o;
 		end
 		else begin
 			physical_addr_2 <= physical_addr_1;
 			cpu_req_2 <= cpu_req_i;
 			cpu_inst1_addr_o <= virtual_addr_i;
 			cpu_inst2_addr_o <= virtual_addr_i + 32'h4;
-			inst1_from_mem_2 <= read_from_mem[virtual_addr_i[4:2]];
-			inst2_from_mem_2 <= read_from_mem[virtual_addr_i[4:2]+3'h1];
+			corr_pack0_o <= corr_pack0_i;
+			corr_pack1_o <= corr_pack1_i;
 		end
 	end
     //TLB
@@ -204,16 +213,29 @@ module ICache_pipeline(
 							(hit_way1 == `HitSuccess)? inst2_way1:
 							(hit_fail == `Valid && read_success == `Success)? read_from_mem[physical_addr_2[4:2]+3'h1]:
 							`ZeroWord;
-						
-    assign inst1_valid_o = (hit_success == `HitSuccess)? cpu_req_2 :
-                              (read_success == `Success)? cpu_req_2 :
+    wire debug1 = hit_success == `HitSuccess;
+    wire debug2 = read_success == `Success;
+    wire debug3 = (read_success == `Success)? cpu_req_2 &!rst :
                               `Invalid ;
-							  
-	assign inst2_valid_o = (physical_addr_2[4:2] == 3'b111)? `Invalid: inst1_valid_o;//in the edge
+    wire debug4 = (hit_success == `HitSuccess)? cpu_req_2 &!rst :
+                              (read_success == `Success)? cpu_req_2 &!rst :
+                              `Invalid ;
+    
+    always @ (*) begin
+        if (hit_success == `HitSuccess || read_success == `Success) inst1_valid_o <= cpu_req_2 & ~rst;
+        else inst1_valid_o <= `Invalid;
+    end
+    
+    always @ (*) begin
+        if (physical_addr_2[4:2] == 3'b111) inst2_valid_o <= `Invalid;
+        else inst2_valid_o <= inst1_valid_o;
+    end
 			  
 	assign stall_o = (hit_fail == `Valid)? ~cpu_inst_valid_o: //not valid == stall_o
-					`Invalid; 
-	
+					rst;//if ICache is reset, then pc should not move 
+	assign is_pipeline2_empty_o = !cpu_req_2;
 	
 	assign hit_o = hit_success;
+	assign is_working_o = cpu_req_i | hit_fail;
+//	assign is_mem_request = hit_fail;
 endmodule

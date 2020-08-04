@@ -14,17 +14,17 @@ module Cache_pipeline(
     input wire rst,
     
 	//bpu
-	wire 				is_pc_branch_i;
-	wire 				is_pcPlus4_branch_i;
-	wire [`InstAddrBus]	pc_branch_dest_i;
-	wire [`InstAddrBus]	pcPlus4_branch_dest_i;
-    input wire [`SIZE_OF_CORR_PACK] corr_pack0_i;
-    input wire [`SIZE_OF_CORR_PACK] corr_pack1_i;
-    output wire [`SIZE_OF_CORR_PACK] corr_pack0_o;
-    output wire [`SIZE_OF_CORR_PACK] corr_pack1_o;
+	input wire 				is_pc_branch_i,
+	input wire 				is_pcPlus4_branch_i,
+	input wire [`InstAddrBus]	pc_branch_dest_i,
+	input wire [`InstAddrBus]	pcPlus4_branch_dest_i,
+    input wire [`SIZE_OF_CORR_PACK] corr_pack0_i,
+    input wire [`SIZE_OF_CORR_PACK] corr_pack1_i,
+    output wire [`SIZE_OF_CORR_PACK] corr_pack0_o,
+    output wire [`SIZE_OF_CORR_PACK] corr_pack1_o,
 	
 	//pc control
-	wire [`InstAddrBus] npc_o;
+	output reg [`InstAddrBus] npc_o,
 	
 	//Inst
 	input wire 					inst_req_i,//�ߵ�ƽ��ʾcpu����ȡָ��
@@ -155,7 +155,7 @@ module Cache_pipeline(
 	wire 				ICache_inst2_valid_o;
 	//wire 				ICache_single_issue;
 	always@(*)begin
-		if(rst|flush)begin
+		if(rst)begin
 			ICache_req 				<= `Invalid;
 			interface_inst_req 		<= `Invalid;
 			interface_inst_araddr 	<= `ZeroWord;
@@ -318,18 +318,19 @@ module Cache_pipeline(
 //////////////////////////////////////////////////////////////////////////////////
 
 	wire is_process_cached_inst;//VALID: ICache request for loading inst from mem
-	reg ICache_flush;
-	assign pc_stall_o = ICache_flush | ICache_stall;//When ICache stops, pc should not move.
-	always@(posedge clk)begin
-		if(rst)
-			ICache_flush <= `Invalid;
-		else if(is_process_cached_inst & flush & !mem_inst_rvalid_i)begin//read mem but not end
-			ICache_flush <= `Valid;
-		end
-		else if(mem_inst_rvalid_i == `Valid)begin
-			ICache_flush <= `Invalid;
-		end
-	end
+	assign pc_stall_o = ICache_stall;//When ICache stops, pc should not move.
+	//reg ICache_flush;
+	//assign pc_stall_o = ICache_flush | ICache_stall;//When ICache stops, pc should not move.
+	//always@(posedge clk)begin
+	//	if(rst)
+	//		ICache_flush <= `Invalid;
+	//	else if(is_process_cached_inst & flush & !mem_inst_rvalid_i)begin//read mem but not end
+	//		ICache_flush <= `Valid;
+	//	end
+	//	else if(mem_inst_rvalid_i == `Valid)begin
+	//		ICache_flush <= `Invalid;
+	//	end
+	//end
 
 
 	
@@ -345,10 +346,17 @@ module Cache_pipeline(
 	reg 				inst1_valid_en_2;
 	reg 				inst2_valid_en_1;
 	reg 				inst2_valid_en_2;
+//	reg [`InstAddrBus]	pc_branch_dest_2;
+//	reg [`InstAddrBus]	pcPlus4_branch_dest_2;
+	reg [`InstAddrBus]	branch_dest_2;
     reg [`SIZE_OF_CORR_PACK] corr_pack0_2;
     reg [`SIZE_OF_CORR_PACK] corr_pack1_2;
-	assign corr_pack0_o = corr_pack0_2;
-	assign corr_pack1_o = corr_pack1_2;
+	//assign corr_pack0_o = corr_pack0_2;
+	//assign corr_pack1_o = corr_pack1_2;
+	
+	//ICache state
+    wire ICache_is_working;
+    wire is_ICache_pipeline2_empty;
 	
 	//Signal in control
 	wire sign_pc_edge = (pc_i[4:2] == 3'b111);
@@ -360,39 +368,76 @@ module Cache_pipeline(
 	//keep data for one more operation
 	always@(posedge clk)begin
 		//keep data
-		if(ICache_inst1_valid_o == `Invalid)begin
-			inst1_valid_en_2 <= inst1_valid_en_2;
-			inst2_valid_en_2 <= inst2_valid_en_2;
-			corr_pack0_2 	 <= corr_pack0_2;
-			corr_pack1_2 	 <= corr_pack1_2;
-		end
-		else begin
-			inst1_valid_en_2 <= inst1_valid_en_1;
-			inst2_valid_en_2 <= inst2_valid_en_1;
-			corr_pack0_2 	 <= corr_pack0_1;
-			corr_pack1_2 	 <= corr_pack1_1;
-		end
-		
 		if(rst)begin
+			inst1_valid_en_2         <= `Valid;
+			inst2_valid_en_2         <= `Valid;
+//            pc_branch_dest_2 	     <= `ZeroWord;
+//			pcPlus4_branch_dest_2 	 <= `ZeroWord;
+			corr_pack0_2 	         <= 0;
+			corr_pack1_2 	         <= 0;
+		end
+		//Flush: if ICache is working on old request, the inst is wrong definitely,
+		//       while ICache is not working the inst will process right.
+		else if(flush)begin
+			inst1_valid_en_2         <= ~ICache_is_working;
+			inst2_valid_en_2         <= ~ICache_is_working;
+			corr_pack0_2 	 		<= {corr_pack0_i[`CRR_PRED_DIR],87'd0};
+			corr_pack1_2 	 		<= {corr_pack1_i[`CRR_PRED_DIR],87'd0};
+		end
+		else if(ICache_inst1_valid_o == `Valid)begin
+			inst1_valid_en_2 		<= inst1_valid_en_1;
+			inst2_valid_en_2 		<= inst2_valid_en_1;
+//			pc_branch_dest_2 	 	<= pc_branch_dest_i;
+//			pcPlus4_branch_dest_2 	 <= pcPlus4_branch_dest_i;
+			corr_pack0_2 	 		<= corr_pack0_i;
+			corr_pack1_2 	 		<= corr_pack1_i;
+		end
+	end
+	
+	always@(posedge clk)begin
+		if(rst)
 			BPU_inst_state <= `GetNormalInst;
+		else if(flush)
+			BPU_inst_state <= `GetNormalInst;
+		else if ((ICache_inst1_valid_o & ICache_req)|(ICache_req & is_ICache_pipeline2_empty))begin
+			case(BPU_inst_state)
+				`GetNormalInst:begin
+                    if(is_pc_branch_i & sign_pc_edge) begin
+                        BPU_inst_state <= `OnlyGetOneInst;
+                        branch_dest_2 <= pc_branch_dest_i;
+                    end
+                    else if(is_pcPlus4_branch_i & !sign_pc_edge) begin
+                        BPU_inst_state <= `OnlyGetOneInst;
+                        branch_dest_2 <= pcPlus4_branch_dest_i;
+                    end
+                    else if(is_pcPlus4_branch_i & sign_pc_edge) begin
+                        BPU_inst_state <= `OnlyGetTwoInst;
+                        branch_dest_2 <= pcPlus4_branch_dest_i;
+                    end
+				end
+				`OnlyGetOneInst:	BPU_inst_state <= `GetNormalInst;
+				`OnlyGetTwoInst:	begin
+				    if(sign_pc_edge)
+				        BPU_inst_state <= `OnlyGetOneInst;
+                    else
+				        BPU_inst_state <= `GetNormalInst;
+				end
+				default:			BPU_inst_state <= `GetNormalInst;
+			endcase
 		end
-		else if(ICache_inst1_valid_o)begin//Cache operation finished
-			if(is_pc_branch_i & sign_pc_edge)
-				BPU_inst_state <= `OnlyGetTwoInst;
-			else if(is_pcPlus4_branch_i)
-				BPU_inst_state <= `OnlyGetThreeInst;
-			else
-				BPU_inst_state <= `GetNormalInst;
-		end
+		else
+			BPU_inst_state <= BPU_inst_state;
+	
 	end
 	
 	//Add More Operation of Inst Valid
 	always@(*)begin
-		inst1_valid_en_1 <= `Invalid;
-		inst2_valid_en_1 <= `Invalid;
+	    npc_o            <=  pc_i;
+		inst1_valid_en_1 <= `Valid;
+		inst2_valid_en_1 <= `Valid;
 		case(BPU_inst_state)
 			`GetNormalInst:begin
-				if(ICache_inst1_valid_o == `Invalid)begin//ICache operation not finished, stall
+				if(ICache_stall)begin//ICache operation not finished, stall
 					npc_o <= pc_i;
 					inst1_valid_en_1 <= `Valid;
 					inst2_valid_en_1 <= `Valid;
@@ -434,32 +479,32 @@ module Cache_pipeline(
 					end
 				end
 			end
-			`OnlyGetTwoInst:begin
-				if(ICache_inst1_valid_o == `Invalid)begin//Cache operation not finished, stall
+			`OnlyGetOneInst: begin
+				if(ICache_stall)begin//Cache operation not finished, stall
+					npc_o <= pc_i;
+					inst1_valid_en_1 <= `Valid;
+					inst2_valid_en_1 <= `Invalid;
+				end
+				else begin
+					npc_o <= branch_dest_2;
+					inst1_valid_en_1 <= `Valid;
+					inst2_valid_en_1 <= `Invalid;
+				end
+			end
+			`OnlyGetTwoInst: begin
+				if(ICache_stall)begin//Cache operation not finished, stall
 					npc_o <= pc_i;
 					inst1_valid_en_1 <= `Valid;
 					inst2_valid_en_1 <= `Valid;
 				end
 				else begin
-					npc_o <= pc_branch_dest_i;
-					inst1_valid_en_1 <= `Valid;
-					inst2_valid_en_1 <= `Invalid;
-				end
-			end
-			`OnlyGetThreeInst: begin
-				if(ICache_inst1_valid_o == `Invalid)begin//Cache operation not finished, stall
-					npc_o <= pc_i;
-					inst1_valid_en_1 <= `Valid;
-					inst2_valid_en_1 <= `Invalid;
-				end
-				else begin
 					if(sign_pc_edge)begin
-						npc_o <= pc_branch_dest_2;
+						npc_o <= pc_plus4;
 						inst1_valid_en_1 <= `Valid;
 						inst2_valid_en_1 <= `Invalid;
 					end
 					else begin
-						npc_o <= pc_branch_dest_2;
+						npc_o <= branch_dest_2;
 						inst1_valid_en_1 <= `Valid;
 						inst2_valid_en_1 <= `Valid;
 					end
@@ -478,7 +523,9 @@ module Cache_pipeline(
 	ICache_pipeline ICache0(
 
 		clk,
-		rst|ICache_flush|flush,
+		rst,
+		ICache_is_working,
+		is_ICache_pipeline2_empty,
 //		is_mem_request,
 		
 		//read inst request
@@ -501,7 +548,12 @@ module Cache_pipeline(
 		mem_inst_rvalid_i,
 		mem_inst_rdata_i,
 		mem_inst_ren_o,
-		mem_inst_araddr_o
+		mem_inst_araddr_o,
+		
+		corr_pack0_i,////////////////
+		corr_pack1_i,////////////////
+		corr_pack0_o,///////////////
+		corr_pack1_o ///////////////
 		
 		);	
 	DCache_pipeline DCache0(
