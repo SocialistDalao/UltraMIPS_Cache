@@ -197,8 +197,8 @@ module ICache_pipeline(
 		assign read_from_mem[i] = mem_inst_rdata_i[32*(i+1)-1:32*i];
    end
    //write back mem data
-	assign wea_way0 = (read_success && LRU_pick == 1'b0)? 4'b1111 : 4'h0;
-	assign wea_way1 = (read_success && LRU_pick == 1'b1)? 4'b1111 : 4'h0;
+	assign wea_way0 = (cpu_req_2 && read_success && LRU_pick == 1'b0)? 4'b1111 : 4'h0;
+	assign wea_way1 = (cpu_req_2 && read_success && LRU_pick == 1'b1)? 4'b1111 : 4'h0;
     
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////Êä³ö¿ØÖÆ//////////////////////////////////////////
