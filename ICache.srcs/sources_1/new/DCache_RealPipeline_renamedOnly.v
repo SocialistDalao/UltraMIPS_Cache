@@ -29,7 +29,6 @@ module DCache_pipeline(
     input wire cpu_rreq_i,
     input wire cpu_wreq_i,
     input wire [`DataAddrBus]virtual_addr_i,
-    input wire [`DataAddrBus]physical_addr_i,
     input wire [`DataBus]cpu_wdata_i,
     input wire [3:0]cpu_wsel_i,
     output wire hit_o,
@@ -54,11 +53,10 @@ module DCache_pipeline(
     //test
     //output [`DirtyBus] dirty
     );
-	
 //////////////////////////////////////////////////////////////////////////////////
-////////////////////////////Hit Rate Calculation//////////////////////////////////
+////////////////////////////////Initialization////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
-
+    
 	reg [127:0]total_dcache_hit;
 	reg [127:0]total_dcache_req;
 	always@(posedge clk)begin
@@ -71,52 +69,52 @@ module DCache_pipeline(
 		else if(current_state == `STATE_LOOK_UP && (cpu_rreq_i|cpu_wreq_i))
 			total_dcache_req <= total_dcache_req + 1;
 	end
-//////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////Initialization////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////
-    
 	
-	//mem_data_i in 2-dimen array
+	//mem_data_i in 2-dimen arry
 	wire [`DataBus]mem_rdata[`BlockNum-1:0];
    generate for(genvar i =0 ;i<`BlockNum; i=i+1)begin
 		assign mem_rdata[i] = mem_rdata_i[32*(i+1)-1:32*i];
    end
 	
-	//keep input data
-    wire [`DataBus]		wsel_expand = {{8{cpu_wsel_2[3]}} , {8{cpu_wsel_2[2]}} , {8{cpu_wsel_2[1]}} , {8{cpu_wsel_2[0]}}};
-    reg [`InstAddrBus]	virtual_addr_2;
-    reg [`InstAddrBus]	physical_addr_2;
-    reg [`RegBus]		cpu_wdata;
-	reg 				cpu_rreq_2;
-	reg 				cpu_wreq_2;
-    reg [3:0]			cpu_wsel_2;
+	
+	
+    wire [31:0]wsel_expand;
+    assign wsel_expand={{8{cpu_wsel_2[3]}} , {8{cpu_wsel_2[2]}} , {8{cpu_wsel_2[1]}} , {8{cpu_wsel_2[0]}}};
+    //keep the data of STATE_LOOK_UP
+    reg [`InstAddrBus]virtual_addr;
+    reg [`RegBus]cpu_wdata;
+    reg func;//?????¡ì??????????
+    reg [3:0]cpu_wsel_2;
+    
+	
     always@(posedge clk)begin
         if(rst)begin
-            virtual_addr_2	<= `ZeroWord;
-            physical_addr_2	<= `ZeroWord;
-            cpu_wdata		<= `ZeroWord;
-            cpu_rreq_2 		<= `Invalid;
-            cpu_wreq_2 		<= `Invalid;
-            cpu_wsel_2 		<= 4'h0;
+            virtual_addr<= `ZeroWord;
+            cpu_wdata<= `ZeroWord;
+            func <= `Invalid;
+            cpu_wsel_2 <= 4'h0;
         end
         else if(current_state == `STATE_LOOK_UP)begin
-            virtual_addr_2 	<= virtual_addr_i;
-            physical_addr_2	<= physical_addr_i;
-            cpu_wdata 		<= cpu_wdata_i;
-            cpu_rreq_2 		<= cpu_rreq_i;
-            cpu_wreq_2 		<= cpu_wreq_i;
-            cpu_wsel_2 		<= cpu_wsel_i;
+            virtual_addr <= virtual_addr_i;
+            cpu_wdata <= cpu_wdata_i;
+            func <= cpu_wreq_i;
+            cpu_wsel_2 <= cpu_wsel_i;
         end
         else begin
-            virtual_addr_2 	<= virtual_addr_2;
-            physical_addr_2	<= physical_addr_2;
-            cpu_wdata 		<= cpu_wdata;
-            cpu_rreq_2 		<= cpu_rreq_2;
-            cpu_wreq_2 		<= cpu_wreq_2;
-            cpu_wsel_2 		<= cpu_wsel_2;
+            virtual_addr <= virtual_addr;
+            cpu_wdata <= cpu_wdata;
+            func <= func;
+            cpu_wsel_2 <= cpu_wsel_2;
         end
     end
-	
+    //TLB
+    wire [`InstAddrBus]physical_addr = virtual_addr;
+//    wire index = physical_addr[`IndexBus];
+//    wire offset = physical_addr[`OffsetBus];
+//    TLB tlb0(
+//    .virtual_addr_i(virtual_addr),
+//    .physical_addr_o(physical_addr)
+//    );
 	//WriteBuffer
 	wire [`DataBus]FIFO_rdata[`BlockNum-1:0];
 	wire [`DataAddrBus]FIFO_waddr;
@@ -133,7 +131,7 @@ module DCache_pipeline(
         .cpu_wdata_i(FIFO_wdata),//WaySize
         //CPU read request and response
         .cpu_rreq_i(cpu_rreq_i),
-        .cpu_araddr_i(physical_addr_2),
+        .cpu_araddr_i(physical_addr),
         .read_hit_o(FIFO_hit),
         .cpu_rdata_o({FIFO_rdata[7],
 					  FIFO_rdata[6],
@@ -158,7 +156,7 @@ module DCache_pipeline(
     //BANK 0~7 WAY 0~1
     //biwj indicates bank_i way_j
 //    reg [`WayBus] data_cache;
-    wire [`InstAddrBus]ram_addr = (current_state == `STATE_LOOK_UP)? virtual_addr_i : physical_addr_2; 
+    wire [`InstAddrBus]ram_addr = (current_state == `STATE_LOOK_UP)? virtual_addr_i : physical_addr; 
 	reg [`DataBus]cache_wdata[`BlockNum-1:0];
 	
     wire [3:0]wea_way0;
@@ -188,35 +186,35 @@ module DCache_pipeline(
     //Tag+Valid
     wire [`TagVBus]tagv_cache_w0;
     wire [`TagVBus]tagv_cache_w1;
-    tag_ram TagV0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(ram_addr[`IndexBus]),.dina({1'b1,physical_addr_2[`TagBus]}),.douta(tagv_cache_w0));
-    tag_ram TagV1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(ram_addr[`IndexBus]),.dina({1'b1,physical_addr_2[`TagBus]}),.douta(tagv_cache_w1));
+    tag_ram TagV0 (.clka(clk),.ena(`Enable),.wea(wea_way0),.addra(ram_addr[`IndexBus]),.dina({1'b1,physical_addr[`TagBus]}),.douta(tagv_cache_w0));
+    tag_ram TagV1 (.clka(clk),.ena(`Enable),.wea(wea_way1),.addra(ram_addr[`IndexBus]),.dina({1'b1,physical_addr[`TagBus]}),.douta(tagv_cache_w1));
     
     //LRU
     reg [`SetBus]LRU;
-    wire LRU_pick = LRU[virtual_addr_2[`IndexBus]];
+    wire LRU_pick = LRU[virtual_addr[`IndexBus]];
     always@(posedge clk)begin
         if(rst)
             LRU <= 0;
         else if(hit_o == `HitSuccess)//hit: set LRU to bit that is not hit
-            LRU[virtual_addr_2[`IndexBus]] <= hit_way0;
+            LRU[virtual_addr[`IndexBus]] <= hit_way0;
         else if(cpu_data_valid_o == `Valid && hit_o == `HitFail)//not hit: set opposite LRU
-            LRU[virtual_addr_2[`IndexBus]] <= ~LRU[virtual_addr_2[`IndexBus]];
+            LRU[virtual_addr[`IndexBus]] <= ~LRU[virtual_addr[`IndexBus]];
         else
             LRU <= LRU;
     end
     
     //Dirty 
     reg [`DirtyBus] dirty;
-	wire write_dirty = dirty[{virtual_addr_2[`IndexBus],LRU_pick}]; 
+	wire write_dirty = dirty[{virtual_addr[`IndexBus],LRU_pick}]; 
     always@(posedge clk)begin
         if(rst)
             dirty<=0;
 		else if(current_state == `STATE_FETCH_DATA && bus_read_success == `Valid && func == `WriteDisable)//Read not hit
-            dirty[{virtual_addr_2[`IndexBus],LRU_pick}] <= `NotDirty;
+            dirty[{virtual_addr[`IndexBus],LRU_pick}] <= `NotDirty;
 		else if(current_state == `STATE_FETCH_DATA && mem_rvalid_i == `Valid && func == `WriteEnable)//write not hit
-            dirty[{virtual_addr_2[`IndexBus],LRU_pick}] <= `Dirty;
+            dirty[{virtual_addr[`IndexBus],LRU_pick}] <= `Dirty;
 		else if(current_state == `STATE_FETCH_DATA && (hit_way0|hit_way1) == `HitSuccess && func == `WriteEnable)//write hit but not FIFO
-            dirty[{virtual_addr_2[`IndexBus],hit_way1}] <= `Dirty;
+            dirty[{virtual_addr[`IndexBus],hit_way1}] <= `Dirty;
         else
             dirty <= dirty;
     end
@@ -238,7 +236,7 @@ module DCache_pipeline(
 ////////////////////////////////State Transmission/////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 
-	wire bus_read_success = mem_rvalid_i;
+	wire bus_read_success = mem_rvalid_i;//Better understatnding 
 	//state
     reg [`StateBus]current_state;
     reg [`StateBus]next_state;
@@ -282,59 +280,37 @@ module DCache_pipeline(
 ////////////////////////////////State Operation//////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
     
-    //STATE_LOOK_UP
-	//RAM Coliision 
-	reg ram_collision_way0;
-	reg ram_collision_way1;
-	//collision keep
-    reg [`InstBus]cache_wdata_2;//data collision
-    reg [`InstBus]tagv_way0_2;//tag collision
-    reg [`InstBus]tagv_way1_2;
-	always@(posedge clk)begin
-		ram_collision_way0 	<= physical_addr_2[`IndexBus] == virtual_addr_i[`IndexBus] && |wea_way0;
-		ram_collision_way1 	<= physical_addr_2[`IndexBus] == virtual_addr_i[`IndexBus] && |wea_way1;
-		cache_wdata_2 		<= cache_wdata[virtual_addr_i[4:2]];
-		tagv_way0_2 		<= {1'b1,physical_addr_2[`TagBus]};
-		tagv_way1_2 		<= {1'b1,physical_addr_2[`TagBus]};
-	end
-	//Collistion data select
-    wire [`InstBus]data_way0 = ram_collision_way0 ? //write/read collision
-								cache_wdata_2: way0_cache[physical_addr_2[4:2]];
-    wire [`InstBus]data_way1 = ram_collision_way1? //write/read collision
-								cache_wdata_2: way1_cache[physical_addr_2[4:2]];
-    
-    wire [`TagVBus]tagv_way0 = ram_collision_way0? //write/read collision
-								tagv_way0_2: tagv_cache_w0;
-    wire [`TagVBus]tagv_way1 = ram_collision_way1? //write/read collision
-								tagv_way1_2: tagv_cache_w1;
+    //STATE_LOOK_UP?? Detail operation is at the first of this file.
+	
 	
     //STATE_FETCH_DATA
 	//hit judgement
-    wire hit_way0 = (tagv_way0_2[19:0]==physical_addr_2[`TagBus] && tagv_way0_2[20]==`Valid)? `HitSuccess : `HitFail;
-    wire hit_way1 = (tagv_way1_2[19:0]==physical_addr_2[`TagBus] && tagv_way1_2[20]==`Valid)? `HitSuccess : `HitFail;
+    wire hit_way0 = (tagv_cache_w0[19:0]==physical_addr[`TagBus] && tagv_cache_w0[20]==`Valid)? `HitSuccess : `HitFail;
+    wire hit_way1 = (tagv_cache_w1[19:0]==physical_addr[`TagBus] && tagv_cache_w1[20]==`Valid)? `HitSuccess : `HitFail;
     assign hit_o = (current_state==`STATE_FETCH_DATA)? (hit_way0 | hit_way1 | FIFO_hit) :`HitFail;
-	wire hit_success = (hit_way0 | hit_way1 | FIFO_hit) & (cpu_rreq_2 | cpu_wreq_2);//hit & req valid
-	wire hit_fail = ~(hit_success) & (cpu_rreq_2 | cpu_wreq_2);
+	
 	//tag hit
-    wire [`InstBus]data_FIFO = FIFO_rdata[virtual_addr_2[4:2]];
+    wire [`InstBus]data_way0 = way0_cache[virtual_addr[4:2]];
+    wire [`InstBus]data_way1 = way1_cache[virtual_addr[4:2]];
+    wire [`InstBus]data_FIFO = FIFO_rdata[virtual_addr[4:2]];
     
     
    //Tag not hit
    //write to ram
-    assign wea_way0 =(hit_fail==`Valid && bus_read_success == `Success && LRU_pick == 1'b0)? 4'b1111 : // Not Hit
-                     (hit_way0 == `HitSuccess && cpu_wreq_2 == `WriteEnable )? cpu_wsel_2: 4'h0;//Write Hit
+    assign wea_way0 =(bus_read_success==`Valid && bus_read_success == `Success && LRU_pick == 1'b0)? 4'b1111 : // Not Hit
+                     (current_state==`STATE_FETCH_DATA && hit_way0 == `HitSuccess && func == `WriteEnable )? cpu_wsel_2: 4'h0;//Write Hit
     
-    assign wea_way1 = (hit_fail==`Valid && bus_read_success == `Success && LRU_pick == 1'b1)? 4'b1111 ://not hit
-                     (hit_way1 == `HitSuccess  && cpu_wreq_2 == `WriteEnable )? cpu_wsel_2 : 4'h0;//write hit
+    assign wea_way1 = (bus_read_success==`Valid && bus_read_success == `Success && LRU_pick == 1'b1)? 4'b1111 ://not hit
+                     (current_state==`STATE_FETCH_DATA && hit_way1 == `HitSuccess  && func == `WriteEnable )? cpu_wsel_2 : 4'h0;//write hit
                      
                  
-	assign FIFO_wreq = (FIFO_hit == `HitSuccess && cpu_wreq_2 == `WriteEnable)? `WriteEnable:
+	assign FIFO_wreq = (current_state == `STATE_FETCH_DATA && FIFO_hit == `HitSuccess && func == `WriteEnable)? `WriteEnable:
 	                   (bus_read_success == `Success && FIFO_state != `STATE_FULL && write_dirty == `Dirty)? `WriteEnable: `WriteDisable;
-   assign FIFO_waddr = (LRU_pick == 1'b1)?  {tagv_way1[19:0],physical_addr_2[11:0]}:
-                        {tagv_way0[19:0],physical_addr_2[11:0]};
+   assign FIFO_waddr = (LRU_pick == 1'b1)?  {tagv_cache_w1[19:0],physical_addr[11:0]}:
+                        {tagv_cache_w0[19:0],physical_addr[11:0]};
    //AXI read requirements
-   assign mem_ren_o = (hit_fail == `Valid) ?  ~bus_read_success: `ReadDisable;
-   assign mem_araddr_o = physical_addr_2;
+   assign mem_ren_o = (current_state==`STATE_FETCH_DATA && hit_o == `HitFail) ?  ~bus_read_success:`ReadDisable;
+   assign mem_araddr_o = physical_addr;
    //ram write data
    always@(*) begin 
         cache_wdata[0] <= `ZeroWord;
@@ -345,7 +321,7 @@ module DCache_pipeline(
         cache_wdata[5] <= `ZeroWord;
         cache_wdata[6] <= `ZeroWord;
         cache_wdata[7] <= `ZeroWord;
-		if(current_state == `STATE_FETCH_DATA && hit_fail == `Valid)begin//hit fail
+		if(current_state == `STATE_FETCH_DATA && hit_o == `HitFail)begin//hit fail
 			cache_wdata[0] <= mem_rdata[0];
 			cache_wdata[1] <= mem_rdata[1];
 			cache_wdata[2] <= mem_rdata[2];
@@ -354,8 +330,8 @@ module DCache_pipeline(
 			cache_wdata[5] <= mem_rdata[5];
 			cache_wdata[6] <= mem_rdata[6];
 			cache_wdata[7] <= mem_rdata[7];
-			if(cpu_wreq_2 == `WriteEnable)//write
-				cache_wdata[virtual_addr_2[4:2]] <= (cpu_wdata & wsel_expand)|(mem_rdata_i[virtual_addr_2[4:2]] & ~wsel_expand);
+			if(func == `WriteEnable)//write
+				cache_wdata[virtual_addr[4:2]] <= (cpu_wdata & wsel_expand)|(mem_rdata_i[virtual_addr[4:2]] & ~wsel_expand);
 		end
 		if(current_state == `STATE_FETCH_DATA && hit_o == `HitSuccess)begin//hit success
 			if(hit_way0 == `HitSuccess)begin
@@ -367,7 +343,7 @@ module DCache_pipeline(
 				cache_wdata[5] <= way0_cache[5];
 				cache_wdata[6] <= way0_cache[6];
 				cache_wdata[7] <= way0_cache[7];
-				cache_wdata[virtual_addr_2[4:2]] <= cpu_wdata;
+				cache_wdata[virtual_addr[4:2]] <= cpu_wdata;
 			end
 			if(hit_way1 == `HitSuccess)begin
 				cache_wdata[0] <= way1_cache[0];
@@ -378,7 +354,7 @@ module DCache_pipeline(
 				cache_wdata[5] <= way1_cache[5];
 				cache_wdata[6] <= way1_cache[6];
 				cache_wdata[7] <= way1_cache[7];
-				cache_wdata[virtual_addr_2[4:2]] <= cpu_wdata;
+				cache_wdata[virtual_addr[4:2]] <= cpu_wdata;
 			end
 			if(FIFO_hit == `HitSuccess)begin
 				cache_wdata[0] <= FIFO_rdata[0];
@@ -389,7 +365,7 @@ module DCache_pipeline(
 				cache_wdata[5] <= FIFO_rdata[5];
 				cache_wdata[6] <= FIFO_rdata[6];
 				cache_wdata[7] <= FIFO_rdata[7];
-				cache_wdata[virtual_addr_2[4:2]] <= cpu_wdata;
+				cache_wdata[virtual_addr[4:2]] <= cpu_wdata;
 			end
 		end
    end
@@ -407,7 +383,7 @@ module DCache_pipeline(
 				cache_wdata[5] <= FIFO_rdata[5];
 				cache_wdata[6] <= FIFO_rdata[6];
 				cache_wdata[7] <= FIFO_rdata[7];
-				cache_wdata[virtual_addr_2[4:2]] <= cpu_wdata;
+				cache_wdata[virtual_addr[4:2]] <= cpu_wdata;
 	   end
 	   if(bus_read_success == `Success)begin
             if(LRU_pick == 1'b0)begin//0?¡è????I
@@ -448,7 +424,7 @@ reg [`DataBus] cpu_data_o;
         if(current_state==`STATE_FETCH_DATA && FIFO_hit == `HitSuccess)
             cpu_data_o <= data_FIFO;
         if(current_state==`STATE_FETCH_DATA && bus_read_success ==`Success)begin
-			cpu_data_o <= mem_rdata[virtual_addr_2[4:2]];
+			cpu_data_o <= mem_rdata[virtual_addr[4:2]];
         end
     end
 
