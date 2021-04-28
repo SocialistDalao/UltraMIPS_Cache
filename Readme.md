@@ -1,6 +1,6 @@
 ## UltraMIPS Cache项目说明
 
-The introduction has not been translated to English, and currently we have no plan to do so.
+The documentation has not been translated to English, and currently we have no plan to do so.
 
 #### 作者/Author
 
